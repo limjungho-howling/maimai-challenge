@@ -1,7 +1,7 @@
 "use client";
 
 import { Copy, ExternalLink } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { buildBookmarklet } from "@/lib/bookmarklet";
 
@@ -11,7 +11,12 @@ interface BookmarkletButtonProps {
 
 export function BookmarkletButton({ appOrigin }: BookmarkletButtonProps) {
   const [copied, setCopied] = useState(false);
+  const linkRef = useRef<HTMLAnchorElement>(null);
   const href = useMemo(() => buildBookmarklet(appOrigin), [appOrigin]);
+
+  useEffect(() => {
+    linkRef.current?.setAttribute("href", href);
+  }, [href]);
 
   async function copyBookmarklet() {
     await navigator.clipboard.writeText(href);
@@ -23,7 +28,8 @@ export function BookmarkletButton({ appOrigin }: BookmarkletButtonProps) {
     <div className="flex flex-wrap items-center gap-3">
       <a
         className="inline-flex h-10 items-center gap-2 rounded-md bg-cyan-300 px-4 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
-        href={href}
+        href="#"
+        ref={linkRef}
         title="이 링크를 북마크바로 드래그하세요"
       >
         <ExternalLink className="h-4 w-4" />
