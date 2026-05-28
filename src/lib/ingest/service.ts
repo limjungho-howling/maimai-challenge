@@ -13,7 +13,7 @@ import {
   type ParsedSongScore,
 } from "@/lib/maimai/parser";
 import type { RankingEvent, ScoreEntry } from "@/lib/maimai/ranking";
-import type { MaimaiIngestPayload } from "@/lib/ingest/schema";
+import type { MaimaiCatalogPayload, MaimaiIngestPayload } from "@/lib/ingest/schema";
 
 const DB_CHUNK_SIZE = 500;
 
@@ -40,6 +40,7 @@ export interface IngestProgress {
     | "parsing"
     | "songs"
     | "charts"
+    | "catalog"
     | "rankings"
     | "scores"
     | "events"
@@ -75,40 +76,19 @@ export async function ingestMaimaiPayload(
   const allScores = payload.scorePages.flatMap(({ difficulty, html }) =>
     parseSongScoreHtml(html, difficulty),
   );
-  const jacketUrlsByIdx = new Map(
-    (payload.detailPages ?? [])
-      .map(({ idx, html }) => parseSongDetailHtml(html, idx))
-      .filter((detail) => detail.jacketUrl)
-      .map((detail) => [detail.officialIdx, detail.jacketUrl] as const),
-  );
-  const uniqueScores = dedupeScores(
-    allScores.map((score) => ({
-      ...score,
-      jacketUrl:
-        score.jacketUrl ??
-        (score.officialIdx ? jacketUrlsByIdx.get(score.officialIdx) ?? null : null),
-    })),
-  );
+  const uniqueScores = dedupeScores(allScores);
 
   try {
     await reportProgress(onProgress, {
-      stage: "songs",
-      message: "곡 정보를 묶음으로 저장하는 중입니다.",
+      stage: "catalog",
+      message: "등록된 곡 카탈로그와 점수를 매칭하는 중입니다.",
       current: 10,
       total: 100,
     });
-    const songsByKey = await upsertSongs(supabase, uniqueScores);
-
-    await reportProgress(onProgress, {
-      stage: "charts",
-      message: "난이도별 차트 정보를 묶음으로 저장하는 중입니다.",
-      current: 28,
-      total: 100,
-    });
-    const chartsByKey = await upsertCharts(supabase, uniqueScores, songsByKey);
+    const chartsByKey = await listCatalogCharts(supabase);
     const scoreUpdates = uniqueScores.map((score) => ({
       score,
-      chartId: getRequiredMapValue(chartsByKey, chartKey(score)),
+      chartId: getRequiredChartId(chartsByKey, score),
     }));
     const chartIds = scoreUpdates.map((update) => update.chartId);
 
@@ -194,6 +174,65 @@ export async function ingestMaimaiPayload(
     });
     throw error;
   }
+}
+
+export async function ingestMaimaiCatalogPayload(
+  supabase: SupabaseClient,
+  payload: MaimaiCatalogPayload,
+  onProgress?: IngestProgressReporter,
+): Promise<{ songCount: number; chartCount: number }> {
+  await reportProgress(onProgress, {
+    stage: "parsing",
+    message: "곡 카탈로그 HTML을 파싱하는 중입니다.",
+    current: 0,
+    total: 100,
+  });
+
+  const allScores = payload.scorePages.flatMap(({ difficulty, html }) =>
+    parseSongScoreHtml(html, difficulty),
+  );
+  const jacketUrlsByIdx = new Map(
+    payload.detailPages
+      .map(({ idx, html }) => parseSongDetailHtml(html, idx))
+      .filter((detail) => detail.jacketUrl)
+      .map((detail) => [detail.officialIdx, detail.jacketUrl] as const),
+  );
+  const uniqueScores = dedupeScores(
+    allScores.map((score) => ({
+      ...score,
+      jacketUrl:
+        score.jacketUrl ??
+        (score.officialIdx ? jacketUrlsByIdx.get(score.officialIdx) ?? null : null),
+    })),
+  );
+
+  await reportProgress(onProgress, {
+    stage: "songs",
+    message: "곡 정보를 묶음으로 저장하는 중입니다.",
+    current: 35,
+    total: 100,
+  });
+  const songsByKey = await upsertSongs(supabase, uniqueScores);
+
+  await reportProgress(onProgress, {
+    stage: "charts",
+    message: "난이도별 차트 정보를 묶음으로 저장하는 중입니다.",
+    current: 70,
+    total: 100,
+  });
+  await upsertCharts(supabase, uniqueScores, songsByKey);
+
+  await reportProgress(onProgress, {
+    stage: "completed",
+    message: "곡 카탈로그 저장이 완료되었습니다.",
+    current: 100,
+    total: 100,
+  });
+
+  return {
+    songCount: songsByKey.size,
+    chartCount: uniqueScores.length,
+  };
 }
 
 function getDiscordProfile(user: User): LinkedDiscordProfile {
@@ -340,6 +379,29 @@ async function upsertCharts(
   }
 
   return chartIdsByScoreKey;
+}
+
+async function listCatalogCharts(
+  supabase: SupabaseClient,
+): Promise<Map<string, string>> {
+  const { data, error } = await supabase
+    .from("chart_leaderboard_summary")
+    .select("chart_id,title,kind,difficulty")
+    .in("difficulty", [3, 4]);
+
+  if (error) {
+    throw error;
+  }
+
+  const idsByKey = new Map<string, string>();
+  for (const row of data ?? []) {
+    idsByKey.set(
+      `${songKey(String(row.title), String(row.kind))}\u0000${Number(row.difficulty)}`,
+      String(row.chart_id),
+    );
+  }
+
+  return idsByKey;
 }
 
 async function listScoresForCharts(
@@ -654,6 +716,20 @@ function getRequiredMapValue(map: Map<string, string>, key: string): string {
   const value = map.get(key);
   if (!value) {
     throw new Error(`Missing bulk ingest mapping for ${key}`);
+  }
+
+  return value;
+}
+
+function getRequiredChartId(
+  map: Map<string, string>,
+  score: ParsedSongScore,
+): string {
+  const value = map.get(chartKey(score));
+  if (!value) {
+    throw new Error(
+      `"${score.title}" ${score.difficultyLabel} 차트가 아직 등록되지 않았습니다. 곡 정보 수집 북마클릿을 먼저 실행해주세요.`,
+    );
   }
 
   return value;

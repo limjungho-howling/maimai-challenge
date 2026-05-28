@@ -22,6 +22,7 @@ interface RelayMessage {
   difficulty?: number;
   current?: number;
   total?: number;
+  uploadType?: "score" | "catalog";
   payload?: unknown;
 }
 
@@ -36,6 +37,8 @@ interface IngestStreamEvent {
     playerName?: string;
     scoreCount?: number;
     changedChartCount?: number;
+    songCount?: number;
+    chartCount?: number;
   };
   error?: string;
 }
@@ -95,17 +98,24 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
       }
 
       if (event.data.type === "maimai-challenge:payload") {
+        const uploadType = event.data.uploadType ?? "score";
         setState({
           status: "uploading",
-          message: "서버에 업로드하는 중입니다.",
+          message:
+            uploadType === "catalog"
+              ? "곡 카탈로그를 서버에 업로드하는 중입니다."
+              : "점수를 서버에 업로드하는 중입니다.",
           progress: 32,
         });
 
-        const response = await fetch("/api/ingest/maimai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(event.data.payload),
-        });
+        const response = await fetch(
+          uploadType === "catalog" ? "/api/ingest/catalog" : "/api/ingest/maimai",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(event.data.payload),
+          },
+        );
 
         if (!response.ok) {
           const result = (await response.json()) as { error?: string };
@@ -137,9 +147,13 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
           }
 
           if (streamEvent.type === "result" && streamEvent.result) {
+            const message =
+              uploadType === "catalog"
+                ? `곡 ${streamEvent.result.songCount}개, 차트 ${streamEvent.result.chartCount}개 정보를 저장했습니다.`
+                : `${streamEvent.result.playerName}님 점수 ${streamEvent.result.scoreCount}개를 처리했습니다. 변동 차트 ${streamEvent.result.changedChartCount}개.`;
             setState({
               status: "success",
-              message: `${streamEvent.result.playerName}님 점수 ${streamEvent.result.scoreCount}개를 처리했습니다. 변동 차트 ${streamEvent.result.changedChartCount}개.`,
+              message,
               progress: 100,
             });
           }

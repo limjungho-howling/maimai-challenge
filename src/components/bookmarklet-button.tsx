@@ -7,12 +7,18 @@ import { buildBookmarklet } from "@/lib/bookmarklet";
 
 interface BookmarkletButtonProps {
   appOrigin: string;
+  kind?: "score" | "catalog";
+  label?: string;
 }
 
-export function BookmarkletButton({ appOrigin }: BookmarkletButtonProps) {
+export function BookmarkletButton({
+  appOrigin,
+  kind = "score",
+  label = "maimai 갱신",
+}: BookmarkletButtonProps) {
   const [copied, setCopied] = useState(false);
   const linkRef = useRef<HTMLAnchorElement>(null);
-  const href = useMemo(() => buildBookmarklet(appOrigin), [appOrigin]);
+  const href = useMemo(() => buildBookmarklet(appOrigin, kind), [appOrigin, kind]);
 
   useEffect(() => {
     linkRef.current?.setAttribute("href", href);
@@ -33,7 +39,7 @@ export function BookmarkletButton({ appOrigin }: BookmarkletButtonProps) {
         title="이 링크를 북마크바로 드래그하세요"
       >
         <ExternalLink className="h-4 w-4" />
-        maimai 갱신
+        {label}
       </a>
       <button
         className="inline-flex h-10 items-center gap-2 rounded-md border border-white/15 px-4 text-sm font-medium text-slate-100 transition hover:bg-white/10"
