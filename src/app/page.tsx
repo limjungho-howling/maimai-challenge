@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 
+import { SongListSkeleton } from "@/components/leaderboard-skeletons";
 import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
 import { listChartLevels, listCharts } from "@/lib/data/charts";
 import { formatKstDateTime } from "@/lib/time";
@@ -16,24 +18,7 @@ interface HomePageProps {
   }>;
 }
 
-export default async function HomePage({ searchParams }: HomePageProps) {
-  const params = await searchParams;
-  const difficulty = parseDifficulty(params.diff);
-  const level = parseTextParam(params.level);
-  const search = parseTextParam(params.q);
-  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
-  const [{ charts, count }, levels] = await Promise.all([
-    listCharts({
-      difficulty,
-      level,
-      page,
-      pageSize: PAGE_SIZE,
-      search,
-    }),
-    listChartLevels(),
-  ]);
-  const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
-
+export default function HomePage({ searchParams }: HomePageProps) {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#123042,transparent_34rem),linear-gradient(135deg,#080b12,#111827_52%,#13151b)]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
@@ -66,6 +51,34 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </nav>
         </header>
 
+        <Suspense fallback={<SongListSkeleton />}>
+          <SongListContent searchParams={searchParams} />
+        </Suspense>
+      </div>
+    </main>
+  );
+}
+
+async function SongListContent({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const difficulty = parseDifficulty(params.diff);
+  const level = parseTextParam(params.level);
+  const search = parseTextParam(params.q);
+  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
+  const [{ charts, count }, levels] = await Promise.all([
+    listCharts({
+      difficulty,
+      level,
+      page,
+      pageSize: PAGE_SIZE,
+      search,
+    }),
+    listChartLevels(),
+  ]);
+  const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
+
+  return (
+    <>
         <section className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-semibold text-white">곡 리스트</h2>
@@ -197,8 +210,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             label="다음"
           />
         </nav>
-      </div>
-    </main>
+    </>
   );
 }
 

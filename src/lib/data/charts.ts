@@ -27,6 +27,7 @@ export interface ChartRanking {
   achievementRate: number | null;
   dxScore: number;
   maxDxScore: number;
+  dxStarCount: number;
   updatedAt: string;
   rank: number;
 }
@@ -160,6 +161,7 @@ export async function listChartRankings(chartId: string): Promise<ChartRanking[]
       row.achievement_rate === null ? null : Number(row.achievement_rate),
     dxScore: Number(row.dx_score),
     maxDxScore: Number(row.max_dx_score),
+    dxStarCount: Number(row.dx_star_count ?? 0),
     updatedAt: String(row.updated_at),
     rank: Number(row.rank),
   }));

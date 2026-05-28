@@ -1,13 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
+import { PlayerLeaderboardSkeleton } from "@/components/leaderboard-skeletons";
 import { listPlayerLeaderboard } from "@/lib/data/players";
 import { formatKstDateTime } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
 
-export default async function PlayersPage() {
-  const players = await listPlayerLeaderboard();
-
+export default function PlayersPage() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#123042,transparent_34rem),linear-gradient(135deg,#080b12,#111827_52%,#13151b)] px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-7">
@@ -34,6 +34,19 @@ export default async function PlayersPage() {
           </nav>
         </header>
 
+        <Suspense fallback={<PlayerLeaderboardSkeleton />}>
+          <PlayerLeaderboardContent />
+        </Suspense>
+      </div>
+    </main>
+  );
+}
+
+async function PlayerLeaderboardContent() {
+  const players = await listPlayerLeaderboard();
+
+  return (
+    <>
         <section>
           <h2 className="text-xl font-semibold text-white">1등 달성 곡 수</h2>
           <p className="mt-1 text-sm text-slate-300">
@@ -82,7 +95,6 @@ export default async function PlayersPage() {
             </div>
           )}
         </section>
-      </div>
-    </main>
+    </>
   );
 }

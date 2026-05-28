@@ -45,6 +45,17 @@ create table if not exists public.player_scores (
   achievement_rate numeric(8, 4),
   dx_score integer not null,
   max_dx_score integer not null,
+  dx_star_count smallint generated always as (
+    case
+      when max_dx_score <= 0 then 0
+      when dx_score * 100 >= max_dx_score * 97 then 5
+      when dx_score * 100 >= max_dx_score * 95 then 4
+      when dx_score * 100 >= max_dx_score * 93 then 3
+      when dx_score * 100 >= max_dx_score * 90 then 2
+      when dx_score * 100 >= max_dx_score * 85 then 1
+      else 0
+    end
+  ) stored,
   official_idx text,
   collected_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -146,6 +157,7 @@ select
   ps.achievement_rate,
   ps.dx_score,
   ps.max_dx_score,
+  ps.dx_star_count,
   ps.updated_at,
   rank() over (partition by ps.chart_id order by ps.dx_score desc) as rank
 from public.player_scores ps
