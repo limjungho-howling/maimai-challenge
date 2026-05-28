@@ -5,13 +5,17 @@ import {
   sendRankDropNotifications,
   type RankDropNotification,
 } from "@/lib/discord/notifier";
-import { parsePlayerDataHtml, parseSongScoreHtml } from "@/lib/maimai/parser";
+import { detectBulkRankingEvents } from "@/lib/ingest/bulk-ranking";
 import {
-  detectRankingEvents,
-  type RankingEvent,
-  type ScoreEntry,
-} from "@/lib/maimai/ranking";
+  parseSongDetailHtml,
+  parsePlayerDataHtml,
+  parseSongScoreHtml,
+  type ParsedSongScore,
+} from "@/lib/maimai/parser";
+import type { RankingEvent, ScoreEntry } from "@/lib/maimai/ranking";
 import type { MaimaiIngestPayload } from "@/lib/ingest/schema";
+
+const DB_CHUNK_SIZE = 500;
 
 interface IngestResult {
   ingestRunId: string;
@@ -31,11 +35,36 @@ interface ChartMeta {
   difficultyLabel: string;
 }
 
+export interface IngestProgress {
+  stage:
+    | "parsing"
+    | "songs"
+    | "charts"
+    | "rankings"
+    | "scores"
+    | "events"
+    | "notifications"
+    | "completed";
+  message: string;
+  current: number;
+  total: number;
+}
+
+export type IngestProgressReporter = (progress: IngestProgress) => void | Promise<void>;
+
 export async function ingestMaimaiPayload(
   supabase: SupabaseClient,
   user: User,
   payload: MaimaiIngestPayload,
+  onProgress?: IngestProgressReporter,
 ): Promise<IngestResult> {
+  await reportProgress(onProgress, {
+    stage: "parsing",
+    message: "공식 페이지 HTML을 파싱하는 중입니다.",
+    current: 0,
+    total: 100,
+  });
+
   const player = parsePlayerDataHtml(payload.playerHtml);
   const collectedAt = payload.collectedAt ?? new Date().toISOString();
   const discordProfile = getDiscordProfile(user);
@@ -46,63 +75,116 @@ export async function ingestMaimaiPayload(
   const allScores = payload.scorePages.flatMap(({ difficulty, html }) =>
     parseSongScoreHtml(html, difficulty),
   );
-  const changedCharts = new Set<string>();
-  const allRankDropEvents: Array<RankingEvent & ChartMeta> = [];
+  const jacketUrlsByIdx = new Map(
+    (payload.detailPages ?? [])
+      .map(({ idx, html }) => parseSongDetailHtml(html, idx))
+      .filter((detail) => detail.jacketUrl)
+      .map((detail) => [detail.officialIdx, detail.jacketUrl] as const),
+  );
+  const uniqueScores = dedupeScores(
+    allScores.map((score) => ({
+      ...score,
+      jacketUrl:
+        score.jacketUrl ??
+        (score.officialIdx ? jacketUrlsByIdx.get(score.officialIdx) ?? null : null),
+    })),
+  );
 
   try {
-    for (const score of allScores) {
-      const songId = await upsertSong(supabase, score.title, score.kind);
-      const chartId = await upsertChart(supabase, songId, score);
-      const before = await listChartScores(supabase, chartId);
-      const previousActorScore =
-        before.find((entry) => entry.userId === user.id)?.dxScore ?? null;
+    await reportProgress(onProgress, {
+      stage: "songs",
+      message: "곡 정보를 묶음으로 저장하는 중입니다.",
+      current: 10,
+      total: 100,
+    });
+    const songsByKey = await upsertSongs(supabase, uniqueScores);
 
-      await upsertPlayerScore(supabase, user.id, chartId, score, collectedAt);
+    await reportProgress(onProgress, {
+      stage: "charts",
+      message: "난이도별 차트 정보를 묶음으로 저장하는 중입니다.",
+      current: 28,
+      total: 100,
+    });
+    const chartsByKey = await upsertCharts(supabase, uniqueScores, songsByKey);
+    const scoreUpdates = uniqueScores.map((score) => ({
+      score,
+      chartId: getRequiredMapValue(chartsByKey, chartKey(score)),
+    }));
+    const chartIds = scoreUpdates.map((update) => update.chartId);
 
-      const after = await listChartScores(supabase, chartId);
-      const events = detectRankingEvents({
+    await reportProgress(onProgress, {
+      stage: "rankings",
+      message: "기존 랭킹을 한 번에 불러오는 중입니다.",
+      current: 48,
+      total: 100,
+    });
+    const beforeScoresByChartId = await listScoresForCharts(supabase, chartIds);
+    const rankingResult = detectBulkRankingEvents({
+      actorUserId: user.id,
+      beforeScoresByChartId,
+      updates: scoreUpdates.map(({ score, chartId }) => ({
         chartId,
-        actorUserId: user.id,
-        before,
-        after,
-        previousActorScore,
-        nextActorScore: score.dxScore,
-      });
+        title: score.title,
+        difficultyLabel: score.difficultyLabel,
+        dxScore: score.dxScore,
+      })),
+    });
 
-      if (events.length > 0) {
-        changedCharts.add(chartId);
-        await markChartChanged(supabase, chartId);
-        await insertRankingEvents(supabase, run.id, user.id, events);
-        await insertScoreSnapshots(supabase, run.id, events);
-      }
+    await reportProgress(onProgress, {
+      stage: "scores",
+      message: "플레이어 점수를 묶음으로 저장하는 중입니다.",
+      current: 66,
+      total: 100,
+    });
+    await upsertPlayerScores(supabase, user.id, scoreUpdates, collectedAt);
 
-      for (const event of events) {
-        if (event.type === "rank_dropped") {
-          allRankDropEvents.push({
-            ...event,
-            chartTitle: score.title,
-            difficultyLabel: score.difficultyLabel,
-          });
-        }
-      }
+    await reportProgress(onProgress, {
+      stage: "events",
+      message: "랭킹 변동 기록을 저장하는 중입니다.",
+      current: 82,
+      total: 100,
+    });
+    if (rankingResult.events.length > 0) {
+      await markChartsChanged(supabase, [...rankingResult.changedChartIds]);
+      await insertRankingEvents(supabase, run.id, user.id, rankingResult.events);
+      await insertScoreSnapshots(supabase, run.id, rankingResult.events);
     }
 
     await updateIngestRun(supabase, run.id, {
       status: "completed",
       score_count: allScores.length,
-      changed_chart_count: changedCharts.size,
+      changed_chart_count: rankingResult.changedChartIds.size,
       completed_at: new Date().toISOString(),
     });
 
-    await notifyRankDrops(supabase, run.id, allRankDropEvents);
-    await notifyChannel(supabase, run.id, player.name, allScores.length, changedCharts.size);
+    await reportProgress(onProgress, {
+      stage: "notifications",
+      message: "Discord 알림을 처리하는 중입니다.",
+      current: 92,
+      total: 100,
+    });
+    await notifyRankDrops(supabase, run.id, rankingResult.rankDropEvents);
+    await notifyChannel(
+      supabase,
+      run.id,
+      player.name,
+      allScores.length,
+      rankingResult.changedChartIds.size,
+    );
+
+    await reportProgress(onProgress, {
+      stage: "completed",
+      message: "업로드 처리가 완료되었습니다.",
+      current: 100,
+      total: 100,
+    });
 
     return {
       ingestRunId: run.id,
       playerName: player.name,
       scoreCount: allScores.length,
-      changedChartCount: changedCharts.size,
-      rankDropCount: allRankDropEvents.length,
+      changedChartCount: rankingResult.changedChartIds.size,
+      rankDropCount: rankingResult.rankDropEvents.length,
     };
   } catch (error) {
     await updateIngestRun(supabase, run.id, {
@@ -184,112 +266,162 @@ async function insertIngestRun(
   return data;
 }
 
-async function upsertSong(
+async function upsertSongs(
   supabase: SupabaseClient,
-  title: string,
-  kind: string,
-): Promise<string> {
-  const { data, error } = await supabase
-    .from("songs")
-    .upsert({ title, kind, updated_at: new Date().toISOString() }, { onConflict: "title,kind" })
-    .select("id")
-    .single();
+  scores: ParsedSongScore[],
+): Promise<Map<string, string>> {
+  const songs = uniqueBy(
+    scores.map((score) => ({
+      title: score.title,
+      kind: score.kind,
+      jacket_url: score.jacketUrl,
+      updated_at: new Date().toISOString(),
+    })),
+    (song) => songKey(song.title, song.kind),
+  );
+  const idsByKey = new Map<string, string>();
 
-  if (error || !data) {
-    throw error ?? new Error("Failed to upsert song");
+  for (const chunk of chunks(songs, DB_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("songs")
+      .upsert(chunk, { onConflict: "title,kind" })
+      .select("id,title,kind");
+
+    if (error || !data) {
+      throw error ?? new Error("Failed to upsert songs");
+    }
+
+    for (const row of data) {
+      idsByKey.set(songKey(String(row.title), String(row.kind)), String(row.id));
+    }
   }
 
-  return data.id;
+  return idsByKey;
 }
 
-async function upsertChart(
+async function upsertCharts(
   supabase: SupabaseClient,
-  songId: string,
-  score: ReturnType<typeof parseSongScoreHtml>[number],
-): Promise<string> {
-  const { data, error } = await supabase
-    .from("song_charts")
-    .upsert(
-      {
-        song_id: songId,
-        difficulty: score.difficulty,
-        difficulty_label: score.difficultyLabel,
-        level: score.level,
-        genre: score.genre,
-        max_dx_score: score.maxDxScore,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "song_id,difficulty" },
-    )
-    .select("id")
-    .single();
-
-  if (error || !data) {
-    throw error ?? new Error("Failed to upsert chart");
-  }
-
-  return data.id;
-}
-
-async function listChartScores(
-  supabase: SupabaseClient,
-  chartId: string,
-): Promise<ScoreEntry[]> {
-  const { data, error } = await supabase
-    .from("player_scores")
-    .select("profile_id, dx_score")
-    .eq("chart_id", chartId);
-
-  if (error) {
-    throw error;
-  }
-
-  return (data ?? []).map((entry) => ({
-    userId: String(entry.profile_id),
-    dxScore: Number(entry.dx_score),
+  scores: ParsedSongScore[],
+  songsByKey: Map<string, string>,
+): Promise<Map<string, string>> {
+  const charts = scores.map((score) => ({
+    song_id: getRequiredMapValue(songsByKey, songKey(score.title, score.kind)),
+    difficulty: score.difficulty,
+    difficulty_label: score.difficultyLabel,
+    level: score.level,
+    genre: score.genre,
+    max_dx_score: score.maxDxScore,
+    updated_at: new Date().toISOString(),
   }));
+  const idsByKey = new Map<string, string>();
+
+  for (const chunk of chunks(charts, DB_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("song_charts")
+      .upsert(chunk, { onConflict: "song_id,difficulty" })
+      .select("id,song_id,difficulty");
+
+    if (error || !data) {
+      throw error ?? new Error("Failed to upsert charts");
+    }
+
+    for (const row of data) {
+      idsByKey.set(chartKeyFromParts(String(row.song_id), Number(row.difficulty)), String(row.id));
+    }
+  }
+
+  const chartIdsByScoreKey = new Map<string, string>();
+  for (const score of scores) {
+    const songId = getRequiredMapValue(songsByKey, songKey(score.title, score.kind));
+    chartIdsByScoreKey.set(
+      chartKey(score),
+      getRequiredMapValue(idsByKey, chartKeyFromParts(songId, score.difficulty)),
+    );
+  }
+
+  return chartIdsByScoreKey;
 }
 
-async function upsertPlayerScore(
+async function listScoresForCharts(
+  supabase: SupabaseClient,
+  chartIds: string[],
+): Promise<Map<string, ScoreEntry[]>> {
+  const scoresByChartId = new Map<string, ScoreEntry[]>();
+
+  for (const chunk of chunks([...new Set(chartIds)], DB_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("player_scores")
+      .select("chart_id, profile_id, dx_score")
+      .in("chart_id", chunk);
+
+    if (error) {
+      throw error;
+    }
+
+    for (const row of data ?? []) {
+      const chartId = String(row.chart_id);
+      scoresByChartId.set(chartId, [
+        ...(scoresByChartId.get(chartId) ?? []),
+        {
+          userId: String(row.profile_id),
+          dxScore: Number(row.dx_score),
+        },
+      ]);
+    }
+  }
+
+  return scoresByChartId;
+}
+
+async function upsertPlayerScores(
   supabase: SupabaseClient,
   profileId: string,
-  chartId: string,
-  score: ReturnType<typeof parseSongScoreHtml>[number],
+  updates: Array<{ chartId: string; score: ParsedSongScore }>,
   collectedAt: string,
 ): Promise<void> {
-  const { error } = await supabase.from("player_scores").upsert(
-    {
-      profile_id: profileId,
-      chart_id: chartId,
-      achievement_rate: score.achievementRate,
-      dx_score: score.dxScore,
-      max_dx_score: score.maxDxScore,
-      official_idx: score.officialIdx,
-      collected_at: collectedAt,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "profile_id,chart_id" },
-  );
+  const rows = updates.map(({ chartId, score }) => ({
+    profile_id: profileId,
+    chart_id: chartId,
+    achievement_rate: score.achievementRate,
+    dx_score: score.dxScore,
+    max_dx_score: score.maxDxScore,
+    official_idx: score.officialIdx,
+    collected_at: collectedAt,
+    updated_at: new Date().toISOString(),
+  }));
 
-  if (error) {
-    throw error;
+  for (const chunk of chunks(rows, DB_CHUNK_SIZE)) {
+    const { error } = await supabase
+      .from("player_scores")
+      .upsert(chunk, { onConflict: "profile_id,chart_id" });
+
+    if (error) {
+      throw error;
+    }
   }
 }
 
-async function markChartChanged(
+async function markChartsChanged(
   supabase: SupabaseClient,
-  chartId: string,
+  chartIds: string[],
 ): Promise<void> {
-  const { error } = await supabase
-    .from("song_charts")
-    .update({
-      last_changed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", chartId);
+  if (chartIds.length === 0) {
+    return;
+  }
 
-  if (error) {
-    throw error;
+  const changedAt = new Date().toISOString();
+  for (const chunk of chunks(chartIds, DB_CHUNK_SIZE)) {
+    const { error } = await supabase
+      .from("song_charts")
+      .update({
+        last_changed_at: changedAt,
+        updated_at: changedAt,
+      })
+      .in("id", chunk);
+
+    if (error) {
+      throw error;
+    }
   }
 }
 
@@ -299,6 +431,10 @@ async function insertRankingEvents(
   actorProfileId: string,
   events: RankingEvent[],
 ): Promise<void> {
+  if (events.length === 0) {
+    return;
+  }
+
   const rows = events.map((event) => ({
     chart_id: event.chartId,
     profile_id: event.userId,
@@ -310,10 +446,13 @@ async function insertRankingEvents(
     previous_rank: event.previousRank,
     next_rank: event.nextRank,
   }));
-  const { error } = await supabase.from("ranking_events").insert(rows);
 
-  if (error) {
-    throw error;
+  for (const chunk of chunks(rows, DB_CHUNK_SIZE)) {
+    const { error } = await supabase.from("ranking_events").insert(chunk);
+
+    if (error) {
+      throw error;
+    }
   }
 }
 
@@ -337,10 +476,12 @@ async function insertScoreSnapshots(
     previous_rank: event.previousRank,
     next_rank: event.nextRank,
   }));
-  const { error } = await supabase.from("score_snapshots").insert(rows);
+  for (const chunk of chunks(rows, DB_CHUNK_SIZE)) {
+    const { error } = await supabase.from("score_snapshots").insert(chunk);
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw error;
+    }
   }
 }
 
@@ -368,9 +509,14 @@ async function notifyRankDrops(
   }
 
   const notifications: RankDropNotification[] = [];
+  const profilesById = await listProfilesForNotification(supabase, [...grouped.keys()]);
 
   for (const [profileId, profileEvents] of grouped) {
-    const profile = await getProfileForNotification(supabase, profileId);
+    const profile = profilesById.get(profileId);
+    if (!profile) {
+      continue;
+    }
+
     if (!profile.dmAlertsEnabled) {
       continue;
     }
@@ -400,29 +546,52 @@ async function notifyChannel(
   await insertNotificationResults(supabase, ingestRunId, [result]);
 }
 
-async function getProfileForNotification(
+async function listProfilesForNotification(
   supabase: SupabaseClient,
-  profileId: string,
-): Promise<{
-  playerName: string;
-  discordUserId: string | null;
-  dmAlertsEnabled: boolean;
-}> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("maimai_name, discord_user_id, dm_alerts_enabled")
-    .eq("id", profileId)
-    .single();
+  profileIds: string[],
+): Promise<
+  Map<
+    string,
+    {
+      playerName: string;
+      discordUserId: string | null;
+      dmAlertsEnabled: boolean;
+    }
+  >
+> {
+  const profilesById = new Map<
+    string,
+    {
+      playerName: string;
+      discordUserId: string | null;
+      dmAlertsEnabled: boolean;
+    }
+  >();
 
-  if (error || !data) {
-    throw error ?? new Error("Failed to load notification profile");
+  if (profileIds.length === 0) {
+    return profilesById;
   }
 
-  return {
-    playerName: data.maimai_name ?? "Unknown",
-    discordUserId: data.discord_user_id,
-    dmAlertsEnabled: Boolean(data.dm_alerts_enabled),
-  };
+  for (const chunk of chunks(profileIds, DB_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, maimai_name, discord_user_id, dm_alerts_enabled")
+      .in("id", chunk);
+
+    if (error) {
+      throw error;
+    }
+
+    for (const row of data ?? []) {
+      profilesById.set(String(row.id), {
+        playerName: row.maimai_name ?? "Unknown",
+        discordUserId: row.discord_user_id,
+        dmAlertsEnabled: Boolean(row.dm_alerts_enabled),
+      });
+    }
+  }
+
+  return profilesById;
 }
 
 async function insertNotificationResults(
@@ -463,6 +632,50 @@ function readString(source: object, key: string): string | null {
 
   const value = (source as Record<string, unknown>)[key];
   return typeof value === "string" && value ? value : null;
+}
+
+function dedupeScores(scores: ParsedSongScore[]): ParsedSongScore[] {
+  return [...new Map(scores.map((score) => [chartKey(score), score])).values()];
+}
+
+function songKey(title: string, kind: string): string {
+  return `${kind}\u0000${title}`;
+}
+
+function chartKey(score: ParsedSongScore): string {
+  return `${songKey(score.title, score.kind)}\u0000${score.difficulty}`;
+}
+
+function chartKeyFromParts(songId: string, difficulty: number): string {
+  return `${songId}\u0000${difficulty}`;
+}
+
+function getRequiredMapValue(map: Map<string, string>, key: string): string {
+  const value = map.get(key);
+  if (!value) {
+    throw new Error(`Missing bulk ingest mapping for ${key}`);
+  }
+
+  return value;
+}
+
+function uniqueBy<T>(items: T[], getKey: (item: T) => string): T[] {
+  return [...new Map(items.map((item) => [getKey(item), item])).values()];
+}
+
+function chunks<T>(items: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let index = 0; index < items.length; index += size) {
+    result.push(items.slice(index, index + size));
+  }
+  return result;
+}
+
+async function reportProgress(
+  reporter: IngestProgressReporter | undefined,
+  progress: IngestProgress,
+): Promise<void> {
+  await reporter?.(progress);
 }
 
 function getErrorMessage(error: unknown): string {

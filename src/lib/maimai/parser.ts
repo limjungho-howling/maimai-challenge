@@ -26,6 +26,12 @@ export interface ParsedSongScore {
   maxDxScore: number;
   officialIdx: string | null;
   genre: string | null;
+  jacketUrl: string | null;
+}
+
+export interface ParsedSongDetail {
+  officialIdx: string;
+  jacketUrl: string | null;
 }
 
 export function parsePlayerDataHtml(html: string): ParsedPlayerData {
@@ -50,6 +56,22 @@ export function parsePlayerDataHtml(html: string): ParsedPlayerData {
   };
 }
 
+export function parseSongDetailHtml(
+  html: string,
+  officialIdx: string,
+): ParsedSongDetail {
+  const $ = cheerio.load(html);
+  const imageSource = $("img")
+    .toArray()
+    .map((image) => $(image).attr("src"))
+    .find((src) => src?.includes("/Music/") || src?.includes("img/Music/"));
+
+  return {
+    officialIdx,
+    jacketUrl: normalizeJacketUrl(imageSource),
+  };
+}
+
 export function parseSongScoreHtml(
   html: string,
   difficulty: Difficulty,
@@ -69,6 +91,7 @@ export function parseSongScoreHtml(
     const officialIdx =
       $(block).find('input[type="hidden"][name="idx"]').attr("value") ?? null;
     const genre = findGenre($, container);
+    const jacketUrl = findJacketUrl(container);
 
     if (!title || !level || maxDxScore === null) {
       return;
@@ -85,10 +108,34 @@ export function parseSongScoreHtml(
       maxDxScore,
       officialIdx,
       genre,
+      jacketUrl,
     });
   });
 
   return scores;
+}
+
+function findJacketUrl(container: cheerio.Cheerio<AnyNode>): string | null {
+  const imageSource = container
+    .find("img")
+    .toArray()
+    .map((image) => container.find(image).attr("src"))
+    .find((src) => src?.includes("/Music/") || src?.includes("img/Music/"));
+
+  if (!imageSource) {
+    return null;
+  }
+
+  return normalizeJacketUrl(imageSource);
+}
+
+function normalizeJacketUrl(imageSource: string | undefined): string | null {
+  if (!imageSource) {
+    return null;
+  }
+
+  const match = imageSource.match(/(?:^|\/)(?:img\/)?Music\/([^/?#]+\.png)/);
+  return match ? `https://maimaidx-eng.com/maimai-mobile/img/Music/${match[1]}` : null;
 }
 
 function findGenre(

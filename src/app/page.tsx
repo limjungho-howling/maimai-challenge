@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
+import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
 import { listCharts } from "@/lib/data/charts";
 
 const PAGE_SIZE = 30;
@@ -58,7 +58,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
           <div className="flex flex-wrap gap-2">
             <DifficultyLink active={difficulty === null} href="/" label="전체" />
-            {DIFFICULTIES.map((item) => (
+            {RANKING_DIFFICULTIES.map((item) => (
               <DifficultyLink
                 active={difficulty === item}
                 href={`/?diff=${item}`}
@@ -88,18 +88,31 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   href={`/charts/${chart.chartId}`}
                   key={chart.chartId}
                 >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium text-white">{chart.title}</span>
-                      <span className="rounded bg-amber-300/15 px-2 py-0.5 text-xs text-amber-200">
-                        {chart.kind}
-                      </span>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-white/10 bg-white/8">
+                      {chart.jacketUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          alt=""
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          src={chart.jacketUrl}
+                        />
+                      ) : null}
                     </div>
-                    <div className="mt-1 text-xs text-slate-400">
-                      Lv {chart.level}
-                      {chart.lastChangedAt
-                        ? ` · ${new Date(chart.lastChangedAt).toLocaleString("ko-KR")}`
-                        : ""}
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-medium text-white">{chart.title}</span>
+                        <span className="rounded bg-amber-300/15 px-2 py-0.5 text-xs text-amber-200">
+                          {chart.kind}
+                        </span>
+                      </div>
+                      <div className="mt-1 text-xs text-slate-400">
+                        Lv {chart.level}
+                        {chart.lastChangedAt
+                          ? ` · ${new Date(chart.lastChangedAt).toLocaleString("ko-KR")}`
+                          : ""}
+                      </div>
                     </div>
                   </div>
                   <div className="text-sm text-cyan-100">{chart.difficultyLabel}</div>
@@ -180,7 +193,7 @@ function PageLink({
 
 function parseDifficulty(value: string | undefined): number | null {
   const parsed = Number.parseInt(value ?? "", 10);
-  return DIFFICULTIES.includes(parsed as never) ? parsed : null;
+  return RANKING_DIFFICULTIES.includes(parsed as never) ? parsed : null;
 }
 
 function pageHref(difficulty: number | null, page: number): string {

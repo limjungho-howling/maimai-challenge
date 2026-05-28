@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 export interface ChartSummary {
   chartId: string;
   title: string;
+  jacketUrl: string | null;
   kind: string;
   difficulty: number;
   difficultyLabel: string;
@@ -123,6 +124,7 @@ function mapChartSummary(row: Record<string, unknown>): ChartSummary {
   return {
     chartId: String(row.chart_id),
     title: String(row.title),
+    jacketUrl: typeof row.jacket_url === "string" ? row.jacket_url : null,
     kind: String(row.kind),
     difficulty: Number(row.difficulty),
     difficultyLabel: String(row.difficulty_label),

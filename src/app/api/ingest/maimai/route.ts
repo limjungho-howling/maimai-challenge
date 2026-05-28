@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { ingestPayloadSchema } from "@/lib/ingest/schema";
-import { ingestMaimaiPayload } from "@/lib/ingest/service";
+import { ingestMaimaiPayload, type IngestProgress } from "@/lib/ingest/service";
 import {
   createSupabaseServerClient,
   createSupabaseServiceClient,
@@ -22,9 +22,42 @@ export async function POST(request: Request) {
     const json = await request.json();
     const payload = ingestPayloadSchema.parse(json);
     const serviceClient = createSupabaseServiceClient();
-    const result = await ingestMaimaiPayload(serviceClient, user, payload);
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        function send(event: Record<string, unknown>) {
+          controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+        }
 
-    return NextResponse.json(result);
+        try {
+          const result = await ingestMaimaiPayload(
+            serviceClient,
+            user,
+            payload,
+            (progress: IngestProgress) => send({ type: "progress", progress }),
+          );
+
+          send({ type: "result", result });
+        } catch (error) {
+          send({
+            type: "error",
+            error:
+              error instanceof Error
+                ? error.message
+                : "업로드 처리 중 오류가 발생했습니다.",
+          });
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Cache-Control": "no-store",
+        "Content-Type": "application/x-ndjson; charset=utf-8",
+      },
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "업로드 처리 중 오류가 발생했습니다.";

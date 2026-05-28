@@ -38,6 +38,26 @@
     }
     return await response.text();
   };
+  const parallelMap = async function (items, limit, mapper) {
+    const results = new Array(items.length);
+    let nextIndex = 0;
+    const workers = new Array(Math.min(limit, items.length)).fill(0).map(async function () {
+      while (nextIndex < items.length) {
+        const index = nextIndex++;
+        results[index] = await mapper(items[index], index);
+      }
+    });
+    await Promise.all(workers);
+    return results;
+  };
+  const extractDetailTargets = function (html) {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return Array.from(doc.querySelectorAll('input[type="hidden"][name="idx"]'))
+      .map(function (input) {
+        return input.value;
+      })
+      .filter(Boolean);
+  };
 
   try {
     relay.postMessage(
@@ -50,17 +70,37 @@
 
     const playerHtml = await fetchText("/maimai-mobile/playerData/");
     const scorePages = [];
+    const detailTargets = [];
 
-    for (const difficulty of [0, 1, 2, 3, 4]) {
+    for (const difficulty of [3, 4]) {
       const html = await fetchText(
         "/maimai-mobile/record/musicGenre/search/?genre=99&diff=" + difficulty,
       );
       scorePages.push({ difficulty, html });
+      detailTargets.push.apply(detailTargets, extractDetailTargets(html));
       relay.postMessage(
         { type: "maimai-challenge:progress", difficulty },
         APP_ORIGIN,
       );
     }
+
+    const uniqueDetailTargets = Array.from(new Set(detailTargets));
+    let detailDone = 0;
+    const detailPages = await parallelMap(uniqueDetailTargets, 8, async function (idx) {
+      const html = await fetchText(
+        "/maimai-mobile/record/musicDetail/?idx=" + encodeURIComponent(idx),
+      );
+      detailDone += 1;
+      relay.postMessage(
+        {
+          type: "maimai-challenge:detail-progress",
+          current: detailDone,
+          total: uniqueDetailTargets.length,
+        },
+        APP_ORIGIN,
+      );
+      return { idx, html };
+    });
 
     relay.postMessage(
       {
@@ -68,6 +108,7 @@
         payload: {
           playerHtml,
           scorePages,
+          detailPages,
           collectedAt: new Date().toISOString(),
         },
       },

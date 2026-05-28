@@ -1,0 +1,95 @@
+import {
+  detectRankingEvents,
+  type RankingEvent,
+  type ScoreEntry,
+} from "@/lib/maimai/ranking";
+
+export interface BulkRankingUpdate {
+  chartId: string;
+  title: string;
+  difficultyLabel: string;
+  dxScore: number;
+}
+
+export interface BulkRankingResult {
+  changedChartIds: Set<string>;
+  events: RankingEvent[];
+  rankDropEvents: Array<
+    RankingEvent & {
+      chartTitle: string;
+      difficultyLabel: string;
+    }
+  >;
+}
+
+export function detectBulkRankingEvents({
+  actorUserId,
+  updates,
+  beforeScoresByChartId,
+}: {
+  actorUserId: string;
+  updates: BulkRankingUpdate[];
+  beforeScoresByChartId: Map<string, ScoreEntry[]>;
+}): BulkRankingResult {
+  const changedChartIds = new Set<string>();
+  const events: RankingEvent[] = [];
+  const rankDropEvents: BulkRankingResult["rankDropEvents"] = [];
+
+  for (const update of updates) {
+    const before = beforeScoresByChartId.get(update.chartId) ?? [];
+    const previousActorScore =
+      before.find((entry) => entry.userId === actorUserId)?.dxScore ?? null;
+    const after = applyActorScore(before, actorUserId, update.dxScore);
+    const chartEvents = detectRankingEvents({
+      chartId: update.chartId,
+      actorUserId,
+      before,
+      after,
+      previousActorScore,
+      nextActorScore: update.dxScore,
+    });
+
+    if (chartEvents.length === 0) {
+      continue;
+    }
+
+    changedChartIds.add(update.chartId);
+    events.push(...chartEvents);
+
+    for (const event of chartEvents) {
+      if (event.type !== "rank_dropped") {
+        continue;
+      }
+
+      rankDropEvents.push({
+        ...event,
+        chartTitle: update.title,
+        difficultyLabel: update.difficultyLabel,
+      });
+    }
+  }
+
+  return { changedChartIds, events, rankDropEvents };
+}
+
+function applyActorScore(
+  before: ScoreEntry[],
+  actorUserId: string,
+  nextDxScore: number,
+): ScoreEntry[] {
+  let foundActor = false;
+  const after = before.map((entry) => {
+    if (entry.userId !== actorUserId) {
+      return entry;
+    }
+
+    foundActor = true;
+    return { ...entry, dxScore: nextDxScore };
+  });
+
+  if (!foundActor) {
+    after.push({ userId: actorUserId, dxScore: nextDxScore });
+  }
+
+  return after;
+}

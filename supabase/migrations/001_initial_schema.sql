@@ -18,6 +18,7 @@ create table if not exists public.songs (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   kind text not null check (kind in ('DX', 'STANDARD')),
+  jacket_url text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (title, kind)
@@ -121,6 +122,7 @@ leaders as (
 select
   sc.id as chart_id,
   s.title,
+  s.jacket_url,
   s.kind,
   sc.difficulty,
   sc.difficulty_label,

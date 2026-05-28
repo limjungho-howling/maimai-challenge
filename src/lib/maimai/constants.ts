@@ -7,6 +7,7 @@ export const DIFFICULTY_LABELS = {
 } as const;
 
 export const DIFFICULTIES = [0, 1, 2, 3, 4] as const;
+export const RANKING_DIFFICULTIES = [3, 4] as const;
 
 export type Difficulty = (typeof DIFFICULTIES)[number];
 export type DifficultyLabel = (typeof DIFFICULTY_LABELS)[Difficulty];

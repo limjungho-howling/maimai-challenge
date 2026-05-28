@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  parseSongDetailHtml,
   parsePlayerDataHtml,
   parseSongScoreHtml,
 } from "@/lib/maimai/parser";
@@ -16,6 +17,7 @@ const playerHtml = `
 const songScoreHtml = `
 <div class="screw_block m_15 f_15 p_s">POPS＆ANIME</div>
 <div class="w_450 m_15 p_r f_0">
+  <img src="https://maimaidx-eng.com/maimai-mobile/img/Music/000001.png" class="music_jacket">
   <div class="music_master_score_back pointer p_3">
     <form action="https://maimaidx-eng.com/maimai-mobile/record/musicDetail/" method="get">
       <img src="./files/diff_master.png" class="h_20 f_l">
@@ -72,6 +74,7 @@ describe("maimai parser", () => {
         maxDxScore: 1404,
         officialIdx: "opaque-session-value",
         genre: "POPS＆ANIME",
+        jacketUrl: "https://maimaidx-eng.com/maimai-mobile/img/Music/000001.png",
       },
       {
         title: "アイドル",
@@ -84,7 +87,20 @@ describe("maimai parser", () => {
         maxDxScore: 1887,
         officialIdx: null,
         genre: "POPS＆ANIME",
+        jacketUrl: null,
       },
     ]);
+  });
+
+  it("extracts the jacket URL from a song detail page", () => {
+    expect(
+      parseSongDetailHtml(
+        '<img src="/maimai-mobile/img/Music/012345.png" class="w_120">',
+        "idx-token",
+      ),
+    ).toEqual({
+      officialIdx: "idx-token",
+      jacketUrl: "https://maimaidx-eng.com/maimai-mobile/img/Music/012345.png",
+    });
   });
 });

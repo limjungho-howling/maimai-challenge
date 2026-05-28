@@ -1,13 +1,10 @@
 import { z } from "zod";
 
-import { DIFFICULTIES } from "@/lib/maimai/constants";
+import { RANKING_DIFFICULTIES } from "@/lib/maimai/constants";
 
 const difficultySchema = z.union([
-  z.literal(DIFFICULTIES[0]),
-  z.literal(DIFFICULTIES[1]),
-  z.literal(DIFFICULTIES[2]),
-  z.literal(DIFFICULTIES[3]),
-  z.literal(DIFFICULTIES[4]),
+  z.literal(RANKING_DIFFICULTIES[0]),
+  z.literal(RANKING_DIFFICULTIES[1]),
 ]);
 
 export const ingestPayloadSchema = z.object({
@@ -19,7 +16,15 @@ export const ingestPayloadSchema = z.object({
         html: z.string().min(1),
       }),
     )
-    .length(5),
+    .length(2),
+  detailPages: z
+    .array(
+      z.object({
+        idx: z.string().min(1),
+        html: z.string().min(1),
+      }),
+    )
+    .optional(),
   collectedAt: z.string().datetime().optional(),
 });
 
