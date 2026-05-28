@@ -1,7 +1,12 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
-import { sendChannelLog } from "@/lib/discord/notifier";
+import {
+  sendChannelLog,
+  sendPersonalRankDropNotifications,
+  type PersonalChannelNotification,
+} from "@/lib/discord/notifier";
 import { requireCatalogJackets } from "@/lib/ingest/catalog";
+import { detectBulkRankingEvents } from "@/lib/ingest/bulk-ranking";
 import { mapWithConcurrency } from "@/lib/ingest/chunk-utils";
 import {
   parseSongDetailHtml,
@@ -17,6 +22,12 @@ const DB_CHUNK_SIZE = 500;
 const DB_CHUNK_CONCURRENCY = 4;
 const DB_FILTER_CHUNK_SIZE = 100;
 const DB_SELECT_PAGE_SIZE = 1000;
+
+interface CatalogChart {
+  chartId: string;
+  title: string;
+  difficultyLabel: string;
+}
 
 interface IngestResult {
   ingestRunId: string;
@@ -118,6 +129,18 @@ export async function ingestMaimaiPayload(
       scoreUpdates,
       previousScoresByChartId,
     );
+    const rankingScoresByChartId = await listScoresForCharts(supabase, chartIds);
+    const rankingResult = detectBulkRankingEvents({
+      actorUserId: user.id,
+      updates: scoreUpdates.map(({ chartId, score, chart }) => ({
+        chartId,
+        title: chart.title,
+        difficultyLabel: chart.difficultyLabel,
+        dxScore: score.dxScore,
+        maxDxScore: score.maxDxScore,
+      })),
+      beforeScoresByChartId: rankingScoresByChartId,
+    });
 
     await reportProgress(onProgress, {
       stage: "scores",
@@ -133,14 +156,22 @@ export async function ingestMaimaiPayload(
       current: 82,
       total: 100,
     });
-    if (changedChartIds.length > 0) {
-      await markChartsChanged(supabase, changedChartIds);
+    const actualChangedChartIds = [
+      ...new Set([...changedChartIds, ...rankingResult.changedChartIds]),
+    ];
+
+    if (actualChangedChartIds.length > 0) {
+      await markChartsChanged(supabase, actualChangedChartIds);
+    }
+
+    if (rankingResult.events.length > 0) {
+      await insertRankingEvents(supabase, run.id, user.id, rankingResult.events);
     }
 
     await updateIngestRun(supabase, run.id, {
       status: "completed",
       score_count: scoreUpdates.length,
-      changed_chart_count: changedChartIds.length,
+      changed_chart_count: actualChangedChartIds.length,
       completed_at: kstNowIsoString(),
     });
 
@@ -155,7 +186,8 @@ export async function ingestMaimaiPayload(
       run.id,
       player.name,
       scoreUpdates.length,
-      changedChartIds.length,
+      actualChangedChartIds.length,
+      rankingResult.rankDropEvents,
     );
 
     await reportProgress(onProgress, {
@@ -170,8 +202,8 @@ export async function ingestMaimaiPayload(
       playerName: player.name,
       scoreCount: scoreUpdates.length,
       skippedChartCount: skippedScores.length,
-      changedChartCount: changedChartIds.length,
-      rankDropCount: 0,
+      changedChartCount: actualChangedChartIds.length,
+      rankDropCount: rankingResult.rankDropEvents.length,
     };
   } catch (error) {
     const errorMessage = getErrorMessage(error);
@@ -186,18 +218,18 @@ export async function ingestMaimaiPayload(
 
 export function matchScoresToCatalogCharts(
   scores: ParsedSongScore[],
-  chartsByKey: Map<string, string>,
+  chartsByKey: Map<string, CatalogChart>,
 ): {
-  scoreUpdates: Array<{ chartId: string; score: ParsedSongScore }>;
+  scoreUpdates: Array<{ chartId: string; chart: CatalogChart; score: ParsedSongScore }>;
   skippedScores: ParsedSongScore[];
 } {
-  const scoreUpdates: Array<{ chartId: string; score: ParsedSongScore }> = [];
+  const scoreUpdates: Array<{ chartId: string; chart: CatalogChart; score: ParsedSongScore }> = [];
   const skippedScores: ParsedSongScore[] = [];
 
   for (const score of scores) {
-    const chartId = chartsByKey.get(chartKey(score));
-    if (chartId) {
-      scoreUpdates.push({ chartId, score });
+    const chart = chartsByKey.get(chartKey(score));
+    if (chart) {
+      scoreUpdates.push({ chartId: chart.chartId, chart, score });
     } else {
       skippedScores.push(score);
     }
@@ -458,13 +490,13 @@ async function upsertCharts(
 
 async function listCatalogCharts(
   supabase: SupabaseClient,
-): Promise<Map<string, string>> {
+): Promise<Map<string, CatalogChart>> {
   const rows: Array<Record<string, unknown>> = [];
 
   for (let from = 0; ; from += DB_SELECT_PAGE_SIZE) {
     const { data, error } = await supabase
       .from("chart_leaderboard_summary")
-      .select("chart_id,title,kind,difficulty")
+      .select("chart_id,title,kind,difficulty,difficulty_label")
       .in("difficulty", [3, 4])
       .range(from, from + DB_SELECT_PAGE_SIZE - 1);
 
@@ -479,15 +511,57 @@ async function listCatalogCharts(
     }
   }
 
-  const idsByKey = new Map<string, string>();
+  const idsByKey = new Map<string, CatalogChart>();
   for (const row of rows) {
     idsByKey.set(
       `${songKey(String(row.title), String(row.kind))}\u0000${Number(row.difficulty)}`,
-      String(row.chart_id),
+      {
+        chartId: String(row.chart_id),
+        title: String(row.title),
+        difficultyLabel: String(row.difficulty_label),
+      },
     );
   }
 
   return idsByKey;
+}
+
+async function listScoresForCharts(
+  supabase: SupabaseClient,
+  chartIds: string[],
+): Promise<Map<string, Array<{ userId: string; dxScore: number }>>> {
+  const scoresByChartId = new Map<string, Array<{ userId: string; dxScore: number }>>();
+
+  const chunkResults = await mapWithConcurrency(
+    chunks([...new Set(chartIds)], DB_FILTER_CHUNK_SIZE),
+    DB_CHUNK_CONCURRENCY,
+    async (chunk) => {
+      const { data, error } = await supabase
+        .from("player_scores")
+        .select("chart_id, profile_id, dx_score")
+        .in("chart_id", chunk);
+
+      if (error) {
+        throw error;
+      }
+
+      return data ?? [];
+    },
+  );
+
+  for (const data of chunkResults) {
+    for (const row of data) {
+      const chartId = String(row.chart_id);
+      const entries = scoresByChartId.get(chartId) ?? [];
+      entries.push({
+        userId: String(row.profile_id),
+        dxScore: Number(row.dx_score),
+      });
+      scoresByChartId.set(chartId, entries);
+    }
+  }
+
+  return scoresByChartId;
 }
 
 async function listPlayerScoresForCharts(
@@ -565,6 +639,42 @@ async function upsertPlayerScores(
   });
 }
 
+async function insertRankingEvents(
+  supabase: SupabaseClient,
+  ingestRunId: string,
+  actorProfileId: string,
+  events: Array<{
+    chartId: string;
+    userId: string;
+    type: string;
+    previousDxScore: number | null;
+    nextDxScore: number;
+    previousRank: number | null;
+    nextRank: number;
+  }>,
+): Promise<void> {
+  const rows = events.map((event) => ({
+    chart_id: event.chartId,
+    profile_id: event.userId,
+    actor_profile_id: actorProfileId,
+    ingest_run_id: ingestRunId,
+    event_type: event.type,
+    previous_dx_score: event.previousDxScore,
+    next_dx_score: event.nextDxScore,
+    previous_rank: event.previousRank,
+    next_rank: event.nextRank,
+    created_at: kstNowIsoString(),
+  }));
+
+  await mapWithConcurrency(chunks(rows, DB_CHUNK_SIZE), DB_CHUNK_CONCURRENCY, async (chunk) => {
+    const { error } = await supabase.from("ranking_events").insert(chunk);
+
+    if (error) {
+      throw error;
+    }
+  });
+}
+
 async function markChartsChanged(
   supabase: SupabaseClient,
   chartIds: string[],
@@ -607,18 +717,125 @@ async function notifyChannel(
   playerName: string,
   scoreCount: number,
   changedChartCount: number,
+  rankDropEvents: Array<{
+    userId: string;
+    chartTitle: string;
+    difficultyLabel: string;
+    previousDxScore: number | null;
+    nextDxScore: number;
+    previousRank: number | null;
+    nextRank: number;
+    actorDxScore: number;
+    actorMaxDxScore: number;
+  }>,
 ): Promise<void> {
   const result = await sendChannelLog(
     `${playerName}님이 ${scoreCount}개 점수를 갱신했습니다. 변동 차트: ${changedChartCount}개`,
   );
-  await insertNotificationResults(supabase, ingestRunId, [result]);
+  const personalResults =
+    rankDropEvents.length > 0
+      ? await sendPersonalRankDropNotifications(
+          await buildPersonalChannelNotifications(supabase, rankDropEvents),
+        )
+      : [];
+  await persistPersonalChannelIds(supabase, personalResults);
+  await insertNotificationResults(supabase, ingestRunId, [result, ...personalResults]);
+}
+
+async function buildPersonalChannelNotifications(
+  supabase: SupabaseClient,
+  rankDropEvents: Array<{
+    userId: string;
+    chartTitle: string;
+    difficultyLabel: string;
+    previousDxScore: number | null;
+    nextDxScore: number;
+    previousRank: number | null;
+    nextRank: number;
+    actorDxScore: number;
+    actorMaxDxScore: number;
+  }>,
+): Promise<PersonalChannelNotification[]> {
+  const profileIds = [...new Set(rankDropEvents.map((event) => event.userId))];
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, discord_user_id, discord_username, discord_personal_channel_id, maimai_name")
+    .in("id", profileIds);
+
+  if (error) {
+    throw error;
+  }
+
+  const profilesById = new Map((data ?? []).map((profile) => [String(profile.id), profile]));
+
+  return profileIds.map((profileId) => {
+    const profile = profilesById.get(profileId);
+    return {
+      profileId,
+      discordUserId:
+        typeof profile?.discord_user_id === "string" ? profile.discord_user_id : null,
+      discordUsername:
+        typeof profile?.discord_username === "string" ? profile.discord_username : null,
+      personalChannelId:
+        typeof profile?.discord_personal_channel_id === "string"
+          ? profile.discord_personal_channel_id
+          : null,
+      playerName:
+        typeof profile?.maimai_name === "string" ? profile.maimai_name : "Unknown",
+      events: rankDropEvents
+        .filter((event) => event.userId === profileId)
+        .map((event) => ({
+          chartTitle: event.chartTitle,
+          difficultyLabel: event.difficultyLabel,
+          previousDxScore: event.previousDxScore,
+          nextDxScore: event.nextDxScore,
+          previousRank: event.previousRank,
+          nextRank: event.nextRank,
+          actorDxScore: event.actorDxScore,
+          actorMaxDxScore: event.actorMaxDxScore,
+        })),
+    };
+  });
+}
+
+async function persistPersonalChannelIds(
+  supabase: SupabaseClient,
+  results: Array<{
+    type: string;
+    profileId: string | null;
+    status: string;
+    channelId?: string | null;
+  }>,
+): Promise<void> {
+  for (const result of results) {
+    if (
+      result.type !== "personal_channel" ||
+      result.status !== "sent" ||
+      !result.profileId ||
+      !result.channelId
+    ) {
+      continue;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        discord_personal_channel_id: result.channelId,
+        updated_at: kstNowIsoString(),
+      })
+      .eq("id", result.profileId);
+
+    if (error) {
+      throw error;
+    }
+  }
 }
 
 async function insertNotificationResults(
   supabase: SupabaseClient,
   ingestRunId: string,
-  results: Array<{
-    type: "dm" | "channel";
+    results: Array<{
+    type: "dm" | "channel" | "personal_channel";
     profileId: string | null;
     status: "sent" | "failed" | "skipped";
     message: string;

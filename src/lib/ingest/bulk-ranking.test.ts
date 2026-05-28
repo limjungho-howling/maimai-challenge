@@ -7,8 +7,20 @@ describe("bulk ranking event detection", () => {
     const result = detectBulkRankingEvents({
       actorUserId: "actor",
       updates: [
-        { chartId: "chart-a", title: "Song A", difficultyLabel: "MASTER", dxScore: 1450 },
-        { chartId: "chart-b", title: "Song B", difficultyLabel: "EXPERT", dxScore: 990 },
+        {
+          chartId: "chart-a",
+          title: "Song A",
+          difficultyLabel: "MASTER",
+          dxScore: 1450,
+          maxDxScore: 1500,
+        },
+        {
+          chartId: "chart-b",
+          title: "Song B",
+          difficultyLabel: "EXPERT",
+          dxScore: 990,
+          maxDxScore: 1000,
+        },
       ],
       beforeScoresByChartId: new Map([
         [
@@ -37,6 +49,8 @@ describe("bulk ranking event detection", () => {
         chartId: "chart-a",
         chartTitle: "Song A",
         difficultyLabel: "MASTER",
+        actorDxScore: 1450,
+        actorMaxDxScore: 1500,
       }),
     ]);
   });

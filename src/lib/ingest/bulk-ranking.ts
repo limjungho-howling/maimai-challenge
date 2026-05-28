@@ -9,6 +9,7 @@ export interface BulkRankingUpdate {
   title: string;
   difficultyLabel: string;
   dxScore: number;
+  maxDxScore: number;
 }
 
 export interface BulkRankingResult {
@@ -18,6 +19,8 @@ export interface BulkRankingResult {
     RankingEvent & {
       chartTitle: string;
       difficultyLabel: string;
+      actorDxScore: number;
+      actorMaxDxScore: number;
     }
   >;
 }
@@ -65,6 +68,8 @@ export function detectBulkRankingEvents({
         ...event,
         chartTitle: update.title,
         difficultyLabel: update.difficultyLabel,
+        actorDxScore: update.dxScore,
+        actorMaxDxScore: update.maxDxScore,
       });
     }
   }

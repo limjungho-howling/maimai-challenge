@@ -21,10 +21,15 @@ describe("matchScoresToCatalogCharts", () => {
   it("skips scores whose charts are not registered yet", () => {
     const registered = { ...baseScore, title: "Registered Song" };
     const missing = { ...baseScore, title: "Missing Song" };
-    const chartsByKey = new Map([["DX\u0000Registered Song\u00004", "chart-1"]]);
+    const chart = {
+      chartId: "chart-1",
+      title: "Registered Song",
+      difficultyLabel: "Re:MASTER",
+    };
+    const chartsByKey = new Map([["DX\u0000Registered Song\u00004", chart]]);
 
     expect(matchScoresToCatalogCharts([registered, missing], chartsByKey)).toEqual({
-      scoreUpdates: [{ chartId: "chart-1", score: registered }],
+      scoreUpdates: [{ chartId: "chart-1", chart, score: registered }],
       skippedScores: [missing],
     });
   });

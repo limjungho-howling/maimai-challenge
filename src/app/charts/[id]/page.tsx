@@ -81,7 +81,7 @@ export default async function ChartPage({ params }: ChartPageProps) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-[48px_minmax(120px,1.2fr)_minmax(108px,0.5fr)_minmax(124px,0.8fr)_minmax(88px,0.6fr)_minmax(112px,0.8fr)] gap-x-3 border-b border-white/10 px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400 max-md:hidden">
+              <div className="grid grid-cols-[48px_minmax(120px,1.2fr)_minmax(108px,0.8fr)_minmax(124px,0.8fr)_minmax(88px,0.6fr)_minmax(112px,0.8fr)] gap-x-3 border-b border-white/10 px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400 max-md:hidden">
                 <span>순위</span>
                 <span>사용자</span>
                 <span className="justify-self-start text-left">DX Score</span>
@@ -92,7 +92,7 @@ export default async function ChartPage({ params }: ChartPageProps) {
               <div className="divide-y divide-white/10">
                 {rankings.map((ranking) => (
                   <div
-                    className="grid min-h-20 grid-cols-[48px_minmax(120px,1.2fr)_minmax(108px,0.5fr)_minmax(124px,0.8fr)_minmax(88px,0.6fr)_minmax(112px,0.8fr)] items-center gap-x-3 gap-y-3 px-4 py-3 max-md:grid-cols-[48px_minmax(0,1fr)] max-md:items-start"
+                    className="grid min-h-20 grid-cols-[48px_minmax(120px,1.2fr)_minmax(108px,0.8fr)_minmax(124px,0.8fr)_minmax(88px,0.6fr)_minmax(112px,0.8fr)] items-center gap-x-3 gap-y-3 px-4 py-3 max-md:grid-cols-[48px_minmax(0,1fr)] max-md:items-start"
                     key={ranking.profileId}
                   >
                     <div className="font-mono text-lg leading-none text-cyan-100">
