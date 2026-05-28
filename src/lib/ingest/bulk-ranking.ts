@@ -84,7 +84,7 @@ export function detectBulkRankingEvents({
         });
       }
 
-      if (event.type !== "rank_dropped") {
+      if (event.type !== "rank_dropped" || previousActorScore === null) {
         continue;
       }
 

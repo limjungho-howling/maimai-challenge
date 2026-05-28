@@ -58,13 +58,27 @@ describe("bulk ranking event detection", () => {
       previousRank: 2,
       nextRank: 3,
     });
-    expect(result.rankDropEvents).toEqual(expect.arrayContaining([
+    expect(result.events).toContainEqual({
+      type: "rank_dropped",
+      chartId: "chart-c",
+      userId: "alice",
+      previousDxScore: 1500,
+      nextDxScore: 1500,
+      previousRank: 1,
+      nextRank: 2,
+    });
+    expect(result.rankDropEvents).not.toEqual(expect.arrayContaining([
       expect.objectContaining({
         chartId: "chart-a",
-        chartTitle: "Song A",
-        difficultyLabel: "MASTER",
-        actorDxScore: 1450,
-        actorMaxDxScore: 1500,
+      }),
+    ]));
+    expect(result.rankDropEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        chartId: "chart-c",
+        chartTitle: "Song C",
+        difficultyLabel: "Re:MASTER",
+        actorDxScore: 1550,
+        actorMaxDxScore: 1600,
       }),
     ]));
     expect(result.rankUpEvents).toEqual([
