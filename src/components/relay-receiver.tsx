@@ -52,6 +52,7 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
       : "Discord 로그인이 필요합니다.",
     progress: isLoggedIn ? 0 : 100,
   });
+  const [closeMessage, setCloseMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -213,6 +214,23 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
         >
           Discord로 로그인
         </a>
+      ) : null}
+      {state.status === "success" ? (
+        <div className="flex flex-col items-center gap-2">
+          <button
+            className="inline-flex h-10 items-center rounded-md border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white transition hover:bg-white/15"
+            type="button"
+            onClick={() => {
+              window.close();
+              setCloseMessage("창이 자동으로 닫히지 않으면 브라우저의 닫기 버튼을 눌러주세요.");
+            }}
+          >
+            닫기
+          </button>
+          {closeMessage ? (
+            <p className="text-xs leading-5 text-slate-400">{closeMessage}</p>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
