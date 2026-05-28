@@ -1,9 +1,11 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 import {
+  ensurePersonalChannel,
   sendChannelLog,
   sendChannelRankUpLogs,
   sendPersonalRankDropNotifications,
+  type DiscordNotificationResult,
   type PersonalChannelNotification,
 } from "@/lib/discord/notifier";
 import { requireCatalogJackets } from "@/lib/ingest/catalog";
@@ -82,6 +84,16 @@ export async function ingestMaimaiPayload(
   await upsertProfile(supabase, user.id, player, discordProfile);
 
   const run = await insertIngestRun(supabase, user.id, player.name);
+  const personalChannelResult = await ensureProfilePersonalChannel(
+    supabase,
+    user.id,
+    player.name,
+    discordProfile,
+  );
+  if (personalChannelResult) {
+    await persistPersonalChannelIds(supabase, [personalChannelResult]);
+    await insertNotificationResults(supabase, run.id, [personalChannelResult]);
+  }
   const detailScoresByKey = buildDetailScoresByKey(payload);
   const allScores = payload.scorePages.flatMap(({ difficulty, html }) =>
     parseSongScoreHtml(html, difficulty).map((score) => {
@@ -383,6 +395,37 @@ async function upsertProfile(
   if (error) {
     throw error;
   }
+}
+
+async function ensureProfilePersonalChannel(
+  supabase: SupabaseClient,
+  profileId: string,
+  playerName: string,
+  discordProfile: LinkedDiscordProfile,
+): Promise<DiscordNotificationResult | null> {
+  if (!discordProfile.discordUserId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("discord_personal_channel_id")
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (typeof data?.discord_personal_channel_id === "string") {
+    return null;
+  }
+
+  return ensurePersonalChannel({
+    profileId,
+    discordUsername: discordProfile.discordUsername,
+    playerName,
+  });
 }
 
 async function insertIngestRun(

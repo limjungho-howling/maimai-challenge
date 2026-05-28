@@ -58,9 +58,21 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
       return;
     }
 
+    window.opener?.postMessage(
+      { type: "maimai-challenge:relay-ready" },
+      "https://maimaidx-eng.com",
+    );
+
     async function handleMessage(event: MessageEvent<RelayMessage>) {
       if (!isAllowedRelayOrigin(event.origin)) {
         return;
+      }
+
+      if (event.data.type === "maimai-challenge:hello") {
+        window.opener?.postMessage(
+          { type: "maimai-challenge:relay-ready" },
+          "https://maimaidx-eng.com",
+        );
       }
 
       if (event.data.type === "maimai-challenge:status") {

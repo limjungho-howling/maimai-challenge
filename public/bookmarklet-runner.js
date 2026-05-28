@@ -6,6 +6,7 @@
   const FETCH_RETRY_COUNT = 3;
   const FETCH_TIMEOUT_MS = 20000;
   const SCORE_DIFFICULTIES = [3, 4];
+  const RELAY_READY_TIMEOUT_MS = 120000;
 
   if (
     location.origin !== MAIMAI_ORIGIN ||
@@ -39,6 +40,35 @@
       { type: "maimai-challenge:status", message },
       APP_ORIGIN,
     );
+  };
+  const waitForRelayReady = function () {
+    return new Promise(function (resolve, reject) {
+      var timeout = setTimeout(function () {
+        window.removeEventListener("message", handleMessage);
+        reject(
+          new Error(
+            "릴레이가 준비되지 않았습니다. 릴레이 창에서 Discord 로그인을 완료한 뒤 북마클릿을 다시 실행해주세요.",
+          ),
+        );
+      }, RELAY_READY_TIMEOUT_MS);
+
+      var handleMessage = function (event) {
+        if (event.origin !== APP_ORIGIN) {
+          return;
+        }
+
+        if (!event.data || event.data.type !== "maimai-challenge:relay-ready") {
+          return;
+        }
+
+        clearTimeout(timeout);
+        window.removeEventListener("message", handleMessage);
+        resolve();
+      };
+
+      window.addEventListener("message", handleMessage);
+      relay.postMessage({ type: "maimai-challenge:hello" }, APP_ORIGIN);
+    });
   };
   const fetchText = async function (path) {
     let lastError = null;
@@ -75,6 +105,7 @@
   };
 
   try {
+    await waitForRelayReady();
     notifyStatus("MASTER/Re:MASTER 점수 목록을 수집하는 중입니다.");
 
     const [playerHtml, scorePages] = await Promise.all([

@@ -112,6 +112,55 @@ export interface ChannelRankUpNotification {
   events: ChannelRankUpEvent[];
 }
 
+export async function ensurePersonalChannel({
+  profileId,
+  discordUsername,
+  playerName,
+}: {
+  profileId: string;
+  discordUsername: string | null;
+  playerName: string;
+}): Promise<DiscordNotificationResult> {
+  const token = process.env.DISCORD_BOT_TOKEN;
+  const guildId = process.env.DISCORD_GUILD_ID;
+  const message = "Discord personal channel prepared";
+
+  if (!token || !guildId) {
+    return {
+      type: "personal_channel",
+      profileId,
+      status: "skipped",
+      message,
+      errorMessage: "DISCORD_BOT_TOKEN or DISCORD_GUILD_ID is not configured",
+    };
+  }
+
+  try {
+    const channelId = await createPersonalGuildChannel({
+      token,
+      guildId,
+      discordUsername,
+      playerName,
+    });
+    return {
+      type: "personal_channel",
+      profileId,
+      status: "sent",
+      message,
+      errorMessage: null,
+      channelId,
+    };
+  } catch (error) {
+    return {
+      type: "personal_channel",
+      profileId,
+      status: "failed",
+      message,
+      errorMessage: getErrorMessage(error),
+    };
+  }
+}
+
 export async function sendPersonalRankDropNotifications(
   notifications: PersonalChannelNotification[],
 ): Promise<DiscordNotificationResult[]> {
