@@ -5,6 +5,16 @@ export interface PersonalRankDropEvent
     RankingEvent,
     "previousRank" | "nextRank" | "previousDxScore" | "nextDxScore"
   > {
+  chartId: string;
+  chartTitle: string;
+  difficultyLabel: string;
+  actorDxScore: number;
+  actorMaxDxScore: number;
+}
+
+export interface ChannelRankUpEvent
+  extends Pick<RankingEvent, "previousRank" | "nextRank"> {
+  chartId: string;
   chartTitle: string;
   difficultyLabel: string;
   actorDxScore: number;
@@ -24,27 +34,48 @@ export interface RankGoal {
   }>;
 }
 
-export function buildPersonalRankDropMessage({
-  playerName,
+export function buildPersonalRankDropMessages({
+  actorName,
   events,
+  appUrl,
 }: {
   playerName: string;
+  actorName: string;
   events: PersonalRankDropEvent[];
-}): string {
-  const lines = events.map((event) => {
+  appUrl: string;
+}): string[] {
+  return events.map((event) => {
     const previousRank = event.previousRank === null ? "-" : `#${event.previousRank}`;
     return [
-      `- ${event.chartTitle} [${event.difficultyLabel}]`,
+      `${actorName}에 의해 다음 곡의 디럭스 스코어 등수가 하락하였습니다.`,
+      `${event.chartTitle} [${event.difficultyLabel}]`,
       `  순위: ${previousRank} -> #${event.nextRank}`,
-      `  내 DX: ${event.nextDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
-      `  역전 기록: DX ${event.actorDxScore.toLocaleString("ko-KR")}`,
+      `  내 DX 스코어: ${event.nextDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
+      `  역전 기록: DX ${event.actorDxScore.toLocaleString("ko-KR")} (${formatSignedDifference(event.actorDxScore - event.nextDxScore)})`,
+      `  곡 랭킹: ${trimTrailingSlash(appUrl)}/charts/${event.chartId}`,
     ].join("\n");
   });
+}
 
-  return [
-    `${playerName}님, 새 갱신으로 등수 하락이 발생했습니다.`,
-    ...lines,
-  ].join("\n");
+export function buildChannelRankUpMessages({
+  actorName,
+  events,
+  appUrl,
+}: {
+  actorName: string;
+  events: ChannelRankUpEvent[];
+  appUrl: string;
+}): string[] {
+  return events.map((event) => {
+    const previousRank = event.previousRank === null ? "-" : `#${event.previousRank}`;
+    return [
+      `${actorName}의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.`,
+      `${event.chartTitle} [${event.difficultyLabel}]`,
+      `  순위: ${previousRank} -> #${event.nextRank}`,
+      `  DX 스코어: ${event.actorDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
+      `  곡 랭킹: ${trimTrailingSlash(appUrl)}/charts/${event.chartId}`,
+    ].join("\n");
+  });
 }
 
 export function buildRankGoalMessage(playerName: string, goals: RankGoal[]): string {
@@ -62,4 +93,13 @@ export function buildRankGoalMessage(playerName: string, goals: RankGoal[]): str
   ]);
 
   return [`${playerName}님의 랜덤 갱신 목표 ${goals.length}개`, ...lines].join("\n");
+}
+
+function trimTrailingSlash(value: string): string {
+  return value.replace(/\/+$/g, "");
+}
+
+function formatSignedDifference(value: number): string {
+  const sign = value >= 0 ? "+" : "-";
+  return `${sign}${Math.abs(value).toLocaleString("ko-KR")}`;
 }

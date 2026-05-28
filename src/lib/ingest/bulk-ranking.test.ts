@@ -21,6 +21,13 @@ describe("bulk ranking event detection", () => {
           dxScore: 990,
           maxDxScore: 1000,
         },
+        {
+          chartId: "chart-c",
+          title: "Song C",
+          difficultyLabel: "Re:MASTER",
+          dxScore: 1550,
+          maxDxScore: 1600,
+        },
       ],
       beforeScoresByChartId: new Map([
         [
@@ -31,10 +38,17 @@ describe("bulk ranking event detection", () => {
           ],
         ],
         ["chart-b", [{ userId: "actor", dxScore: 900 }]],
+        [
+          "chart-c",
+          [
+            { userId: "alice", dxScore: 1500 },
+            { userId: "actor", dxScore: 1400 },
+          ],
+        ],
       ]),
     });
 
-    expect(result.changedChartIds).toEqual(new Set(["chart-a", "chart-b"]));
+    expect(result.changedChartIds).toEqual(new Set(["chart-a", "chart-b", "chart-c"]));
     expect(result.events).toContainEqual({
       type: "rank_dropped",
       chartId: "chart-a",
@@ -44,13 +58,22 @@ describe("bulk ranking event detection", () => {
       previousRank: 2,
       nextRank: 3,
     });
-    expect(result.rankDropEvents).toEqual([
+    expect(result.rankDropEvents).toEqual(expect.arrayContaining([
       expect.objectContaining({
         chartId: "chart-a",
         chartTitle: "Song A",
         difficultyLabel: "MASTER",
         actorDxScore: 1450,
         actorMaxDxScore: 1500,
+      }),
+    ]));
+    expect(result.rankUpEvents).toEqual([
+      expect.objectContaining({
+        chartId: "chart-c",
+        chartTitle: "Song C",
+        difficultyLabel: "Re:MASTER",
+        previousRank: 2,
+        nextRank: 1,
       }),
     ]);
   });

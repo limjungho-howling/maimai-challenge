@@ -1,6 +1,8 @@
 import type { RankingEvent } from "@/lib/maimai/ranking";
 import {
-  buildPersonalRankDropMessage,
+  buildChannelRankUpMessages,
+  buildPersonalRankDropMessages,
+  type ChannelRankUpEvent,
   type PersonalRankDropEvent,
 } from "@/lib/discord/messages";
 
@@ -26,6 +28,19 @@ export interface RankDropNotification {
 }
 
 const DISCORD_API_BASE = "https://discord.com/api/v10";
+const DISCORD_PERMISSION_VIEW_CHANNEL = 1024;
+const DISCORD_PERMISSION_SEND_MESSAGES = 2048;
+const DISCORD_PERMISSION_READ_MESSAGE_HISTORY = 65536;
+const PERSONAL_CHANNEL_READER_ALLOW = (
+  DISCORD_PERMISSION_VIEW_CHANNEL | DISCORD_PERMISSION_READ_MESSAGE_HISTORY
+).toString();
+const PERSONAL_CHANNEL_READER_DENY = DISCORD_PERMISSION_SEND_MESSAGES.toString();
+const PERSONAL_CHANNEL_BOT_ALLOW = (
+  DISCORD_PERMISSION_VIEW_CHANNEL |
+  DISCORD_PERMISSION_SEND_MESSAGES |
+  DISCORD_PERMISSION_READ_MESSAGE_HISTORY
+).toString();
+let cachedBotUserId: string | null = null;
 
 export async function sendRankDropNotifications(
   notifications: RankDropNotification[],
@@ -88,7 +103,13 @@ export interface PersonalChannelNotification {
   discordUsername: string | null;
   personalChannelId: string | null;
   playerName: string;
+  actorName: string;
   events: PersonalRankDropEvent[];
+}
+
+export interface ChannelRankUpNotification {
+  actorName: string;
+  events: ChannelRankUpEvent[];
 }
 
 export async function sendPersonalRankDropNotifications(
@@ -98,61 +119,84 @@ export async function sendPersonalRankDropNotifications(
   const guildId = process.env.DISCORD_GUILD_ID;
 
   if (!token || !guildId) {
-    return notifications.map((notification) => ({
-      type: "personal_channel",
-      profileId: notification.profileId,
-      status: "skipped",
-      message: buildPersonalRankDropMessage(notification),
-      errorMessage: "DISCORD_BOT_TOKEN or DISCORD_GUILD_ID is not configured",
-      channelId: notification.personalChannelId,
-    }));
+    return notifications.flatMap((notification) =>
+      buildPersonalRankDropMessages({
+        ...notification,
+        appUrl: getAppUrl(),
+      }).map((message) => ({
+        type: "personal_channel" as const,
+        profileId: notification.profileId,
+        status: "skipped" as const,
+        message,
+        errorMessage: "DISCORD_BOT_TOKEN or DISCORD_GUILD_ID is not configured",
+        channelId: notification.personalChannelId,
+      })),
+    );
   }
 
   const results: DiscordNotificationResult[] = [];
 
   for (const notification of notifications) {
-    const message = buildPersonalRankDropMessage(notification);
+    const messages = buildPersonalRankDropMessages({
+      ...notification,
+      appUrl: getAppUrl(),
+    });
 
     if (!notification.discordUserId) {
-      results.push({
-        type: "personal_channel",
+      results.push(...messages.map((message) => ({
+        type: "personal_channel" as const,
         profileId: notification.profileId,
-        status: "skipped",
+        status: "skipped" as const,
         message,
         errorMessage: "Discord user id is not linked",
         channelId: notification.personalChannelId,
-      });
+      })));
       continue;
     }
 
+    let channelId: string;
     try {
-      const channelId =
+      channelId =
         notification.personalChannelId ??
         (await createPersonalGuildChannel({
           token,
           guildId,
-          discordUserId: notification.discordUserId,
           discordUsername: notification.discordUsername,
           playerName: notification.playerName,
         }));
-      await createMessage(token, channelId, message);
-      results.push({
-        type: "personal_channel",
-        profileId: notification.profileId,
-        status: "sent",
-        message,
-        errorMessage: null,
-        channelId,
-      });
     } catch (error) {
-      results.push({
-        type: "personal_channel",
+      results.push(...messages.map((message) => ({
+        type: "personal_channel" as const,
         profileId: notification.profileId,
-        status: "failed",
+        status: "failed" as const,
         message,
         errorMessage: getErrorMessage(error),
         channelId: notification.personalChannelId,
-      });
+      })));
+      continue;
+    }
+
+    for (const message of messages) {
+      try {
+        await createMessageWithRetry(token, channelId, message);
+        results.push({
+          type: "personal_channel",
+          profileId: notification.profileId,
+          status: "sent",
+          message,
+          errorMessage: null,
+          channelId,
+        });
+      } catch (error) {
+        results.push({
+          type: "personal_channel",
+          profileId: notification.profileId,
+          status: "failed",
+          message,
+          errorMessage: getErrorMessage(error),
+          channelId,
+        });
+      }
     }
   }
 
@@ -197,6 +241,61 @@ export async function sendChannelLog(
           : getErrorMessage(error),
     };
   }
+}
+
+export async function sendChannelRankUpLogs({
+  actorName,
+  events,
+}: ChannelRankUpNotification): Promise<DiscordNotificationResult[]> {
+  const messages = buildChannelRankUpMessages({
+    actorName,
+    events,
+    appUrl: getAppUrl(),
+  });
+  const token = process.env.DISCORD_BOT_TOKEN;
+  const channelId = getChallengeLogChannelId();
+
+  if (!token || !channelId) {
+    return messages.map((message) => ({
+      type: "channel" as const,
+      profileId: null,
+      status: "skipped" as const,
+      message,
+      errorMessage: "DISCORD_BOT_TOKEN or DISCORD_LOG_CHANNEL_ID is not configured",
+      channelId,
+    }));
+  }
+
+  const results: DiscordNotificationResult[] = [];
+
+  for (const message of messages) {
+    try {
+      await createMessageWithRetry(token, channelId, message);
+      results.push({
+        type: "channel",
+        profileId: null,
+        status: "sent",
+        message,
+        errorMessage: null,
+        channelId,
+      });
+    } catch (error) {
+      const discordError = getDiscordApiError(error);
+      results.push({
+        type: "channel",
+        profileId: null,
+        status: "failed",
+        message,
+        errorMessage:
+          discordError?.code === 50001
+            ? "Discord log channel failed: bot is missing access to DISCORD_LOG_CHANNEL_ID. Add the bot to the server/channel and grant View Channel + Send Messages."
+            : getErrorMessage(error),
+        channelId,
+      });
+    }
+  }
+
+  return results;
 }
 
 function buildRankDropMessage(notification: RankDropNotification): string {
@@ -248,21 +347,42 @@ async function createMessage(
   }
 }
 
+async function createMessageWithRetry(
+  token: string,
+  channelId: string,
+  content: string,
+): Promise<void> {
+  const maxAttempts = 3;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      await createMessage(token, channelId, content);
+      return;
+    } catch (error) {
+      const discordError = getDiscordApiError(error);
+      if (discordError?.status !== 429 || attempt === maxAttempts) {
+        throw error;
+      }
+
+      await sleep(discordError.retryAfterMs ?? attempt * 1000);
+    }
+  }
+}
+
 async function createPersonalGuildChannel({
   token,
   guildId,
-  discordUserId,
   discordUsername,
   playerName,
 }: {
   token: string;
   guildId: string;
-  discordUserId: string;
   discordUsername: string | null;
   playerName: string;
 }): Promise<string> {
   const categoryId = process.env.DISCORD_PERSONAL_CHANNEL_CATEGORY_ID;
   const name = makePersonalChannelName(discordUsername ?? playerName);
+  const botUserId = await getBotUserId(token);
   const body: Record<string, unknown> = {
     name,
     type: 0,
@@ -270,12 +390,14 @@ async function createPersonalGuildChannel({
       {
         id: guildId,
         type: 0,
-        deny: "1024",
+        allow: PERSONAL_CHANNEL_READER_ALLOW,
+        deny: PERSONAL_CHANNEL_READER_DENY,
       },
       {
-        id: discordUserId,
+        id: botUserId,
         type: 1,
-        allow: "68608",
+        allow: PERSONAL_CHANNEL_BOT_ALLOW,
+        deny: "0",
       },
     ],
   };
@@ -302,6 +424,28 @@ async function createPersonalGuildChannel({
   return payload.id;
 }
 
+async function getBotUserId(token: string): Promise<string> {
+  if (cachedBotUserId) {
+    return cachedBotUserId;
+  }
+
+  const response = await fetch(`${DISCORD_API_BASE}/users/@me`, {
+    headers: discordHeaders(token),
+  });
+
+  if (!response.ok) {
+    throw await createDiscordHttpError(response, "Discord bot user lookup failed");
+  }
+
+  const payload = (await response.json()) as { id?: string };
+  if (!payload.id) {
+    throw new Error("Discord bot user response did not include an id");
+  }
+
+  cachedBotUserId = payload.id;
+  return payload.id;
+}
+
 function makePersonalChannelName(value: string): string {
   const normalized = value
     .toLowerCase()
@@ -310,6 +454,18 @@ function makePersonalChannelName(value: string): string {
     .slice(0, 80);
 
   return `maimai-${normalized || "player"}`;
+}
+
+function getAppUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.replace(/^/, "https://") ??
+    "https://maimai-challenge.vercel.app"
+  );
+}
+
+function getChallengeLogChannelId(): string | null {
+  return process.env.DISCORD_CHALLENGE_LOG_CHANNEL_ID ?? "1509087713888964668";
 }
 
 function discordHeaders(token: string): HeadersInit {
@@ -327,6 +483,7 @@ interface DiscordApiError {
   status: number;
   code: number | null;
   message: string | null;
+  retryAfterMs?: number;
 }
 
 async function createDiscordHttpError(
@@ -348,11 +505,18 @@ async function createDiscordHttpError(
 
 async function readDiscordError(response: Response): Promise<DiscordApiError> {
   try {
-    const payload = (await response.json()) as { code?: unknown; message?: unknown };
+    const payload = (await response.json()) as {
+      code?: unknown;
+      message?: unknown;
+      retry_after?: unknown;
+    };
+    const retryAfter =
+      typeof payload.retry_after === "number" ? payload.retry_after : null;
     return {
       status: response.status,
       code: typeof payload.code === "number" ? payload.code : null,
       message: typeof payload.message === "string" ? payload.message : null,
+      retryAfterMs: retryAfter === null ? undefined : Math.ceil(retryAfter * 1000),
     };
   } catch {
     return {
@@ -374,4 +538,10 @@ function getDiscordApiError(error: unknown): DiscordApiError | null {
   }
 
   return null;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }

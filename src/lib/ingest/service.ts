@@ -2,6 +2,7 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 import {
   sendChannelLog,
+  sendChannelRankUpLogs,
   sendPersonalRankDropNotifications,
   type PersonalChannelNotification,
 } from "@/lib/discord/notifier";
@@ -125,6 +126,7 @@ export async function ingestMaimaiPayload(
       user.id,
       chartIds,
     );
+    const isInitialScoreIngest = previousScoresByChartId.size === 0;
     const changedChartIds = detectChangedChartIds(
       scoreUpdates,
       previousScoresByChartId,
@@ -175,20 +177,30 @@ export async function ingestMaimaiPayload(
       completed_at: kstNowIsoString(),
     });
 
-    await reportProgress(onProgress, {
-      stage: "notifications",
-      message: "Discord 알림을 처리하는 중입니다.",
-      current: 92,
-      total: 100,
-    });
-    await notifyChannel(
-      supabase,
-      run.id,
-      player.name,
-      scoreUpdates.length,
-      actualChangedChartIds.length,
-      rankingResult.rankDropEvents,
-    );
+    if (isInitialScoreIngest) {
+      await reportProgress(onProgress, {
+        stage: "notifications",
+        message: "최초 갱신이므로 Discord 알림을 건너뜁니다.",
+        current: 92,
+        total: 100,
+      });
+    } else {
+      await reportProgress(onProgress, {
+        stage: "notifications",
+        message: "Discord 알림을 처리하는 중입니다.",
+        current: 92,
+        total: 100,
+      });
+      await notifyChannel(
+        supabase,
+        run.id,
+        player.name,
+        scoreUpdates.length,
+        actualChangedChartIds.length,
+        rankingResult.rankUpEvents,
+        rankingResult.rankDropEvents,
+      );
+    }
 
     await reportProgress(onProgress, {
       stage: "completed",
@@ -717,7 +729,20 @@ async function notifyChannel(
   playerName: string,
   scoreCount: number,
   changedChartCount: number,
+  rankUpEvents: Array<{
+    chartId: string;
+    userId: string;
+    chartTitle: string;
+    difficultyLabel: string;
+    previousDxScore: number | null;
+    nextDxScore: number;
+    previousRank: number | null;
+    nextRank: number;
+    actorDxScore: number;
+    actorMaxDxScore: number;
+  }>,
   rankDropEvents: Array<{
+    chartId: string;
     userId: string;
     chartTitle: string;
     difficultyLabel: string;
@@ -729,22 +754,43 @@ async function notifyChannel(
     actorMaxDxScore: number;
   }>,
 ): Promise<void> {
-  const result = await sendChannelLog(
-    `${playerName}님이 ${scoreCount}개 점수를 갱신했습니다. 변동 차트: ${changedChartCount}개`,
-  );
+  const channelResults =
+    rankUpEvents.length > 0
+      ? await sendChannelRankUpLogs({
+          actorName: playerName,
+          events: rankUpEvents.map((event) => ({
+            chartId: event.chartId,
+            chartTitle: event.chartTitle,
+            difficultyLabel: event.difficultyLabel,
+            previousRank: event.previousRank,
+            nextRank: event.nextRank,
+            actorDxScore: event.actorDxScore,
+            actorMaxDxScore: event.actorMaxDxScore,
+          })),
+        })
+      : [
+          await sendChannelLog(
+            `${playerName}님이 ${scoreCount}개 점수를 갱신했습니다. 변동 차트: ${changedChartCount}개`,
+          ),
+        ];
   const personalResults =
     rankDropEvents.length > 0
       ? await sendPersonalRankDropNotifications(
-          await buildPersonalChannelNotifications(supabase, rankDropEvents),
+          await buildPersonalChannelNotifications(supabase, playerName, rankDropEvents),
         )
       : [];
   await persistPersonalChannelIds(supabase, personalResults);
-  await insertNotificationResults(supabase, ingestRunId, [result, ...personalResults]);
+  await insertNotificationResults(supabase, ingestRunId, [
+    ...channelResults,
+    ...personalResults,
+  ]);
 }
 
 async function buildPersonalChannelNotifications(
   supabase: SupabaseClient,
+  actorName: string,
   rankDropEvents: Array<{
+    chartId: string;
     userId: string;
     chartTitle: string;
     difficultyLabel: string;
@@ -782,9 +828,11 @@ async function buildPersonalChannelNotifications(
           : null,
       playerName:
         typeof profile?.maimai_name === "string" ? profile.maimai_name : "Unknown",
+      actorName,
       events: rankDropEvents
         .filter((event) => event.userId === profileId)
         .map((event) => ({
+          chartId: event.chartId,
           chartTitle: event.chartTitle,
           difficultyLabel: event.difficultyLabel,
           previousDxScore: event.previousDxScore,

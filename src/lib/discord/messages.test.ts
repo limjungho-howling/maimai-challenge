@@ -1,18 +1,21 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildPersonalRankDropMessage,
+  buildChannelRankUpMessages,
+  buildPersonalRankDropMessages,
   buildRankGoalMessage,
   type RankGoal,
 } from "@/lib/discord/messages";
 
 describe("Discord messages", () => {
-  it("builds a personal channel rank drop message with chart and rank details", () => {
+  it("builds separate personal channel rank drop messages with chart links", () => {
     expect(
-      buildPersonalRankDropMessage({
+      buildPersonalRankDropMessages({
         playerName: "CHANA",
+        actorName: "E.HOWL",
         events: [
           {
+            chartId: "chart-1",
             chartTitle: "Endless World",
             difficultyLabel: "Re:MASTER",
             previousRank: 1,
@@ -23,8 +26,58 @@ describe("Discord messages", () => {
             actorMaxDxScore: 2500,
           },
         ],
+        appUrl: "https://maimai-challenge.vercel.app",
       }),
-    ).toContain("Endless World [Re:MASTER]");
+    ).toEqual([
+      expect.stringContaining("Endless World [Re:MASTER]"),
+    ]);
+    const message = buildPersonalRankDropMessages({
+      playerName: "CHANA",
+      actorName: "E.HOWL",
+      events: [
+        {
+          chartId: "chart-1",
+          chartTitle: "Endless World",
+          difficultyLabel: "Re:MASTER",
+          previousRank: 1,
+          nextRank: 2,
+          previousDxScore: 2400,
+          nextDxScore: 2400,
+          actorDxScore: 2450,
+          actorMaxDxScore: 2500,
+        },
+      ],
+      appUrl: "https://maimai-challenge.vercel.app",
+    })[0];
+
+    expect(message).toContain("E.HOWL에 의해 다음 곡의 디럭스 스코어 등수가 하락하였습니다.");
+    expect(message).toContain("내 DX 스코어");
+    expect(message).toContain("역전 기록: DX 2,450 (+50)");
+    expect(message).toContain("https://maimai-challenge.vercel.app/charts/chart-1");
+  });
+
+  it("builds separate channel rank up messages", () => {
+    const message = buildChannelRankUpMessages({
+      actorName: "E.HOWL",
+      events: [
+        {
+          chartId: "chart-2",
+          chartTitle: "Song B",
+          difficultyLabel: "MASTER",
+          previousRank: 3,
+          nextRank: 1,
+          actorDxScore: 2400,
+          actorMaxDxScore: 2500,
+        },
+      ],
+      appUrl: "https://maimai-challenge.vercel.app",
+    })[0];
+
+    expect(message).toContain("E.HOWL의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.");
+    expect(message).toContain("Song B [MASTER]");
+    expect(message).toContain("순위: #3 -> #1");
+    expect(message).toContain("DX 스코어: 2,400 / 2,500");
+    expect(message).toContain("https://maimai-challenge.vercel.app/charts/chart-2");
   });
 
   it("builds a rank goal message with higher scores above the user", () => {

@@ -15,6 +15,14 @@ export interface BulkRankingUpdate {
 export interface BulkRankingResult {
   changedChartIds: Set<string>;
   events: RankingEvent[];
+  rankUpEvents: Array<
+    RankingEvent & {
+      chartTitle: string;
+      difficultyLabel: string;
+      actorDxScore: number;
+      actorMaxDxScore: number;
+    }
+  >;
   rankDropEvents: Array<
     RankingEvent & {
       chartTitle: string;
@@ -36,6 +44,7 @@ export function detectBulkRankingEvents({
 }): BulkRankingResult {
   const changedChartIds = new Set<string>();
   const events: RankingEvent[] = [];
+  const rankUpEvents: BulkRankingResult["rankUpEvents"] = [];
   const rankDropEvents: BulkRankingResult["rankDropEvents"] = [];
 
   for (const update of updates) {
@@ -60,6 +69,21 @@ export function detectBulkRankingEvents({
     events.push(...chartEvents);
 
     for (const event of chartEvents) {
+      if (
+        event.type === "rank_changed" &&
+        event.userId === actorUserId &&
+        event.previousRank !== null &&
+        event.nextRank < event.previousRank
+      ) {
+        rankUpEvents.push({
+          ...event,
+          chartTitle: update.title,
+          difficultyLabel: update.difficultyLabel,
+          actorDxScore: update.dxScore,
+          actorMaxDxScore: update.maxDxScore,
+        });
+      }
+
       if (event.type !== "rank_dropped") {
         continue;
       }
@@ -74,7 +98,7 @@ export function detectBulkRankingEvents({
     }
   }
 
-  return { changedChartIds, events, rankDropEvents };
+  return { changedChartIds, events, rankUpEvents, rankDropEvents };
 }
 
 function applyActorScore(
