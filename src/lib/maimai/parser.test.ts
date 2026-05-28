@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   parseSongDetailHtml,
+  parseSongDetailScoreHtml,
   parsePlayerDataHtml,
   parseSongScoreHtml,
 } from "@/lib/maimai/parser";
@@ -92,10 +93,91 @@ describe("maimai parser", () => {
     ]);
   });
 
+  it("extracts Re:MASTER song charts from remaster score blocks", () => {
+    const remasterHtml = songScoreHtml
+      .replaceAll("music_master_score_back", "music_remaster_score_back")
+      .replaceAll("diff_master.png", "diff_remaster.png");
+
+    expect(parseSongScoreHtml(remasterHtml, 4)).toMatchObject([
+      {
+        title: "Overdose",
+        difficulty: 4,
+        difficultyLabel: "Re:MASTER",
+        dxScore: 1358,
+        maxDxScore: 1404,
+      },
+      {
+        title: "アイドル",
+        difficulty: 4,
+        difficultyLabel: "Re:MASTER",
+        dxScore: 1807,
+        maxDxScore: 1887,
+      },
+    ]);
+  });
+
+  it("extracts score fields from the music genre form list fallback", () => {
+    const fallbackHtml = `
+      <body>
+        <div class="wrapper main_wrapper t_c o_v">
+          <div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+          <div>
+            <div>
+              <form>
+                <div class="music_lv_block">14+</div>
+                <div class="music_name_block">Endless World</div>
+                <div class="music_score_block">100.1234%</div>
+                <div class="music_score_block">2,345 / 2,500</div>
+                <input type="hidden" name="idx" value="fallback-idx">
+              </form>
+            </div>
+          </div>
+        </div>
+      </body>
+    `;
+
+    expect(parseSongScoreHtml(fallbackHtml, 4)).toMatchObject([
+      {
+        title: "Endless World",
+        difficulty: 4,
+        difficultyLabel: "Re:MASTER",
+        level: "14+",
+        achievementRate: 100.1234,
+        dxScore: 2345,
+        maxDxScore: 2500,
+        officialIdx: "fallback-idx",
+      },
+    ]);
+  });
+
+  it("extracts Re:MASTER DX score from the detail remaster selector", () => {
+    expect(
+      parseSongDetailScoreHtml(
+        `
+        <div id="remaster">
+          <div class="t_l">
+            <div class="music_score_block w_120 d_ib t_r f_12">
+              100.9876%
+            </div>
+            <div class="music_score_block w_310 m_r_0 d_ib t_r f_12">
+              2,456 / 2,500
+            </div>
+          </div>
+        </div>
+        `,
+        4,
+      ),
+    ).toEqual({
+      achievementRate: 100.9876,
+      dxScore: 2456,
+      maxDxScore: 2500,
+    });
+  });
+
   it("extracts the jacket URL from a song detail page", () => {
     expect(
       parseSongDetailHtml(
-        '<img src="/maimai-mobile/img/Music/012345.png" class="w_120">',
+        '<div style="background-image:url(/maimai-mobile/img/Music/012345.png?ver=1.0)"></div>',
         "idx-token",
       ),
     ).toEqual({

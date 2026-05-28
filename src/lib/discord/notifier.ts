@@ -103,12 +103,16 @@ export async function sendChannelLog(
       errorMessage: null,
     };
   } catch (error) {
+    const discordError = getDiscordApiError(error);
     return {
       type: "channel",
       profileId: null,
       status: "failed",
       message,
-      errorMessage: getErrorMessage(error),
+      errorMessage:
+        discordError?.code === 50001
+          ? "Discord log channel failed: bot is missing access to DISCORD_LOG_CHANNEL_ID. Add the bot to the server/channel and grant View Channel + Send Messages."
+          : getErrorMessage(error),
     };
   }
 }
@@ -132,7 +136,7 @@ async function createDmChannel(token: string, recipientId: string): Promise<stri
   });
 
   if (!response.ok) {
-    throw new Error(`Discord DM channel failed: ${response.status}`);
+    throw await createDiscordHttpError(response, "Discord DM channel failed");
   }
 
   const payload = (await response.json()) as { id?: string };
@@ -158,7 +162,7 @@ async function createMessage(
   });
 
   if (!response.ok) {
-    throw new Error(`Discord message failed: ${response.status}`);
+    throw await createDiscordHttpError(response, "Discord message failed");
   }
 }
 
@@ -171,4 +175,57 @@ function discordHeaders(token: string): HeadersInit {
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Unknown Discord error";
+}
+
+interface DiscordApiError {
+  status: number;
+  code: number | null;
+  message: string | null;
+}
+
+async function createDiscordHttpError(
+  response: Response,
+  prefix: string,
+): Promise<Error & { discord?: DiscordApiError }> {
+  const discord = await readDiscordError(response);
+  const detail = [
+    `${prefix}: ${response.status}`,
+    discord.code === null ? null : `code ${discord.code}`,
+    discord.message,
+  ]
+    .filter(Boolean)
+    .join(" - ");
+  const error = new Error(detail) as Error & { discord?: DiscordApiError };
+  error.discord = discord;
+  return error;
+}
+
+async function readDiscordError(response: Response): Promise<DiscordApiError> {
+  try {
+    const payload = (await response.json()) as { code?: unknown; message?: unknown };
+    return {
+      status: response.status,
+      code: typeof payload.code === "number" ? payload.code : null,
+      message: typeof payload.message === "string" ? payload.message : null,
+    };
+  } catch {
+    return {
+      status: response.status,
+      code: null,
+      message: null,
+    };
+  }
+}
+
+function getDiscordApiError(error: unknown): DiscordApiError | null {
+  if (
+    error &&
+    typeof error === "object" &&
+    "discord" in error &&
+    typeof (error as { discord?: unknown }).discord === "object"
+  ) {
+    return (error as { discord: DiscordApiError }).discord;
+  }
+
+  return null;
 }

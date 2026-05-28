@@ -66,16 +66,11 @@ export default async function DashboardPage() {
                     데이터가 업로드됩니다.
                   </p>
                 </div>
-                <div className="flex flex-col gap-3">
+                <div className="grid gap-3">
                   <BookmarkletButton
                     appOrigin={appOrigin}
                     kind="score"
                     label="점수 갱신"
-                  />
-                  <BookmarkletButton
-                    appOrigin={appOrigin}
-                    kind="catalog"
-                    label="곡 정보 수집"
                   />
                 </div>
               </div>

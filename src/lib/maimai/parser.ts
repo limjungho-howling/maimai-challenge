@@ -34,6 +34,12 @@ export interface ParsedSongDetail {
   jacketUrl: string | null;
 }
 
+export interface ParsedSongDetailScore {
+  achievementRate: number | null;
+  dxScore: number;
+  maxDxScore: number;
+}
+
 export function parsePlayerDataHtml(html: string): ParsedPlayerData {
   const $ = cheerio.load(html);
   const name = normalizeText($(".name_block").first().text());
@@ -61,14 +67,10 @@ export function parseSongDetailHtml(
   officialIdx: string,
 ): ParsedSongDetail {
   const $ = cheerio.load(html);
-  const imageSource = $("img")
-    .toArray()
-    .map((image) => $(image).attr("src"))
-    .find((src) => src?.includes("/Music/") || src?.includes("img/Music/"));
 
   return {
     officialIdx,
-    jacketUrl: normalizeJacketUrl(imageSource),
+    jacketUrl: findFirstJacketUrl(html, $),
   };
 }
 
@@ -78,23 +80,34 @@ export function parseSongScoreHtml(
 ): ParsedSongScore[] {
   const $ = cheerio.load(html);
   const scores: ParsedSongScore[] = [];
+  const scoreBlockSelector = getScoreBlockSelector(difficulty);
+  const scoreNodes = $(scoreBlockSelector).toArray();
+  const nodes =
+    scoreNodes.length > 0
+      ? scoreNodes
+      : $(
+          "body > div.wrapper.main_wrapper.t_c.o_v > div:nth-child(8) > div > form",
+        ).toArray();
 
-  $(".music_master_score_back").each((_, block) => {
-    const container = $(block).closest(".w_450");
-    const title = normalizeText($(block).find(".music_name_block").first().text());
-    const level = normalizeText($(block).find(".music_lv_block").first().text());
-    const scoreBlocks = $(block).find(".music_score_block");
+  for (const node of nodes) {
+    const root = $(node);
+    const form = root.is("form") ? root : root.find("form").first();
+    const scope = form.length > 0 ? form : root;
+    const container = root.closest(".w_450");
+    const title = normalizeText(scope.find(".music_name_block").first().text());
+    const level = normalizeText(scope.find(".music_lv_block").first().text());
+    const scoreBlocks = scope.find(".music_score_block");
     const achievementRate = parseAchievement(scoreBlocks.eq(0).text());
     const dxScoreText = scoreBlocks.eq(1).text();
     const [dxScore, maxDxScore] = parseDxScorePair(dxScoreText);
     const kind = parseSongKind(container.find(".music_kind_icon").attr("src"));
     const officialIdx =
-      $(block).find('input[type="hidden"][name="idx"]').attr("value") ?? null;
+      scope.find('input[type="hidden"][name="idx"]').attr("value") ?? null;
     const genre = findGenre($, container);
     const jacketUrl = findJacketUrl(container);
 
     if (!title || !level || maxDxScore === null) {
-      return;
+      continue;
     }
 
     scores.push({
@@ -110,9 +123,64 @@ export function parseSongScoreHtml(
       genre,
       jacketUrl,
     });
-  });
+  }
 
   return scores;
+}
+
+export function parseSongDetailScoreHtml(
+  html: string,
+  difficulty: Difficulty,
+): ParsedSongDetailScore | null {
+  const $ = cheerio.load(html);
+  const rootSelector = getDetailDifficultySelector(difficulty);
+  const achievementText = $(`${rootSelector} > div.t_l > div.music_score_block.w_120.d_ib.t_r.f_12`)
+    .first()
+    .text();
+  const detailScoreText = $(
+    `${rootSelector} > div.t_l > div.music_score_block.w_310.m_r_0.d_ib.t_r.f_12`,
+  )
+    .first()
+    .text();
+  const fallbackScoreText = $(`${rootSelector} .music_score_block`)
+    .toArray()
+    .map((block) => $(block).text())
+    .find((text) => normalizeText(text).includes("/"));
+  const [dxScore, maxDxScore] = parseDxScorePair(
+    detailScoreText || fallbackScoreText || "",
+  );
+
+  return maxDxScore === null
+    ? null
+    : {
+        achievementRate: parseAchievement(achievementText),
+        dxScore,
+        maxDxScore,
+      };
+}
+
+function getScoreBlockSelector(difficulty: Difficulty): string {
+  const classNames: Record<Difficulty, string> = {
+    0: ".music_basic_score_back",
+    1: ".music_advanced_score_back",
+    2: ".music_expert_score_back",
+    3: ".music_master_score_back",
+    4: ".music_remaster_score_back",
+  };
+
+  return classNames[difficulty];
+}
+
+function getDetailDifficultySelector(difficulty: Difficulty): string {
+  const selectors: Record<Difficulty, string> = {
+    0: "#basic",
+    1: "#advanced",
+    2: "#expert",
+    3: "#master",
+    4: "#remaster",
+  };
+
+  return selectors[difficulty];
 }
 
 function findJacketUrl(container: cheerio.Cheerio<AnyNode>): string | null {
@@ -129,13 +197,29 @@ function findJacketUrl(container: cheerio.Cheerio<AnyNode>): string | null {
   return normalizeJacketUrl(imageSource);
 }
 
+function findFirstJacketUrl(html: string, $: cheerio.CheerioAPI): string | null {
+  const imageSource = $("img")
+    .toArray()
+    .map((image) => $(image).attr("src"))
+    .find((src) => src?.includes("/Music/") || src?.includes("img/Music/"));
+  return normalizeJacketUrl(imageSource) ?? normalizeJacketUrl(html);
+}
+
 function normalizeJacketUrl(imageSource: string | undefined): string | null {
   if (!imageSource) {
     return null;
   }
 
-  const match = imageSource.match(/(?:^|\/)(?:img\/)?Music\/([^/?#]+\.png)/);
-  return match ? `https://maimaidx-eng.com/maimai-mobile/img/Music/${match[1]}` : null;
+  const normalized = imageSource.replace(/\\\//g, "/");
+  const match = normalized.match(/(?:^|\/)(?:maimai-mobile\/)?img\/Music\/([^/?#"' )]+\.png)/i);
+  if (match) {
+    return `https://maimaidx-eng.com/maimai-mobile/img/Music/${match[1]}`;
+  }
+
+  const shortMatch = normalized.match(/(?:^|\/)Music\/([^/?#"' )]+\.png)/i);
+  return shortMatch
+    ? `https://maimaidx-eng.com/maimai-mobile/img/Music/${shortMatch[1]}`
+    : null;
 }
 
 function findGenre(

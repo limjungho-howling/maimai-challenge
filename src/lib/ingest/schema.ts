@@ -14,18 +14,25 @@ const scorePagesSchema = z
       html: z.string().min(1),
     }),
   )
-  .length(2);
+  .min(1)
+  .max(2)
+  .refine(
+    (pages) => new Set(pages.map((page) => page.difficulty)).size === pages.length,
+    "scorePages must not contain duplicate difficulties",
+  );
 
 const detailPagesSchema = z.array(
   z.object({
     idx: z.string().min(1),
     html: z.string().min(1),
+    jacketUrl: z.string().url().nullable().optional(),
   }),
 );
 
 export const ingestPayloadSchema = z.object({
   playerHtml: z.string().min(1),
   scorePages: scorePagesSchema,
+  detailPages: detailPagesSchema.optional(),
   collectedAt: z.string().datetime().optional(),
 });
 
@@ -44,12 +51,18 @@ export const legacyIngestPayloadSchema = z.object({
         html: z.string().min(1),
       }),
     )
-    .length(2),
+    .min(1)
+    .max(2)
+    .refine(
+      (pages) => new Set(pages.map((page) => page.difficulty)).size === pages.length,
+      "scorePages must not contain duplicate difficulties",
+    ),
   detailPages: z
     .array(
       z.object({
         idx: z.string().min(1),
         html: z.string().min(1),
+        jacketUrl: z.string().url().nullable().optional(),
       }),
     )
     .optional(),

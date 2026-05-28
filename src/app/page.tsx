@@ -1,26 +1,36 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
-import { listCharts } from "@/lib/data/charts";
+import { listChartLevels, listCharts } from "@/lib/data/charts";
 
 const PAGE_SIZE = 30;
 
 interface HomePageProps {
   searchParams: Promise<{
     diff?: string;
+    level?: string;
     page?: string;
+    q?: string;
   }>;
 }
 
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const difficulty = parseDifficulty(params.diff);
+  const level = parseTextParam(params.level);
+  const search = parseTextParam(params.q);
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
-  const { charts, count } = await listCharts({
-    difficulty,
-    page,
-    pageSize: PAGE_SIZE,
-  });
+  const [{ charts, count }, levels] = await Promise.all([
+    listCharts({
+      difficulty,
+      level,
+      page,
+      pageSize: PAGE_SIZE,
+      search,
+    }),
+    listChartLevels(),
+  ]);
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
   return (
@@ -57,17 +67,56 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <DifficultyLink active={difficulty === null} href="/" label="전체" />
+            <DifficultyLink
+              active={difficulty === null}
+              href={filterHref({ difficulty: null, level, search })}
+              label="전체"
+            />
             {RANKING_DIFFICULTIES.map((item) => (
               <DifficultyLink
                 active={difficulty === item}
-                href={`/?diff=${item}`}
+                href={filterHref({ difficulty: item, level, search })}
                 key={item}
                 label={getDifficultyLabel(item)}
               />
             ))}
           </div>
         </section>
+
+        <form
+          action="/"
+          className="grid gap-3 rounded-lg border border-white/10 bg-white/[0.045] p-4 sm:grid-cols-[1fr_180px_auto]"
+        >
+          {difficulty !== null ? <input name="diff" type="hidden" value={difficulty} /> : null}
+          <label className="min-w-0">
+            <span className="sr-only">곡 이름 검색</span>
+            <input
+              className="h-11 w-full rounded-md border border-white/10 bg-slate-950/60 px-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300"
+              defaultValue={search ?? ""}
+              name="q"
+              placeholder="곡 이름 검색"
+              type="search"
+            />
+          </label>
+          <label>
+            <span className="sr-only">레벨 필터</span>
+            <select
+              className="h-11 w-full rounded-md border border-white/10 bg-slate-950/60 px-3 text-sm text-white outline-none transition focus:border-cyan-300"
+              defaultValue={level ?? ""}
+              name="level"
+            >
+              <option value="">전체 레벨</option>
+              {levels.map((item) => (
+                <option key={item} value={item}>
+                  Lv {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="h-11 rounded-md bg-cyan-300 px-5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200">
+            검색
+          </button>
+        </form>
 
         <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
           <div className="grid grid-cols-[1fr_100px_160px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-sm:hidden">
@@ -77,8 +126,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           </div>
           {charts.length === 0 ? (
             <div className="px-4 py-16 text-center text-sm text-slate-300">
-              아직 표시할 랭킹 데이터가 없습니다. Discord 로그인 후 북마클릿으로 첫
-              데이터를 업로드해주세요.
+              조건에 맞는 곡이 없습니다.
             </div>
           ) : (
             <div className="divide-y divide-white/10">
@@ -91,12 +139,14 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                   <div className="flex min-w-0 items-center gap-3">
                     <div className="h-14 w-14 shrink-0 overflow-hidden rounded-md border border-white/10 bg-white/8">
                       {chart.jacketUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <Image
                           alt=""
                           className="h-full w-full object-cover"
+                          height={56}
                           loading="lazy"
                           src={chart.jacketUrl}
+                          unoptimized
+                          width={56}
                         />
                       ) : null}
                     </div>
@@ -126,13 +176,17 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         </section>
 
         <nav className="flex items-center justify-center gap-3">
-          <PageLink disabled={page <= 1} href={pageHref(difficulty, page - 1)} label="이전" />
+          <PageLink
+            disabled={page <= 1}
+            href={pageHref({ difficulty, level, page: page - 1, search })}
+            label="이전"
+          />
           <span className="font-mono text-sm text-slate-300">
             {page} / {pageCount}
           </span>
           <PageLink
             disabled={page >= pageCount}
-            href={pageHref(difficulty, page + 1)}
+            href={pageHref({ difficulty, level, page: page + 1, search })}
             label="다음"
           />
         </nav>
@@ -196,13 +250,61 @@ function parseDifficulty(value: string | undefined): number | null {
   return RANKING_DIFFICULTIES.includes(parsed as never) ? parsed : null;
 }
 
-function pageHref(difficulty: number | null, page: number): string {
+function parseTextParam(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function pageHref({
+  difficulty,
+  level,
+  page,
+  search,
+}: {
+  difficulty: number | null;
+  level: string | null;
+  page: number;
+  search: string | null;
+}): string {
+  const params = buildSearchParams({ difficulty, level, search });
+  params.set("page", String(page));
+  return `/?${params.toString()}`;
+}
+
+function filterHref({
+  difficulty,
+  level,
+  search,
+}: {
+  difficulty: number | null;
+  level: string | null;
+  search: string | null;
+}): string {
+  const params = buildSearchParams({ difficulty, level, search });
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
+function buildSearchParams({
+  difficulty,
+  level,
+  search,
+}: {
+  difficulty: number | null;
+  level: string | null;
+  search: string | null;
+}): URLSearchParams {
   const params = new URLSearchParams();
   if (difficulty !== null) {
     params.set("diff", String(difficulty));
   }
-  params.set("page", String(page));
-  return `/?${params.toString()}`;
+  if (level) {
+    params.set("level", level);
+  }
+  if (search) {
+    params.set("q", search);
+  }
+  return params;
 }
 
 function formatLeader(name: string | null, count: number): string {

@@ -3,11 +3,11 @@
 import { Copy, ExternalLink } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { buildBookmarklet } from "@/lib/bookmarklet";
+import { buildBookmarklet, type BookmarkletKind } from "@/lib/bookmarklet";
 
 interface BookmarkletButtonProps {
   appOrigin: string;
-  kind?: "score" | "catalog";
+  kind?: BookmarkletKind;
   label?: string;
 }
 

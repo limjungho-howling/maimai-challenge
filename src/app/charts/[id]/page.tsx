@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { getChartSummary, listChartRankings } from "@/lib/data/charts";
@@ -22,15 +23,32 @@ export default async function ChartPage({ params }: ChartPageProps) {
     <main className="min-h-screen bg-[linear-gradient(135deg,#080b12,#111827_55%,#16171f)] px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-5xl flex-col gap-7">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
-          <div>
+          <div className="flex min-w-0 items-center gap-4">
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-md border border-white/10 bg-white/8">
+              {chart.jacketUrl ? (
+                <Image
+                  alt=""
+                  className="h-full w-full object-cover"
+                  height={80}
+                  priority
+                  src={chart.jacketUrl}
+                  unoptimized
+                  width={80}
+                />
+              ) : null}
+            </div>
+            <div className="min-w-0">
             <Link className="text-sm text-cyan-200 hover:text-cyan-100" href="/">
               곡 리스트로 돌아가기
             </Link>
-            <h1 className="mt-3 text-3xl font-semibold text-white">{chart.title}</h1>
+            <h1 className="mt-3 break-words text-3xl font-semibold text-white">
+              {chart.title}
+            </h1>
             <p className="mt-2 text-sm text-slate-300">
               {chart.kind} · {chart.difficultyLabel} · Lv {chart.level} · 최대 DX{" "}
               {chart.maxDxScore.toLocaleString("ko-KR")}
             </p>
+            </div>
           </div>
           <Link
             className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"

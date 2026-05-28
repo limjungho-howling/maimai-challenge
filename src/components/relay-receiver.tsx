@@ -36,6 +36,7 @@ interface IngestStreamEvent {
   result?: {
     playerName?: string;
     scoreCount?: number;
+    skippedChartCount?: number;
     changedChartCount?: number;
     songCount?: number;
     chartCount?: number;
@@ -147,10 +148,11 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
           }
 
           if (streamEvent.type === "result" && streamEvent.result) {
+            const skippedChartCount = streamEvent.result.skippedChartCount ?? 0;
             const message =
               uploadType === "catalog"
                 ? `곡 ${streamEvent.result.songCount}개, 차트 ${streamEvent.result.chartCount}개 정보를 저장했습니다.`
-                : `${streamEvent.result.playerName}님 점수 ${streamEvent.result.scoreCount}개를 처리했습니다. 변동 차트 ${streamEvent.result.changedChartCount}개.`;
+                : `${streamEvent.result.playerName}님 점수 ${streamEvent.result.scoreCount}개를 처리했습니다. 변동 차트 ${streamEvent.result.changedChartCount}개.${skippedChartCount > 0 ? ` 미등록 차트 ${skippedChartCount}개는 생략했습니다.` : ""}`;
             setState({
               status: "success",
               message,
