@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
 import { listChartLevels, listCharts } from "@/lib/data/charts";
+import { formatKstDateTime } from "@/lib/time";
 
 const PAGE_SIZE = 30;
 
@@ -44,6 +45,12 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             </h1>
           </div>
           <nav className="flex items-center gap-2">
+            <Link
+              className="rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+              href="/players"
+            >
+              유저 순위
+            </Link>
             <Link
               className="rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
               href="/"
@@ -160,7 +167,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
                       <div className="mt-1 text-xs text-slate-400">
                         Lv {chart.level}
                         {chart.lastChangedAt
-                          ? ` · ${new Date(chart.lastChangedAt).toLocaleString("ko-KR")}`
+                          ? ` · ${formatKstDateTime(chart.lastChangedAt)}`
                           : ""}
                       </div>
                     </div>

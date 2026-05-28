@@ -100,7 +100,6 @@
         payload: {
           playerHtml,
           scorePages,
-          collectedAt: new Date().toISOString(),
         },
       },
       APP_ORIGIN,

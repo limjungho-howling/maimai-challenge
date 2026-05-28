@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { getChartSummary, listChartRankings } from "@/lib/data/charts";
+import { formatKstDateTime } from "@/lib/time";
 
 interface ChartPageProps {
   params: Promise<{ id: string }>;
@@ -51,6 +52,12 @@ export default async function ChartPage({ params }: ChartPageProps) {
             </div>
           </div>
           <Link
+            className="rounded-md border border-white/10 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+            href="/players"
+          >
+            유저 순위
+          </Link>
+          <Link
             className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
             href="/dashboard"
           >
@@ -94,7 +101,7 @@ export default async function ChartPage({ params }: ChartPageProps) {
                       : `${ranking.achievementRate.toFixed(4)}%`}
                   </div>
                   <div className="text-xs text-slate-400">
-                    {new Date(ranking.updatedAt).toLocaleString("ko-KR")}
+                    {formatKstDateTime(ranking.updatedAt)}
                   </div>
                 </div>
               ))}

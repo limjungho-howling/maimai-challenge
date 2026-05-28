@@ -4,6 +4,7 @@ import Link from "next/link";
 import { updateDmAlerts } from "@/app/dashboard/actions";
 import { BookmarkletButton } from "@/components/bookmarklet-button";
 import { getDashboardData } from "@/lib/data/dashboard";
+import { formatKstDateTime } from "@/lib/time";
 
 export default async function DashboardPage() {
   const [{ userId, profile, ingestRuns }, headerStore] = await Promise.all([
@@ -19,6 +20,9 @@ export default async function DashboardPage() {
           <div>
             <Link className="text-sm text-cyan-200 hover:text-cyan-100" href="/">
               곡 리스트
+            </Link>
+            <Link className="ml-4 text-sm text-cyan-200 hover:text-cyan-100" href="/players">
+              유저 순위
             </Link>
             <h1 className="mt-3 text-3xl font-semibold text-white">대시보드</h1>
           </div>
@@ -116,7 +120,7 @@ export default async function DashboardPage() {
                       <div>{run.scoreCount.toLocaleString("ko-KR")}곡</div>
                       <div>{run.changedChartCount.toLocaleString("ko-KR")}변동</div>
                       <div className="text-xs text-slate-400">
-                        {new Date(run.createdAt).toLocaleString("ko-KR")}
+                        {formatKstDateTime(run.createdAt)}
                       </div>
                     </div>
                   ))}

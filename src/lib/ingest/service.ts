@@ -11,6 +11,7 @@ import {
   type ParsedSongScore,
 } from "@/lib/maimai/parser";
 import type { MaimaiCatalogPayload, MaimaiIngestPayload } from "@/lib/ingest/schema";
+import { kstNowIsoString } from "@/lib/time";
 
 const DB_CHUNK_SIZE = 500;
 const DB_CHUNK_CONCURRENCY = 4;
@@ -63,7 +64,7 @@ export async function ingestMaimaiPayload(
   });
 
   const player = parsePlayerDataHtml(payload.playerHtml);
-  const collectedAt = payload.collectedAt ?? new Date().toISOString();
+  const collectedAt = payload.collectedAt ?? kstNowIsoString();
   const discordProfile = getDiscordProfile(user);
 
   await upsertProfile(supabase, user.id, player, discordProfile);
@@ -140,7 +141,7 @@ export async function ingestMaimaiPayload(
       status: "completed",
       score_count: scoreUpdates.length,
       changed_chart_count: changedChartIds.length,
-      completed_at: new Date().toISOString(),
+      completed_at: kstNowIsoString(),
     });
 
     await reportProgress(onProgress, {
@@ -177,7 +178,7 @@ export async function ingestMaimaiPayload(
     await updateIngestRun(supabase, run.id, {
       status: "failed",
       error_message: errorMessage,
-      completed_at: new Date().toISOString(),
+      completed_at: kstNowIsoString(),
     });
     throw new Error(errorMessage);
   }
@@ -330,7 +331,7 @@ async function upsertProfile(
       trophy: player.trophy,
       current_version_play_count: player.currentVersionPlayCount,
       total_play_count: player.totalPlayCount,
-      updated_at: new Date().toISOString(),
+      updated_at: kstNowIsoString(),
     },
     { onConflict: "id" },
   );
@@ -351,6 +352,7 @@ async function insertIngestRun(
       profile_id: profileId,
       player_name: playerName,
       status: "started",
+      created_at: kstNowIsoString(),
     })
     .select("id")
     .single();
@@ -371,7 +373,7 @@ async function upsertSongs(
       title: score.title,
       kind: score.kind,
       jacket_url: score.jacketUrl,
-      updated_at: new Date().toISOString(),
+      updated_at: kstNowIsoString(),
     })),
     (song) => songKey(song.title, song.kind),
   );
@@ -415,7 +417,7 @@ async function upsertCharts(
     level: score.level,
     genre: score.genre,
     max_dx_score: score.maxDxScore,
-    updated_at: new Date().toISOString(),
+    updated_at: kstNowIsoString(),
   }));
   const idsByKey = new Map<string, string>();
 
@@ -549,7 +551,7 @@ async function upsertPlayerScores(
     max_dx_score: score.maxDxScore,
     official_idx: score.officialIdx,
     collected_at: collectedAt,
-    updated_at: new Date().toISOString(),
+    updated_at: kstNowIsoString(),
   }));
 
   await mapWithConcurrency(chunks(rows, DB_CHUNK_SIZE), DB_CHUNK_CONCURRENCY, async (chunk) => {
@@ -571,7 +573,7 @@ async function markChartsChanged(
     return;
   }
 
-  const changedAt = new Date().toISOString();
+  const changedAt = kstNowIsoString();
   await mapWithConcurrency(chunks(chartIds, DB_FILTER_CHUNK_SIZE), DB_CHUNK_CONCURRENCY, async (chunk) => {
     const { error } = await supabase
       .from("song_charts")
@@ -635,6 +637,7 @@ async function insertNotificationResults(
       status: result.status,
       message: result.message,
       error_message: result.errorMessage,
+      created_at: kstNowIsoString(),
     })),
   );
 
