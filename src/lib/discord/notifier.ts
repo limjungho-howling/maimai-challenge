@@ -44,6 +44,7 @@ const DISCORD_SUPPRESS_EMBEDS_FLAG = 4;
 const DISCORD_IS_COMPONENTS_V2_FLAG = 32768;
 const DISCORD_TEXT_DISPLAY_COMPONENT = 10;
 const DISCORD_SEPARATOR_COMPONENT = 14;
+const DEFAULT_PERSONAL_CHANNEL_CATEGORY_ID = "1509802732326879283";
 let cachedBotUserId: string | null = null;
 
 export async function sendRankDropNotifications(
@@ -490,7 +491,9 @@ async function createPersonalGuildChannel({
   discordUsername: string | null;
   playerName: string;
 }): Promise<string> {
-  const categoryId = process.env.DISCORD_PERSONAL_CHANNEL_CATEGORY_ID;
+  const categoryId =
+    process.env.DISCORD_PERSONAL_CHANNEL_CATEGORY_ID ??
+    DEFAULT_PERSONAL_CHANNEL_CATEGORY_ID;
   const name = makePersonalChannelName(discordUsername ?? playerName);
   const botUserId = await getBotUserId(token);
   const body: Record<string, unknown> = {
