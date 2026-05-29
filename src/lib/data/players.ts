@@ -1,11 +1,7 @@
-import { unstable_cache } from "next/cache";
-
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
-export const PLAYER_LEADERBOARD_CACHE_TAG = "player-leaderboard";
-const PLAYER_LEADERBOARD_CACHE_KEY = "player-leaderboard-v2";
 
 export interface PlayerLeaderboardEntry {
   profileId: string;
@@ -36,11 +32,6 @@ interface RankingRow {
 }
 
 export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]> {
-  return cachedListPlayerLeaderboard();
-}
-
-const cachedListPlayerLeaderboard = unstable_cache(
-  async (): Promise<PlayerLeaderboardEntry[]> => {
   if (!hasSupabasePublicEnv() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return [];
   }
@@ -142,10 +133,7 @@ const cachedListPlayerLeaderboard = unstable_cache(
           ? entries[index - 1].rank
           : index + 1,
     }));
-  },
-  [PLAYER_LEADERBOARD_CACHE_KEY],
-  { revalidate: 1800, tags: [PLAYER_LEADERBOARD_CACHE_TAG] },
-);
+}
 
 function assignInfluenceBasisPoints(
   statsByProfileId: Map<
