@@ -1,10 +1,7 @@
-import { unstable_cache } from "next/cache";
-
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
-export const PLAYER_LEADERBOARD_CACHE_TAG = "player-leaderboard";
 
 export interface PlayerLeaderboardEntry {
   profileId: string;
@@ -35,123 +32,115 @@ interface RankingRow {
 }
 
 export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]> {
-  return cachedListPlayerLeaderboard();
-}
+  if (!hasSupabasePublicEnv() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return [];
+  }
 
-const cachedListPlayerLeaderboard = unstable_cache(
-  async (): Promise<PlayerLeaderboardEntry[]> => {
-    if (!hasSupabasePublicEnv() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      return [];
+  const supabase = createSupabaseServiceClient();
+  const [profiles, rankings] = await Promise.all([
+    fetchAllProfiles(supabase),
+    fetchAllRankings(supabase),
+  ]);
+  const statsByProfileId = new Map<
+    string,
+    {
+      firstPlaceCount: number;
+      influenceScore: number;
+      influenceBasisPoints: number;
+      scoreCount: number;
+      latestUpdatedAt: string | null;
+    }
+  >();
+
+  for (const ranking of rankings) {
+    const stats = statsByProfileId.get(ranking.profile_id) ?? {
+      firstPlaceCount: 0,
+      influenceScore: 0,
+      influenceBasisPoints: 0,
+      scoreCount: 0,
+      latestUpdatedAt: null,
+    };
+
+    stats.scoreCount += 1;
+    const rank = Number(ranking.rank);
+    if (rank === 1) {
+      stats.firstPlaceCount += 1;
+    }
+    if (rank >= 1 && rank <= 5) {
+      stats.influenceScore += 6 - rank;
+    }
+    if (
+      ranking.updated_at &&
+      (!stats.latestUpdatedAt ||
+        new Date(ranking.updated_at).getTime() >
+          new Date(stats.latestUpdatedAt).getTime())
+    ) {
+      stats.latestUpdatedAt = ranking.updated_at;
     }
 
-    const supabase = createSupabaseServiceClient();
-    const [profiles, rankings] = await Promise.all([
-      fetchAllProfiles(supabase),
-      fetchAllRankings(supabase),
-    ]);
-    const statsByProfileId = new Map<
-      string,
-      {
-        firstPlaceCount: number;
-        influenceScore: number;
-        influenceBasisPoints: number;
-        scoreCount: number;
-        latestUpdatedAt: string | null;
-      }
-    >();
+    statsByProfileId.set(ranking.profile_id, stats);
+  }
+  assignInfluenceBasisPoints(statsByProfileId);
 
-    for (const ranking of rankings) {
-      const stats = statsByProfileId.get(ranking.profile_id) ?? {
-        firstPlaceCount: 0,
-        influenceScore: 0,
-        influenceBasisPoints: 0,
-        scoreCount: 0,
-        latestUpdatedAt: null,
-      };
+  const entries = profiles.map((profile) => {
+    const stats = statsByProfileId.get(profile.id) ?? {
+      firstPlaceCount: 0,
+      influenceScore: 0,
+      influenceBasisPoints: 0,
+      scoreCount: 0,
+      latestUpdatedAt: profile.updated_at,
+    };
 
-      stats.scoreCount += 1;
-      const rank = Number(ranking.rank);
-      if (rank === 1) {
-        stats.firstPlaceCount += 1;
-      }
-      if (rank >= 1 && rank <= 5) {
-        stats.influenceScore += 6 - rank;
-      }
-      if (
-        ranking.updated_at &&
-        (!stats.latestUpdatedAt ||
-          new Date(ranking.updated_at).getTime() >
-            new Date(stats.latestUpdatedAt).getTime())
-      ) {
-        stats.latestUpdatedAt = ranking.updated_at;
-      }
+    return {
+      profileId: profile.id,
+      rank: 0,
+      influenceRank: 0,
+      playerName: profile.maimai_name ?? profile.discord_username ?? "미등록",
+      discordUsername: profile.discord_username,
+      maimaiRating: profile.maimai_rating,
+      firstPlaceCount: stats.firstPlaceCount,
+      influenceScore: stats.influenceScore,
+      influencePercent: stats.influenceBasisPoints / 100,
+      scoreCount: stats.scoreCount,
+      latestUpdatedAt: stats.latestUpdatedAt,
+    };
+  });
 
-      statsByProfileId.set(ranking.profile_id, stats);
+  assignCompetitionRanks(
+    entries,
+    (item) => item.influenceScore,
+    (item, rank) => {
+      item.influenceRank = rank;
+    },
+    (left, right) => left.playerName.localeCompare(right.playerName),
+  );
+
+  const sortedEntries = entries.sort((left, right) => {
+    if (right.firstPlaceCount !== left.firstPlaceCount) {
+      return right.firstPlaceCount - left.firstPlaceCount;
     }
-    assignInfluenceBasisPoints(statsByProfileId);
+    if (right.scoreCount !== left.scoreCount) {
+      return right.scoreCount - left.scoreCount;
+    }
+    return left.playerName.localeCompare(right.playerName);
+  });
 
-    const entries = profiles.map((profile) => {
-      const stats = statsByProfileId.get(profile.id) ?? {
-        firstPlaceCount: 0,
-        influenceScore: 0,
-        influenceBasisPoints: 0,
-        scoreCount: 0,
-        latestUpdatedAt: profile.updated_at,
-      };
-
-      return {
-        profileId: profile.id,
-        rank: 0,
-        influenceRank: 0,
-        playerName: profile.maimai_name ?? profile.discord_username ?? "미등록",
-        discordUsername: profile.discord_username,
-        maimaiRating: profile.maimai_rating,
-        firstPlaceCount: stats.firstPlaceCount,
-        influenceScore: stats.influenceScore,
-        influencePercent: stats.influenceBasisPoints / 100,
-        scoreCount: stats.scoreCount,
-        latestUpdatedAt: stats.latestUpdatedAt,
-      };
-    });
-
-    assignCompetitionRanks(
-      entries,
-      (item) => item.influenceScore,
-      (item, rank) => {
-        item.influenceRank = rank;
-      },
-      (left, right) => left.playerName.localeCompare(right.playerName),
-    );
-
-    const sortedEntries = entries.sort((left, right) => {
-      if (right.firstPlaceCount !== left.firstPlaceCount) {
-        return right.firstPlaceCount - left.firstPlaceCount;
-      }
+  assignCompetitionRanks(
+    sortedEntries,
+    (item) => item.firstPlaceCount,
+    (item, rank) => {
+      item.rank = rank;
+    },
+    (left, right) => {
       if (right.scoreCount !== left.scoreCount) {
         return right.scoreCount - left.scoreCount;
       }
       return left.playerName.localeCompare(right.playerName);
-    });
+    },
+  );
 
-    assignCompetitionRanks(
-      sortedEntries,
-      (item) => item.firstPlaceCount,
-      (item, rank) => {
-        item.rank = rank;
-      },
-      (left, right) => {
-        if (right.scoreCount !== left.scoreCount) {
-          return right.scoreCount - left.scoreCount;
-        }
-        return left.playerName.localeCompare(right.playerName);
-      },
-    );
-
-    return sortedEntries;
-  },
-  ["player-leaderboard"],
-  { revalidate: 60, tags: [PLAYER_LEADERBOARD_CACHE_TAG] },
-);
+  return sortedEntries;
+}
 
 function assignInfluenceBasisPoints(
   statsByProfileId: Map<
