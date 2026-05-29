@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { PlayerSharePieChart } from "@/components/influence-pie-chart";
 import { PlayerLeaderboardSkeleton } from "@/components/leaderboard-skeletons";
 import { listPlayerLeaderboard } from "@/lib/data/players";
 import { formatKstDateTime } from "@/lib/time";
@@ -54,6 +55,10 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
 async function PlayerLeaderboardContent({ tab }: { tab: PlayerRankTab }) {
   const players = await listPlayerLeaderboard();
   const isInfluenceTab = tab === "influence";
+  const firstPlaceTotal = players.reduce(
+    (sum, player) => sum + player.firstPlaceCount,
+    0,
+  );
 
   return (
     <>
@@ -75,51 +80,76 @@ async function PlayerLeaderboardContent({ tab }: { tab: PlayerRankTab }) {
         </section>
 
         {isInfluenceTab ? (
-          <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
-            <div className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-md:hidden">
-              <span>순위</span>
-              <span>유저</span>
-              <span>영향력</span>
-              <span>점수</span>
-              <span>최근 갱신</span>
-            </div>
-            {players.length === 0 ? (
-              <EmptyPlayers />
-            ) : (
-              <div className="divide-y divide-white/10">
-                {[...players]
-                  .sort((left, right) => {
-                    if (right.influenceScore !== left.influenceScore) {
-                      return right.influenceScore - left.influenceScore;
-                    }
-                    if (right.firstPlaceCount !== left.firstPlaceCount) {
-                      return right.firstPlaceCount - left.firstPlaceCount;
-                    }
-                    return left.playerName.localeCompare(right.playerName);
-                  })
-                  .map((player) => (
-                    <div
-                      className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 px-4 py-4 max-md:grid-cols-2"
-                      key={player.profileId}
-                    >
-                      <div className="font-mono text-lg text-cyan-100">
-                        #{player.influenceRank}
-                      </div>
-                      <PlayerIdentity player={player} />
-                      <div className="font-mono text-sm text-slate-100">
-                        {player.influencePercent.toFixed(2)}%
-                      </div>
-                      <div className="font-mono text-sm text-slate-100">
-                        {player.influenceScore.toLocaleString("ko-KR")}점
-                      </div>
-                      <UpdatedAt value={player.latestUpdatedAt} />
-                    </div>
-                  ))}
+          <>
+            <PlayerSharePieChart
+              emptyMessage="영향력 점수가 있는 유저가 아직 없습니다."
+              players={players.map((player) => ({
+                profileId: player.profileId,
+                playerName: player.playerName,
+                percent: player.influencePercent,
+                value: player.influenceScore,
+              }))}
+              unit="점"
+            />
+            <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
+              <div className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-md:hidden">
+                <span>순위</span>
+                <span>유저</span>
+                <span>영향력</span>
+                <span>점수</span>
+                <span>최근 갱신</span>
               </div>
-            )}
-          </section>
+              {players.length === 0 ? (
+                <EmptyPlayers />
+              ) : (
+                <div className="divide-y divide-white/10">
+                  {[...players]
+                    .sort((left, right) => {
+                      if (right.influenceScore !== left.influenceScore) {
+                        return right.influenceScore - left.influenceScore;
+                      }
+                      if (right.firstPlaceCount !== left.firstPlaceCount) {
+                        return right.firstPlaceCount - left.firstPlaceCount;
+                      }
+                      return left.playerName.localeCompare(right.playerName);
+                    })
+                    .map((player) => (
+                      <div
+                        className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 px-4 py-4 max-md:grid-cols-2"
+                        key={player.profileId}
+                      >
+                        <div className="font-mono text-lg text-cyan-100">
+                          #{player.influenceRank}
+                        </div>
+                        <PlayerIdentity player={player} />
+                        <div className="font-mono text-sm text-slate-100">
+                          {player.influencePercent.toFixed(2)}%
+                        </div>
+                        <div className="font-mono text-sm text-slate-100">
+                          {player.influenceScore.toLocaleString("ko-KR")}점
+                        </div>
+                        <UpdatedAt value={player.latestUpdatedAt} />
+                      </div>
+                    ))}
+                </div>
+              )}
+            </section>
+          </>
         ) : (
           <>
+            <PlayerSharePieChart
+              emptyMessage="1등 달성곡이 있는 유저가 아직 없습니다."
+              players={players.map((player) => ({
+                profileId: player.profileId,
+                playerName: player.playerName,
+                percent:
+                  firstPlaceTotal > 0
+                    ? (player.firstPlaceCount / firstPlaceTotal) * 100
+                    : 0,
+                value: player.firstPlaceCount,
+              }))}
+              unit="곡"
+            />
             <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
           <div className="grid grid-cols-[80px_1fr_140px_180px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-md:hidden">
             <span>순위</span>
