@@ -132,8 +132,9 @@ async function PlayerLeaderboardContent({ tab }: { tab: PlayerRankTab }) {
           ) : (
             <div className="divide-y divide-white/10">
               {players.map((player) => (
-                <div
-                  className="grid grid-cols-[80px_1fr_140px_180px] gap-3 px-4 py-4 max-md:grid-cols-2"
+                <Link
+                  className="grid grid-cols-[80px_1fr_140px_180px] gap-3 px-4 py-4 transition hover:bg-white/8 max-md:grid-cols-2"
+                  href={`/?leader=${encodeURIComponent(player.profileId)}`}
                   key={player.profileId}
                 >
                   <div className="font-mono text-lg text-cyan-100">#{player.rank}</div>
@@ -142,7 +143,7 @@ async function PlayerLeaderboardContent({ tab }: { tab: PlayerRankTab }) {
                     {player.firstPlaceCount.toLocaleString("ko-KR")}곡
                   </div>
                   <UpdatedAt value={player.latestUpdatedAt} />
-                </div>
+                </Link>
               ))}
             </div>
           )}

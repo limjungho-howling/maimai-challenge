@@ -14,6 +14,7 @@ const PAGE_SIZE = 30;
 interface HomePageProps {
   searchParams: Promise<{
     diff?: string;
+    leader?: string;
     level?: string;
     page?: string;
     q?: string;
@@ -89,6 +90,7 @@ async function getIsLoggedIn(): Promise<boolean> {
 async function SongListContent({ searchParams }: HomePageProps) {
   const params = await searchParams;
   const difficulty = parseDifficulty(params.diff);
+  const leaderProfileId = parseTextParam(params.leader);
   const level = parseTextParam(params.level);
   const search = parseTextParam(params.q);
   const version = parseVersion(params.version);
@@ -96,6 +98,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
   const [{ charts, count }, levels, versions] = await Promise.all([
     listCharts({
       difficulty,
+      leaderProfileId,
       level,
       page,
       pageSize: PAGE_SIZE,
@@ -113,19 +116,26 @@ async function SongListContent({ searchParams }: HomePageProps) {
           <div>
             <h2 className="text-xl font-semibold text-white">곡 리스트</h2>
             <p className="mt-1 text-sm text-slate-300">
-              최근 점수 또는 순위 변동이 생긴 곡이 먼저 표시됩니다.
+              {leaderProfileId
+                ? "선택한 유저가 1등을 달성한 곡만 표시됩니다."
+                : "최근 점수 또는 순위 변동이 생긴 곡이 먼저 표시됩니다."}
             </p>
+            {leaderProfileId ? (
+              <Link className="mt-2 inline-flex text-sm text-cyan-200 hover:text-cyan-100" href="/">
+                전체 곡 리스트 보기
+              </Link>
+            ) : null}
           </div>
           <div className="flex flex-wrap gap-2">
             <DifficultyLink
               active={difficulty === null}
-              href={filterHref({ difficulty: null, level, search, version })}
+              href={filterHref({ difficulty: null, leaderProfileId, level, search, version })}
               label="전체"
             />
             {RANKING_DIFFICULTIES.map((item) => (
               <DifficultyLink
                 active={difficulty === item}
-                href={filterHref({ difficulty: item, level, search, version })}
+                href={filterHref({ difficulty: item, leaderProfileId, level, search, version })}
                 key={item}
                 label={getDifficultyLabel(item)}
               />
@@ -138,6 +148,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
           className="grid gap-3 rounded-lg border border-white/10 bg-white/[0.045] p-4 sm:grid-cols-[1fr_180px_220px_auto]"
         >
           {difficulty !== null ? <input name="diff" type="hidden" value={difficulty} /> : null}
+          {leaderProfileId ? <input name="leader" type="hidden" value={leaderProfileId} /> : null}
           <label className="min-w-0">
             <span className="sr-only">곡 이름 검색</span>
             <input
@@ -244,7 +255,14 @@ async function SongListContent({ searchParams }: HomePageProps) {
         <nav className="flex items-center justify-center gap-3">
           <PageLink
             disabled={page <= 1}
-            href={pageHref({ difficulty, level, page: page - 1, search, version })}
+            href={pageHref({
+              difficulty,
+              leaderProfileId,
+              level,
+              page: page - 1,
+              search,
+              version,
+            })}
             label="이전"
           />
           <span className="font-mono text-sm text-slate-300">
@@ -252,7 +270,14 @@ async function SongListContent({ searchParams }: HomePageProps) {
           </span>
           <PageLink
             disabled={page >= pageCount}
-            href={pageHref({ difficulty, level, page: page + 1, search, version })}
+            href={pageHref({
+              difficulty,
+              leaderProfileId,
+              level,
+              page: page + 1,
+              search,
+              version,
+            })}
             label="다음"
           />
         </nav>
@@ -327,45 +352,51 @@ function parseTextParam(value: string | undefined): string | null {
 
 function pageHref({
   difficulty,
+  leaderProfileId,
   level,
   page,
   search,
   version,
 }: {
   difficulty: number | null;
+  leaderProfileId: string | null;
   level: string | null;
   page: number;
   search: string | null;
   version: number | null;
 }): string {
-  const params = buildSearchParams({ difficulty, level, search, version });
+  const params = buildSearchParams({ difficulty, leaderProfileId, level, search, version });
   params.set("page", String(page));
   return `/?${params.toString()}`;
 }
 
 function filterHref({
   difficulty,
+  leaderProfileId,
   level,
   search,
   version,
 }: {
   difficulty: number | null;
+  leaderProfileId: string | null;
   level: string | null;
   search: string | null;
   version: number | null;
 }): string {
-  const params = buildSearchParams({ difficulty, level, search, version });
+  const params = buildSearchParams({ difficulty, leaderProfileId, level, search, version });
   const query = params.toString();
   return query ? `/?${query}` : "/";
 }
 
 function buildSearchParams({
   difficulty,
+  leaderProfileId,
   level,
   search,
   version,
 }: {
   difficulty: number | null;
+  leaderProfileId: string | null;
   level: string | null;
   search: string | null;
   version: number | null;
@@ -373,6 +404,9 @@ function buildSearchParams({
   const params = new URLSearchParams();
   if (difficulty !== null) {
     params.set("diff", String(difficulty));
+  }
+  if (leaderProfileId) {
+    params.set("leader", leaderProfileId);
   }
   if (level) {
     params.set("level", level);

@@ -41,6 +41,7 @@ export interface ChartRanking {
 
 export async function listCharts({
   difficulty,
+  leaderProfileId,
   level,
   page,
   pageSize,
@@ -48,18 +49,28 @@ export async function listCharts({
   version,
 }: {
   difficulty: number | null;
+  leaderProfileId: string | null;
   level: string | null;
   page: number;
   pageSize: number;
   search: string | null;
   version: number | null;
 }): Promise<{ charts: ChartSummary[]; count: number }> {
-  return cachedListCharts({ difficulty, level, page, pageSize, search, version });
+  return cachedListCharts({
+    difficulty,
+    leaderProfileId,
+    level,
+    page,
+    pageSize,
+    search,
+    version,
+  });
 }
 
 const cachedListCharts = unstable_cache(
   async ({
     difficulty,
+    leaderProfileId,
     level,
     page,
     pageSize,
@@ -67,6 +78,7 @@ const cachedListCharts = unstable_cache(
     version,
   }: {
     difficulty: number | null;
+    leaderProfileId: string | null;
     level: string | null;
     page: number;
     pageSize: number;
@@ -80,6 +92,26 @@ const cachedListCharts = unstable_cache(
   const supabase = createSupabasePublicReadClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
+
+  if (leaderProfileId) {
+    const firstPlaceChartIds = await fetchFirstPlaceChartIds(supabase, leaderProfileId);
+    if (firstPlaceChartIds.size === 0) {
+      return { charts: [], count: 0 };
+    }
+
+    const filteredRows = (await fetchAllChartSummaries(supabase, {
+      difficulty,
+      level,
+      search,
+      version,
+    })).filter((row) => firstPlaceChartIds.has(String(row.chart_id)));
+
+    return {
+      charts: filteredRows.slice(from, to + 1).map(mapChartSummary),
+      count: filteredRows.length,
+    };
+  }
+
   let query = supabase
     .from("chart_leaderboard_summary")
     .select("*", { count: "exact" })
@@ -118,6 +150,90 @@ const cachedListCharts = unstable_cache(
   ["chart-list"],
   { revalidate: false, tags: [CHART_LIST_CACHE_TAG] },
 );
+
+async function fetchFirstPlaceChartIds(
+  supabase: ReturnType<typeof createSupabasePublicReadClient>,
+  profileId: string,
+): Promise<Set<string>> {
+  const chartIds = new Set<string>();
+
+  for (let from = 0; ; from += SELECT_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("chart_rankings")
+      .select("chart_id")
+      .eq("profile_id", profileId)
+      .eq("rank", 1)
+      .range(from, from + SELECT_PAGE_SIZE - 1);
+
+    if (error) {
+      console.error(error);
+      return new Set();
+    }
+
+    for (const row of data ?? []) {
+      chartIds.add(String(row.chart_id));
+    }
+
+    if ((data ?? []).length < SELECT_PAGE_SIZE) {
+      return chartIds;
+    }
+  }
+}
+
+async function fetchAllChartSummaries(
+  supabase: ReturnType<typeof createSupabasePublicReadClient>,
+  {
+    difficulty,
+    level,
+    search,
+    version,
+  }: {
+    difficulty: number | null;
+    level: string | null;
+    search: string | null;
+    version: number | null;
+  },
+): Promise<Array<Record<string, unknown>>> {
+  const rows: Array<Record<string, unknown>> = [];
+
+  for (let from = 0; ; from += SELECT_PAGE_SIZE) {
+    let query = supabase
+      .from("chart_leaderboard_summary")
+      .select("*")
+      .order("last_changed_at", { ascending: false, nullsFirst: false })
+      .order("title", { ascending: true })
+      .range(from, from + SELECT_PAGE_SIZE - 1);
+
+    if (difficulty !== null) {
+      query = query.eq("difficulty", difficulty);
+    }
+
+    if (level) {
+      query = query.eq("level", level);
+    }
+
+    if (version !== null) {
+      query = query.eq("version_number", version);
+    }
+
+    if (search) {
+      query = query.ilike("title", `%${escapeLikePattern(search)}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error(error);
+      return [];
+    }
+
+    rows.push(...((data ?? []) as Array<Record<string, unknown>>));
+
+    if ((data ?? []).length < SELECT_PAGE_SIZE) {
+      return rows;
+    }
+  }
+}
 
 export async function listChartLevels(): Promise<string[]> {
   return cachedListChartLevels();

@@ -5,6 +5,7 @@ import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
 export const PLAYER_LEADERBOARD_CACHE_TAG = "player-leaderboard";
+const PLAYER_LEADERBOARD_CACHE_KEY = "player-leaderboard-v2";
 
 export interface PlayerLeaderboardEntry {
   profileId: string;
@@ -103,7 +104,7 @@ const cachedListPlayerLeaderboard = unstable_cache(
         profileId: profile.id,
         rank: 0,
         influenceRank: 0,
-        playerName: profile.maimai_name ?? "미등록",
+        playerName: profile.maimai_name ?? profile.discord_username ?? "미등록",
         discordUsername: profile.discord_username,
         maimaiRating: profile.maimai_rating,
         firstPlaceCount: stats.firstPlaceCount,
@@ -142,7 +143,7 @@ const cachedListPlayerLeaderboard = unstable_cache(
           : index + 1,
     }));
   },
-  ["player-leaderboard"],
+  [PLAYER_LEADERBOARD_CACHE_KEY],
   { revalidate: 1800, tags: [PLAYER_LEADERBOARD_CACHE_TAG] },
 );
 
