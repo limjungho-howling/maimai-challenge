@@ -1,15 +1,21 @@
+import { unstable_cache } from "next/cache";
+
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
+export const PLAYER_LEADERBOARD_CACHE_TAG = "player-leaderboard";
 
 export interface PlayerLeaderboardEntry {
   profileId: string;
   rank: number;
+  influenceRank: number;
   playerName: string;
   discordUsername: string | null;
   maimaiRating: number | null;
   firstPlaceCount: number;
+  influenceScore: number;
+  influencePercent: number;
   scoreCount: number;
   latestUpdatedAt: string | null;
 }
@@ -29,6 +35,11 @@ interface RankingRow {
 }
 
 export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]> {
+  return cachedListPlayerLeaderboard();
+}
+
+const cachedListPlayerLeaderboard = unstable_cache(
+  async (): Promise<PlayerLeaderboardEntry[]> => {
   if (!hasSupabasePublicEnv() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return [];
   }
@@ -42,6 +53,8 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
     string,
     {
       firstPlaceCount: number;
+      influenceScore: number;
+      influenceBasisPoints: number;
       scoreCount: number;
       latestUpdatedAt: string | null;
     }
@@ -50,13 +63,19 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
   for (const ranking of rankings) {
     const stats = statsByProfileId.get(ranking.profile_id) ?? {
       firstPlaceCount: 0,
+      influenceScore: 0,
+      influenceBasisPoints: 0,
       scoreCount: 0,
       latestUpdatedAt: null,
     };
 
     stats.scoreCount += 1;
-    if (Number(ranking.rank) === 1) {
+    const rank = Number(ranking.rank);
+    if (rank === 1) {
       stats.firstPlaceCount += 1;
+    }
+    if (rank >= 1 && rank <= 5) {
+      stats.influenceScore += 6 - rank;
     }
     if (
       ranking.updated_at &&
@@ -68,11 +87,14 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
 
     statsByProfileId.set(ranking.profile_id, stats);
   }
+  assignInfluenceBasisPoints(statsByProfileId);
 
-  return profiles
+  const entries = profiles
     .map((profile) => {
       const stats = statsByProfileId.get(profile.id) ?? {
         firstPlaceCount: 0,
+        influenceScore: 0,
+        influenceBasisPoints: 0,
         scoreCount: 0,
         latestUpdatedAt: profile.updated_at,
       };
@@ -80,14 +102,28 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
       return {
         profileId: profile.id,
         rank: 0,
+        influenceRank: 0,
         playerName: profile.maimai_name ?? "미등록",
         discordUsername: profile.discord_username,
         maimaiRating: profile.maimai_rating,
         firstPlaceCount: stats.firstPlaceCount,
+        influenceScore: stats.influenceScore,
+        influencePercent: stats.influenceBasisPoints / 100,
         scoreCount: stats.scoreCount,
         latestUpdatedAt: stats.latestUpdatedAt,
       };
     })
+    .map((entry, _index, allEntries) => ({
+      ...entry,
+      influenceRank: calculateRank(
+        entry,
+        allEntries,
+        (item) => item.influenceScore,
+        (left, right) => left.playerName.localeCompare(right.playerName),
+      ),
+    }));
+
+  return entries
     .sort((left, right) => {
       if (right.firstPlaceCount !== left.firstPlaceCount) {
         return right.firstPlaceCount - left.firstPlaceCount;
@@ -105,6 +141,72 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
           ? entries[index - 1].rank
           : index + 1,
     }));
+  },
+  ["player-leaderboard"],
+  { revalidate: 1800, tags: [PLAYER_LEADERBOARD_CACHE_TAG] },
+);
+
+function assignInfluenceBasisPoints(
+  statsByProfileId: Map<
+    string,
+    {
+      firstPlaceCount: number;
+      influenceScore: number;
+      influenceBasisPoints: number;
+      scoreCount: number;
+      latestUpdatedAt: string | null;
+    }
+  >,
+): void {
+  const stats = [...statsByProfileId.values()];
+  const totalScore = stats.reduce((sum, item) => sum + item.influenceScore, 0);
+
+  if (totalScore <= 0) {
+    return;
+  }
+
+  const rawValues = stats.map((item) => {
+    const rawBasisPoints = (item.influenceScore / totalScore) * 10000;
+    const flooredBasisPoints = Math.floor(rawBasisPoints);
+    item.influenceBasisPoints = flooredBasisPoints;
+    return {
+      item,
+      remainder: rawBasisPoints - flooredBasisPoints,
+    };
+  });
+  let remainingBasisPoints =
+    10000 - stats.reduce((sum, item) => sum + item.influenceBasisPoints, 0);
+
+  for (const { item } of rawValues.sort((left, right) => right.remainder - left.remainder)) {
+    if (remainingBasisPoints <= 0) {
+      break;
+    }
+
+    item.influenceBasisPoints += 1;
+    remainingBasisPoints -= 1;
+  }
+}
+
+function calculateRank<T>(
+  entry: T,
+  entries: T[],
+  score: (entry: T) => number,
+  tieBreak: (left: T, right: T) => number,
+): number {
+  const sorted = [...entries].sort((left, right) => {
+    const scoreDiff = score(right) - score(left);
+    return scoreDiff === 0 ? tieBreak(left, right) : scoreDiff;
+  });
+  const index = sorted.findIndex((item) => item === entry);
+
+  if (index <= 0) {
+    return 1;
+  }
+
+  const previous = sorted[index - 1];
+  return score(previous) === score(entry)
+    ? calculateRank(previous, sorted, score, tieBreak)
+    : index + 1;
 }
 
 async function fetchAllProfiles(
