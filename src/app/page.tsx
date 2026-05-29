@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { SongListSkeleton } from "@/components/leaderboard-skeletons";
 import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
 import { listChartLevels, listChartVersions, listCharts } from "@/lib/data/charts";
+import { hasSupabasePublicEnv } from "@/lib/supabase/env";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatKstDateTime } from "@/lib/time";
 
 const PAGE_SIZE = 30;
@@ -19,7 +21,9 @@ interface HomePageProps {
   }>;
 }
 
-export default function HomePage({ searchParams }: HomePageProps) {
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const isLoggedIn = await getIsLoggedIn();
+
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#123042,transparent_34rem),linear-gradient(135deg,#080b12,#111827_52%,#13151b)]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
@@ -43,12 +47,21 @@ export default function HomePage({ searchParams }: HomePageProps) {
             >
               곡 랭킹
             </Link>
-            <Link
-              className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
-              href="/dashboard"
-            >
-              대시보드
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
+                href="/dashboard"
+              >
+                대시보드
+              </Link>
+            ) : (
+              <Link
+                className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
+                href="/auth/login?next=/dashboard"
+              >
+                Discord로 로그인
+              </Link>
+            )}
           </nav>
         </header>
 
@@ -58,6 +71,19 @@ export default function HomePage({ searchParams }: HomePageProps) {
       </div>
     </main>
   );
+}
+
+async function getIsLoggedIn(): Promise<boolean> {
+  if (!hasSupabasePublicEnv()) {
+    return false;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return Boolean(user);
 }
 
 async function SongListContent({ searchParams }: HomePageProps) {
