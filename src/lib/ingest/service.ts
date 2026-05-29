@@ -170,6 +170,13 @@ export async function ingestMaimaiPayload(
       total: 100,
     });
     await upsertPlayerScores(supabase, user.id, scoreUpdates, collectedAt);
+
+    await reportProgress(onProgress, {
+      stage: "scores",
+      message: "차트 최대 DX 점수를 보정하는 중입니다.",
+      current: 74,
+      total: 100,
+    });
     await fillMissingChartMaxDxScores(
       supabase,
       scoreUpdates.map((update) => update.chartId),
@@ -842,8 +849,13 @@ async function fillMissingChartMaxDxScores(
     return;
   }
 
+  const missingChartIds = await listChartsMissingMaxDxScore(supabase, uniqueChartIds);
+  if (missingChartIds.length === 0) {
+    return;
+  }
+
   const scoreRows = await mapWithConcurrency(
-    chunks(uniqueChartIds, DB_FILTER_CHUNK_SIZE),
+    chunks(missingChartIds, DB_FILTER_CHUNK_SIZE),
     DB_CHUNK_CONCURRENCY,
     async (chunk) => {
       const { data, error } = await supabase
@@ -895,6 +907,31 @@ async function fillMissingChartMaxDxScores(
       }
     },
   );
+}
+
+async function listChartsMissingMaxDxScore(
+  supabase: SupabaseClient,
+  chartIds: string[],
+): Promise<string[]> {
+  const results = await mapWithConcurrency(
+    chunks(chartIds, DB_FILTER_CHUNK_SIZE),
+    DB_CHUNK_CONCURRENCY,
+    async (chunk) => {
+      const { data, error } = await supabase
+        .from("song_charts")
+        .select("id")
+        .in("id", chunk)
+        .lte("max_dx_score", 0);
+
+      if (error) {
+        throw error;
+      }
+
+      return data ?? [];
+    },
+  );
+
+  return results.flat().map((row) => String(row.id));
 }
 
 async function insertRankingEvents(
