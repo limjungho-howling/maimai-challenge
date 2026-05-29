@@ -65,7 +65,8 @@ export function buildPersonalRankDropMessages({
   return events.map((event) => {
     const previousRank = event.previousRank === null ? "-" : `#${event.previousRank}`;
     return [
-      messageTitle,
+      formatDiscordTitle(messageTitle),
+      "---",
       `유저 : ${boldActorName}`,
       `${event.chartTitle} [${event.difficultyLabel}]`,
       `  순위: ${previousRank} -> #${event.nextRank}`,
@@ -89,7 +90,10 @@ export function buildChannelRankUpMessages({
   return events.map((event) => {
     const previousRank = event.previousRank === null ? "-" : `#${event.previousRank}`;
     return [
-      `${boldActorName}의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.`,
+      formatDiscordTitle(
+        `${actorName}의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.`,
+      ),
+      "---",
       `${event.chartTitle} [${event.difficultyLabel}]`,
       `  순위: ${previousRank} -> #${event.nextRank}`,
       `  DX 스코어: ${event.actorDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
@@ -100,7 +104,7 @@ export function buildChannelRankUpMessages({
 
 export function buildRankGoalMessage(playerName: string, goals: RankGoal[]): string {
   if (goals.length === 0) {
-    return `${boldDiscordText(playerName)}님, 현재 추적 중인 역전 목표가 없습니다.`;
+    return formatDiscordTitle(`${playerName}님, 현재 추적 중인 역전 목표가 없습니다.`);
   }
 
   const lines = goals.flatMap((goal, index) => [
@@ -117,7 +121,11 @@ export function buildRankGoalMessage(playerName: string, goals: RankGoal[]): str
       : ["없음"]),
   ]);
 
-  return [`${boldDiscordText(playerName)}님의 랜덤 갱신 목표 ${goals.length}개`, ...lines].join("\n");
+  return [
+    formatDiscordTitle(`${playerName}님의 랜덤 갱신 목표 ${goals.length}개`),
+    "---",
+    ...lines,
+  ].join("\n");
 }
 
 export function buildDailyChallengeMessage({
@@ -133,7 +141,8 @@ export function buildDailyChallengeMessage({
 }): string {
   if (goals.length === 0) {
     return [
-      `${boldDiscordText(playerName)}님, 선택한 조건의 도전장 목표가 없습니다.`,
+      formatDiscordTitle(`${playerName}님, 선택한 조건의 도전장 목표가 없습니다.`),
+      "---",
       `레벨: ${levelLabel}`,
       `대상: ${targetLabel}`,
       "현재 기록이 이미 역전 로그의 상대 기록보다 높거나 같은 곡은 제외했습니다.",
@@ -147,7 +156,8 @@ export function buildDailyChallengeMessage({
   ]);
 
   return [
-    `${boldDiscordText(playerName)}님의 오늘의 도전장 ${goals.length}개`,
+    formatDiscordTitle(`${playerName}님의 오늘의 도전장 ${goals.length}개`),
+    "---",
     `레벨: ${levelLabel}`,
     `대상: ${targetLabel}`,
     ...lines,
@@ -161,6 +171,10 @@ function trimTrailingSlash(value: string): string {
 function formatSignedDifference(value: number): string {
   const sign = value >= 0 ? "+" : "-";
   return `${sign}${Math.abs(value).toLocaleString("ko-KR")}`;
+}
+
+function formatDiscordTitle(value: string): string {
+  return `## ${boldDiscordText(value)}`;
 }
 
 function boldDiscordText(value: string): string {

@@ -41,6 +41,9 @@ const PERSONAL_CHANNEL_BOT_ALLOW = (
   DISCORD_PERMISSION_READ_MESSAGE_HISTORY
 ).toString();
 const DISCORD_SUPPRESS_EMBEDS_FLAG = 4;
+const DISCORD_IS_COMPONENTS_V2_FLAG = 32768;
+const DISCORD_TEXT_DISPLAY_COMPONENT = 10;
+const DISCORD_SEPARATOR_COMPONENT = 14;
 let cachedBotUserId: string | null = null;
 
 export async function sendRankDropNotifications(
@@ -411,16 +414,45 @@ async function createMessage(
   const response = await fetch(`${DISCORD_API_BASE}/channels/${channelId}/messages`, {
     method: "POST",
     headers: discordHeaders(token),
-    body: JSON.stringify({
-      content,
-      flags: DISCORD_SUPPRESS_EMBEDS_FLAG,
-      allowed_mentions: { parse: [] },
-    }),
+    body: JSON.stringify(createMessageBody(content)),
   });
 
   if (!response.ok) {
     throw await createDiscordHttpError(response, "Discord message failed");
   }
+}
+
+function createMessageBody(content: string): Record<string, unknown> {
+  const [title, separator, ...bodyLines] = content.split("\n");
+  const body = bodyLines.join("\n").trim();
+
+  if (title?.startsWith("## ") && separator === "---" && body) {
+    return {
+      flags: DISCORD_SUPPRESS_EMBEDS_FLAG | DISCORD_IS_COMPONENTS_V2_FLAG,
+      allowed_mentions: { parse: [] },
+      components: [
+        {
+          type: DISCORD_TEXT_DISPLAY_COMPONENT,
+          content: title,
+        },
+        {
+          type: DISCORD_SEPARATOR_COMPONENT,
+          divider: true,
+          spacing: 1,
+        },
+        {
+          type: DISCORD_TEXT_DISPLAY_COMPONENT,
+          content: body,
+        },
+      ],
+    };
+  }
+
+  return {
+    content,
+    flags: DISCORD_SUPPRESS_EMBEDS_FLAG,
+    allowed_mentions: { parse: [] },
+  };
 }
 
 async function createMessageWithRetry(
