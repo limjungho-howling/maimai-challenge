@@ -18,10 +18,22 @@ describe("ingest payload schemas", () => {
   it("accepts a single Re:MASTER catalog page", () => {
     expect(() =>
       catalogPayloadSchema.parse({
-        scorePages: [{ difficulty: 4, html }],
-        detailPages: [{ idx: "remaster", html, jacketUrl: null }],
+        scorePages: [{ difficulty: 4, html, version: 25, versionName: "CiRCLE" }],
       }),
     ).not.toThrow();
+  });
+
+  it("accepts the full version catalog page set", () => {
+    const scorePages = Array.from({ length: 26 }, (_, version) =>
+      [3, 4].map((difficulty) => ({
+        difficulty,
+        html,
+        version,
+        versionName: `version-${version}`,
+      })),
+    ).flat();
+
+    expect(() => catalogPayloadSchema.parse({ scorePages })).not.toThrow();
   });
 
   it("rejects duplicate difficulty pages", () => {

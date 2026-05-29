@@ -47,8 +47,10 @@ export default async function ChartPage({ params }: ChartPageProps) {
               {chart.title}
             </h1>
             <p className="mt-2 text-sm text-slate-300">
-              {chart.kind} · {chart.difficultyLabel} · Lv {chart.level} · 최대 DX{" "}
-              {chart.maxDxScore.toLocaleString("ko-KR")}
+              {chart.kind}
+              {chart.versionName ? ` · ${chart.versionName}` : ""} ·{" "}
+              {chart.difficultyLabel} · Lv {chart.level} · 최대 DX{" "}
+              {formatMaxDxScore(chart.maxDxScore)}
             </p>
             </div>
           </div>
@@ -107,8 +109,7 @@ export default async function ChartPage({ params }: ChartPageProps) {
                       </div>
                     </div>
                     <div className="justify-self-start whitespace-nowrap text-left font-mono text-sm leading-5 text-slate-100 max-md:col-start-2">
-                      {ranking.dxScore.toLocaleString("ko-KR")} /{" "}
-                      {ranking.maxDxScore.toLocaleString("ko-KR")}
+                      {formatDxScorePair(ranking.dxScore, ranking.maxDxScore)}
                     </div>
                     <div className="flex w-[124px] items-center max-md:col-start-2">
                       <DxStarImage starCount={ranking.dxStarCount} />
@@ -130,6 +131,18 @@ export default async function ChartPage({ params }: ChartPageProps) {
       </div>
     </main>
   );
+}
+
+function formatDxScorePair(dxScore: number, maxDxScore: number): string {
+  if (maxDxScore <= 0) {
+    return `${dxScore.toLocaleString("ko-KR")} / 추후 입력 예정`;
+  }
+
+  return `${dxScore.toLocaleString("ko-KR")} / ${maxDxScore.toLocaleString("ko-KR")}`;
+}
+
+function formatMaxDxScore(maxDxScore: number): string {
+  return maxDxScore > 0 ? maxDxScore.toLocaleString("ko-KR") : "추후 입력 예정";
 }
 
 function DxStarImage({ starCount }: { starCount: number }) {

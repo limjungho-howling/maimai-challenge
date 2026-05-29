@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildChannelRankUpMessages,
+  buildDailyChallengeMessage,
   buildPersonalRankDropMessages,
   buildRankGoalMessage,
+  type DailyChallengeGoal,
   type RankGoal,
 } from "@/lib/discord/messages";
 
@@ -50,10 +52,10 @@ describe("Discord messages", () => {
       appUrl: "https://maimai-challenge.vercel.app",
     })[0];
 
-    expect(message).toContain("E.HOWL에 의해 다음 곡의 디럭스 스코어 등수가 하락하였습니다.");
+    expect(message).toContain("**E.HOWL**에 의해 다음 곡의 디럭스 스코어 등수가 하락하였습니다.");
     expect(message).toContain("내 DX 스코어");
     expect(message).toContain("역전 기록: DX 2,450 (+50)");
-    expect(message).toContain("https://maimai-challenge.vercel.app/charts/chart-1");
+    expect(message).toContain("<https://maimai-challenge.vercel.app/charts/chart-1>");
   });
 
   it("builds separate channel rank up messages", () => {
@@ -73,11 +75,11 @@ describe("Discord messages", () => {
       appUrl: "https://maimai-challenge.vercel.app",
     })[0];
 
-    expect(message).toContain("E.HOWL의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.");
+    expect(message).toContain("**E.HOWL**의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.");
     expect(message).toContain("Song B [MASTER]");
     expect(message).toContain("순위: #3 -> #1");
     expect(message).toContain("DX 스코어: 2,400 / 2,500");
-    expect(message).toContain("https://maimai-challenge.vercel.app/charts/chart-2");
+    expect(message).toContain("<https://maimai-challenge.vercel.app/charts/chart-2>");
   });
 
   it("builds a rank goal message with higher scores above the user", () => {
@@ -97,8 +99,43 @@ describe("Discord messages", () => {
 
     const message = buildRankGoalMessage("CHANA", goals);
 
-    expect(message).toContain("CHANA님의 랜덤 갱신 목표 1개");
-    expect(message).toContain("현재 #4");
-    expect(message).toContain("#1 A: DX 2,450");
+    expect(message).toContain("**CHANA**님의 랜덤 갱신 목표 1개");
+    expect(message).toContain("Song A [MASTER]\n현재 순위: #4");
+    expect(message).toContain("현재 DX 스코어: 2,300 / 2,500");
+    expect(message).toContain("나보다 높은 유저\n#1 **A** · DX 2,450");
+    expect(message).toContain("#2 **B** · DX 2,400");
+  });
+
+  it("escapes Discord markdown in bold user names", () => {
+    const message = buildRankGoalMessage("A*B", []);
+
+    expect(message).toContain("**A\\*B**님");
+  });
+
+  it("builds daily challenge messages with current and target records", () => {
+    const goals: DailyChallengeGoal[] = [
+      {
+        chartTitle: "Endless World",
+        level: "14+",
+        difficultyLabel: "Re:MASTER",
+        currentRank: 3,
+        currentDxScore: 2400,
+        targetPlayerName: "E.HOWL",
+        targetRank: 2,
+        targetDxScore: 2450,
+      },
+    ];
+
+    const message = buildDailyChallengeMessage({
+      playerName: "CHANA",
+      levelLabel: "14+",
+      targetLabel: "E.HOWL",
+      goals,
+    });
+
+    expect(message).toContain("**CHANA**님의 오늘의 도전장 1개");
+    expect(message).toContain("Endless World [Re:MASTER] · Lv 14+");
+    expect(message).toContain("내 기록: #3 · DX 2,400");
+    expect(message).toContain("목표: #2 **E.HOWL** · DX 2,450");
   });
 });

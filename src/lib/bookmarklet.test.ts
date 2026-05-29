@@ -13,6 +13,13 @@ describe("buildBookmarklet", () => {
     expect(source).toContain("document.createElement('script')");
     expect(source).not.toContain("/maimai-mobile/record/musicGenre/search/");
   });
+
+  it("returns a catalog loader that fetches public catalog-bookmarklet.js", () => {
+    const href = buildBookmarklet("https://example.com", "catalog");
+    const source = decodeURIComponent(href.replace(/^javascript:/, ""));
+
+    expect(source).toContain("https://example.com/catalog-bookmarklet.js");
+  });
 });
 
 describe("bookmarklet runner", () => {
@@ -26,5 +33,23 @@ describe("bookmarklet runner", () => {
     expect(readyIndex).toBeLessThan(fetchIndex);
     expect(source).toContain("maimai-challenge:relay-ready");
     expect(source).toContain("maimai-challenge:hello");
+  });
+
+  it("collects catalog pages by version with a 0.1 second interval", () => {
+    const source = readFileSync("public/catalog-bookmarklet-runner.js", "utf8");
+
+    expect(source).toContain("musicVersion/search/?version=");
+    expect(source).toContain("musicDetail/?idx=");
+    expect(source).toContain("REQUEST_INTERVAL_MS = 100");
+    expect(source).toContain("maimai-challenge:detail-progress");
+    expect(source).toContain("failedDetails.push");
+    expect(source).toContain("failedScorePages.push");
+    expect(source).toContain("const text = await response.text()");
+    expect(source).toContain("waitForUploadComplete");
+    expect(source).toContain("RECOVERY_ROUND_COUNT");
+    expect(source).toContain("collectScorePages");
+    expect(source).toContain("maimai-challenge:collection-complete");
+    expect(source).toContain("versionName");
+    expect(source).toContain("uploadType: \"catalog\"");
   });
 });

@@ -40,6 +40,7 @@ const PERSONAL_CHANNEL_BOT_ALLOW = (
   DISCORD_PERMISSION_SEND_MESSAGES |
   DISCORD_PERMISSION_READ_MESSAGE_HISTORY
 ).toString();
+const DISCORD_SUPPRESS_EMBEDS_FLAG = 4;
 let cachedBotUserId: string | null = null;
 
 export async function sendRankDropNotifications(
@@ -114,11 +115,15 @@ export interface ChannelRankUpNotification {
 
 export async function ensurePersonalChannel({
   profileId,
+  discordUserId,
   discordUsername,
+  personalChannelId,
   playerName,
 }: {
   profileId: string;
+  discordUserId: string;
   discordUsername: string | null;
+  personalChannelId?: string | null;
   playerName: string;
 }): Promise<DiscordNotificationResult> {
   const token = process.env.DISCORD_BOT_TOKEN;
@@ -136,12 +141,25 @@ export async function ensurePersonalChannel({
   }
 
   try {
-    const channelId = await createPersonalGuildChannel({
-      token,
-      guildId,
-      discordUsername,
-      playerName,
-    });
+    const channelId =
+      personalChannelId ??
+      (await createPersonalGuildChannel({
+        token,
+        guildId,
+        discordUserId,
+        discordUsername,
+        playerName,
+      }));
+
+    if (personalChannelId) {
+      await syncPersonalGuildChannelPermissions({
+        token,
+        guildId,
+        channelId,
+        discordUserId,
+      });
+    }
+
     return {
       type: "personal_channel",
       profileId,
@@ -210,6 +228,7 @@ export async function sendPersonalRankDropNotifications(
         (await createPersonalGuildChannel({
           token,
           guildId,
+          discordUserId: notification.discordUserId,
           discordUsername: notification.discordUsername,
           playerName: notification.playerName,
         }));
@@ -387,6 +406,7 @@ async function createMessage(
     headers: discordHeaders(token),
     body: JSON.stringify({
       content,
+      flags: DISCORD_SUPPRESS_EMBEDS_FLAG,
       allowed_mentions: { parse: [] },
     }),
   });
@@ -421,11 +441,13 @@ async function createMessageWithRetry(
 async function createPersonalGuildChannel({
   token,
   guildId,
+  discordUserId,
   discordUsername,
   playerName,
 }: {
   token: string;
   guildId: string;
+  discordUserId: string;
   discordUsername: string | null;
   playerName: string;
 }): Promise<string> {
@@ -444,6 +466,12 @@ async function createPersonalGuildChannel({
       },
       {
         id: botUserId,
+        type: 1,
+        allow: PERSONAL_CHANNEL_BOT_ALLOW,
+        deny: "0",
+      },
+      {
+        id: discordUserId,
         type: 1,
         allow: PERSONAL_CHANNEL_BOT_ALLOW,
         deny: "0",
@@ -471,6 +499,76 @@ async function createPersonalGuildChannel({
   }
 
   return payload.id;
+}
+
+async function syncPersonalGuildChannelPermissions({
+  token,
+  guildId,
+  channelId,
+  discordUserId,
+}: {
+  token: string;
+  guildId: string;
+  channelId: string;
+  discordUserId: string;
+}): Promise<void> {
+  const botUserId = await getBotUserId(token);
+
+  await Promise.all([
+    upsertChannelPermissionOverwrite({
+      token,
+      channelId,
+      overwriteId: guildId,
+      type: 0,
+      allow: PERSONAL_CHANNEL_READER_ALLOW,
+      deny: PERSONAL_CHANNEL_READER_DENY,
+    }),
+    upsertChannelPermissionOverwrite({
+      token,
+      channelId,
+      overwriteId: discordUserId,
+      type: 1,
+      allow: PERSONAL_CHANNEL_BOT_ALLOW,
+      deny: "0",
+    }),
+    upsertChannelPermissionOverwrite({
+      token,
+      channelId,
+      overwriteId: botUserId,
+      type: 1,
+      allow: PERSONAL_CHANNEL_BOT_ALLOW,
+      deny: "0",
+    }),
+  ]);
+}
+
+async function upsertChannelPermissionOverwrite({
+  token,
+  channelId,
+  overwriteId,
+  type,
+  allow,
+  deny,
+}: {
+  token: string;
+  channelId: string;
+  overwriteId: string;
+  type: 0 | 1;
+  allow: string;
+  deny: string;
+}): Promise<void> {
+  const response = await fetch(
+    `${DISCORD_API_BASE}/channels/${channelId}/permissions/${overwriteId}`,
+    {
+      method: "PUT",
+      headers: discordHeaders(token),
+      body: JSON.stringify({ type, allow, deny }),
+    },
+  );
+
+  if (!response.ok) {
+    throw await createDiscordHttpError(response, "Discord channel permission failed");
+  }
 }
 
 async function getBotUserId(token: string): Promise<string> {

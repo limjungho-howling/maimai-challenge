@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { SongListSkeleton } from "@/components/leaderboard-skeletons";
 import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
-import { listChartLevels, listCharts } from "@/lib/data/charts";
+import { listChartLevels, listChartVersions, listCharts } from "@/lib/data/charts";
 import { formatKstDateTime } from "@/lib/time";
 
 const PAGE_SIZE = 30;
@@ -15,6 +15,7 @@ interface HomePageProps {
     level?: string;
     page?: string;
     q?: string;
+    version?: string;
   }>;
 }
 
@@ -64,16 +65,19 @@ async function SongListContent({ searchParams }: HomePageProps) {
   const difficulty = parseDifficulty(params.diff);
   const level = parseTextParam(params.level);
   const search = parseTextParam(params.q);
+  const version = parseVersion(params.version);
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
-  const [{ charts, count }, levels] = await Promise.all([
+  const [{ charts, count }, levels, versions] = await Promise.all([
     listCharts({
       difficulty,
       level,
       page,
       pageSize: PAGE_SIZE,
       search,
+      version,
     }),
     listChartLevels(),
+    listChartVersions(),
   ]);
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
@@ -89,13 +93,13 @@ async function SongListContent({ searchParams }: HomePageProps) {
           <div className="flex flex-wrap gap-2">
             <DifficultyLink
               active={difficulty === null}
-              href={filterHref({ difficulty: null, level, search })}
+              href={filterHref({ difficulty: null, level, search, version })}
               label="전체"
             />
             {RANKING_DIFFICULTIES.map((item) => (
               <DifficultyLink
                 active={difficulty === item}
-                href={filterHref({ difficulty: item, level, search })}
+                href={filterHref({ difficulty: item, level, search, version })}
                 key={item}
                 label={getDifficultyLabel(item)}
               />
@@ -105,7 +109,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
 
         <form
           action="/"
-          className="grid gap-3 rounded-lg border border-white/10 bg-white/[0.045] p-4 sm:grid-cols-[1fr_180px_auto]"
+          className="grid gap-3 rounded-lg border border-white/10 bg-white/[0.045] p-4 sm:grid-cols-[1fr_180px_220px_auto]"
         >
           {difficulty !== null ? <input name="diff" type="hidden" value={difficulty} /> : null}
           <label className="min-w-0">
@@ -129,6 +133,21 @@ async function SongListContent({ searchParams }: HomePageProps) {
               {levels.map((item) => (
                 <option key={item} value={item}>
                   Lv {item}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span className="sr-only">버전 필터</span>
+            <select
+              className="h-11 w-full rounded-md border border-white/10 bg-slate-950/60 px-3 text-sm text-white outline-none transition focus:border-cyan-300"
+              defaultValue={version ?? ""}
+              name="version"
+            >
+              <option value="">전체 버전</option>
+              {versions.map((item) => (
+                <option key={item.number} value={item.number}>
+                  {item.name}
                 </option>
               ))}
             </select>
@@ -179,6 +198,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
                       </div>
                       <div className="mt-1 text-xs text-slate-400">
                         Lv {chart.level}
+                        {chart.versionName ? ` · ${chart.versionName}` : ""}
                         {chart.lastChangedAt
                           ? ` · ${formatKstDateTime(chart.lastChangedAt)}`
                           : ""}
@@ -198,7 +218,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
         <nav className="flex items-center justify-center gap-3">
           <PageLink
             disabled={page <= 1}
-            href={pageHref({ difficulty, level, page: page - 1, search })}
+            href={pageHref({ difficulty, level, page: page - 1, search, version })}
             label="이전"
           />
           <span className="font-mono text-sm text-slate-300">
@@ -206,7 +226,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
           </span>
           <PageLink
             disabled={page >= pageCount}
-            href={pageHref({ difficulty, level, page: page + 1, search })}
+            href={pageHref({ difficulty, level, page: page + 1, search, version })}
             label="다음"
           />
         </nav>
@@ -269,6 +289,11 @@ function parseDifficulty(value: string | undefined): number | null {
   return RANKING_DIFFICULTIES.includes(parsed as never) ? parsed : null;
 }
 
+function parseVersion(value: string | undefined): number | null {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 25 ? parsed : null;
+}
+
 function parseTextParam(value: string | undefined): string | null {
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
@@ -279,13 +304,15 @@ function pageHref({
   level,
   page,
   search,
+  version,
 }: {
   difficulty: number | null;
   level: string | null;
   page: number;
   search: string | null;
+  version: number | null;
 }): string {
-  const params = buildSearchParams({ difficulty, level, search });
+  const params = buildSearchParams({ difficulty, level, search, version });
   params.set("page", String(page));
   return `/?${params.toString()}`;
 }
@@ -294,12 +321,14 @@ function filterHref({
   difficulty,
   level,
   search,
+  version,
 }: {
   difficulty: number | null;
   level: string | null;
   search: string | null;
+  version: number | null;
 }): string {
-  const params = buildSearchParams({ difficulty, level, search });
+  const params = buildSearchParams({ difficulty, level, search, version });
   const query = params.toString();
   return query ? `/?${query}` : "/";
 }
@@ -308,10 +337,12 @@ function buildSearchParams({
   difficulty,
   level,
   search,
+  version,
 }: {
   difficulty: number | null;
   level: string | null;
   search: string | null;
+  version: number | null;
 }): URLSearchParams {
   const params = new URLSearchParams();
   if (difficulty !== null) {
@@ -322,6 +353,9 @@ function buildSearchParams({
   }
   if (search) {
     params.set("q", search);
+  }
+  if (version !== null) {
+    params.set("version", String(version));
   }
   return params;
 }

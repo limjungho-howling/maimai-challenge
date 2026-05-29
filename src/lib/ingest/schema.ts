@@ -21,6 +21,25 @@ const scorePagesSchema = z
     "scorePages must not contain duplicate difficulties",
   );
 
+const catalogScorePagesSchema = z
+  .array(
+    z.object({
+      difficulty: difficultySchema,
+      html: z.string().min(1),
+      version: z.number().int().min(0).max(25).nullable().optional(),
+      versionName: z.string().min(1).nullable().optional(),
+    }),
+  )
+  .min(1)
+  .max(52)
+  .refine(
+    (pages) =>
+      new Set(
+        pages.map((page) => `${page.version ?? "unknown"}:${page.difficulty}`),
+      ).size === pages.length,
+    "scorePages must not contain duplicate version/difficulty pages",
+  );
+
 const detailPagesSchema = z.array(
   z.object({
     idx: z.string().min(1),
@@ -37,8 +56,8 @@ export const ingestPayloadSchema = z.object({
 });
 
 export const catalogPayloadSchema = z.object({
-  scorePages: scorePagesSchema,
-  detailPages: detailPagesSchema,
+  scorePages: catalogScorePagesSchema,
+  detailPages: detailPagesSchema.optional().default([]),
   collectedAt: z.string().datetime().optional(),
 });
 

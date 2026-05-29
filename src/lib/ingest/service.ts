@@ -8,9 +8,10 @@ import {
   type DiscordNotificationResult,
   type PersonalChannelNotification,
 } from "@/lib/discord/notifier";
-import { requireCatalogJackets } from "@/lib/ingest/catalog";
+import { summarizeMissingCatalogJackets } from "@/lib/ingest/catalog";
 import { detectBulkRankingEvents } from "@/lib/ingest/bulk-ranking";
 import { mapWithConcurrency } from "@/lib/ingest/chunk-utils";
+import type { SongKind } from "@/lib/maimai/constants";
 import {
   parseSongDetailHtml,
   parseSongDetailScoreHtml,
@@ -295,8 +296,22 @@ export async function ingestMaimaiCatalogPayload(
     total: 100,
   });
 
-  const allScores = payload.scorePages.flatMap(({ difficulty, html }) =>
-    parseSongScoreHtml(html, difficulty),
+  const allScores = payload.scorePages.flatMap(({ difficulty, html, version, versionName }) =>
+    parseSongScoreHtml(html, difficulty, {
+      includeNoRecord: true,
+      versionNumber: version ?? null,
+      versionName: versionName ?? null,
+    }),
+  );
+  const detailScoresByKey = new Map(
+    payload.detailPages.flatMap((detail) =>
+      payload.scorePages.flatMap((page) => {
+        const score = parseSongDetailScoreHtml(detail.html, page.difficulty);
+        return score
+          ? [[detailScoreKey(detail.idx, page.difficulty), score] as const]
+          : [];
+      }),
+    ),
   );
   const jacketUrlsByIdx = new Map(
     payload.detailPages
@@ -313,12 +328,22 @@ export async function ingestMaimaiCatalogPayload(
   const uniqueScores = dedupeScores(
     allScores.map((score) => ({
       ...score,
+      maxDxScore:
+        score.maxDxScore > 0
+          ? score.maxDxScore
+          : score.officialIdx
+            ? detailScoresByKey.get(detailScoreKey(score.officialIdx, score.difficulty))
+                ?.maxDxScore ?? score.maxDxScore
+            : score.maxDxScore,
       jacketUrl:
         score.jacketUrl ??
         (score.officialIdx ? jacketUrlsByIdx.get(score.officialIdx) ?? null : null),
     })),
   );
-  requireCatalogJackets(uniqueScores);
+  const missingJacketSummary = summarizeMissingCatalogJackets(uniqueScores);
+  if (missingJacketSummary) {
+    console.warn(missingJacketSummary);
+  }
 
   await reportProgress(onProgress, {
     stage: "songs",
@@ -417,13 +442,14 @@ async function ensureProfilePersonalChannel(
     throw error;
   }
 
-  if (typeof data?.discord_personal_channel_id === "string") {
-    return null;
-  }
-
   return ensurePersonalChannel({
     profileId,
+    discordUserId: discordProfile.discordUserId,
     discordUsername: discordProfile.discordUsername,
+    personalChannelId:
+      typeof data?.discord_personal_channel_id === "string"
+        ? data.discord_personal_channel_id
+        : null,
     playerName,
   });
 }
@@ -460,28 +486,42 @@ async function upsertSongs(
       title: score.title,
       kind: score.kind,
       jacket_url: score.jacketUrl,
+      version_number: score.versionNumber,
+      version_name: score.versionName,
       updated_at: kstNowIsoString(),
     })),
     (song) => songKey(song.title, song.kind),
   );
+  const songsWithJackets = songs.filter((song) => song.jacket_url);
+  const songsWithoutJackets = songs
+    .filter((song) => !song.jacket_url)
+    .map(({ jacket_url: _jacketUrl, ...song }) => song);
   const idsByKey = new Map<string, string>();
 
-  const chunkResults = await mapWithConcurrency(
-    chunks(songs, DB_CHUNK_SIZE),
-    DB_CHUNK_CONCURRENCY,
-    async (chunk) => {
-      const { data, error } = await supabase
-        .from("songs")
-        .upsert(chunk, { onConflict: "title,kind" })
-        .select("id,title,kind");
+  const upsertSongChunks = async <T extends { title: string; kind: SongKind }>(
+    rows: T[],
+  ) =>
+    mapWithConcurrency(
+      chunks(rows, DB_CHUNK_SIZE),
+      DB_CHUNK_CONCURRENCY,
+      async (chunk) => {
+        const { data, error } = await supabase
+          .from("songs")
+          .upsert(chunk, { onConflict: "title,kind" })
+          .select("id,title,kind");
 
-      if (error || !data) {
-        throw error ?? new Error("Failed to upsert songs");
-      }
+        if (error || !data) {
+          throw error ?? new Error("Failed to upsert songs");
+        }
 
-      return data;
-    },
-  );
+        return data;
+      },
+    );
+
+  const chunkResults = [
+    ...(await upsertSongChunks(songsWithJackets)),
+    ...(await upsertSongChunks(songsWithoutJackets)),
+  ];
 
   for (const data of chunkResults) {
     for (const row of data) {
@@ -497,7 +537,7 @@ async function upsertCharts(
   scores: ParsedSongScore[],
   songsByKey: Map<string, string>,
 ): Promise<Map<string, string>> {
-  const charts = scores.map((score) => ({
+  const chartRows = scores.map((score) => ({
     song_id: getRequiredMapValue(songsByKey, songKey(score.title, score.kind)),
     difficulty: score.difficulty,
     difficulty_label: score.difficultyLabel,
@@ -506,10 +546,26 @@ async function upsertCharts(
     max_dx_score: score.maxDxScore,
     updated_at: kstNowIsoString(),
   }));
+  const chartsWithKnownMax = chartRows.filter((chart) => chart.max_dx_score > 0);
+  const chartsWithPendingMax = chartRows.filter((chart) => chart.max_dx_score <= 0);
+  const existingPendingCharts = await findExistingChartIds(
+    supabase,
+    chartsWithPendingMax.map((chart) => ({
+      songId: chart.song_id,
+      difficulty: chart.difficulty,
+    })),
+  );
+  const pendingChartInserts = chartsWithPendingMax.filter(
+    (chart) =>
+      !existingPendingCharts.has(chartKeyFromParts(chart.song_id, chart.difficulty)),
+  );
+  const pendingChartUpdates = chartsWithPendingMax.filter((chart) =>
+    existingPendingCharts.has(chartKeyFromParts(chart.song_id, chart.difficulty)),
+  );
   const idsByKey = new Map<string, string>();
 
   const chunkResults = await mapWithConcurrency(
-    chunks(charts, DB_CHUNK_SIZE),
+    chunks([...chartsWithKnownMax, ...pendingChartInserts], DB_CHUNK_SIZE),
     DB_CHUNK_CONCURRENCY,
     async (chunk) => {
       const { data, error } = await supabase
@@ -531,6 +587,41 @@ async function upsertCharts(
     }
   }
 
+  const updateResults = await mapWithConcurrency(
+    chunks(pendingChartUpdates, DB_CHUNK_SIZE),
+    DB_CHUNK_CONCURRENCY,
+    async (chunk) => {
+      const rows = [];
+      for (const chart of chunk) {
+        const { data, error } = await supabase
+          .from("song_charts")
+          .update({
+            difficulty_label: chart.difficulty_label,
+            level: chart.level,
+            genre: chart.genre,
+            updated_at: chart.updated_at,
+          })
+          .eq("song_id", chart.song_id)
+          .eq("difficulty", chart.difficulty)
+          .select("id,song_id,difficulty")
+          .single();
+
+        if (error || !data) {
+          throw error ?? new Error("Failed to update pending-max chart");
+        }
+
+        rows.push(data);
+      }
+      return rows;
+    },
+  );
+
+  for (const data of updateResults) {
+    for (const row of data) {
+      idsByKey.set(chartKeyFromParts(String(row.song_id), Number(row.difficulty)), String(row.id));
+    }
+  }
+
   const chartIdsByScoreKey = new Map<string, string>();
   for (const score of scores) {
     const songId = getRequiredMapValue(songsByKey, songKey(score.title, score.kind));
@@ -541,6 +632,43 @@ async function upsertCharts(
   }
 
   return chartIdsByScoreKey;
+}
+
+async function findExistingChartIds(
+  supabase: SupabaseClient,
+  charts: Array<{ songId: string; difficulty: number }>,
+): Promise<Set<string>> {
+  if (charts.length === 0) {
+    return new Set();
+  }
+
+  const keys = new Set(
+    charts.map((chart) => chartKeyFromParts(chart.songId, chart.difficulty)),
+  );
+  const songIds = [...new Set(charts.map((chart) => chart.songId))];
+  const results = await mapWithConcurrency(
+    chunks(songIds, DB_FILTER_CHUNK_SIZE),
+    DB_CHUNK_CONCURRENCY,
+    async (chunk) => {
+      const { data, error } = await supabase
+        .from("song_charts")
+        .select("song_id,difficulty")
+        .in("song_id", chunk);
+
+      if (error) {
+        throw error;
+      }
+
+      return data ?? [];
+    },
+  );
+
+  return new Set(
+    results
+      .flat()
+      .map((row) => chartKeyFromParts(String(row.song_id), Number(row.difficulty)))
+      .filter((key) => keys.has(key)),
+  );
 }
 
 async function listCatalogCharts(

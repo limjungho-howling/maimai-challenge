@@ -21,6 +21,8 @@ export interface ParsedSongScore {
   difficultyLabel: string;
   level: string;
   kind: SongKind;
+  versionNumber: number | null;
+  versionName: string | null;
   achievementRate: number | null;
   dxScore: number;
   maxDxScore: number;
@@ -77,38 +79,68 @@ export function parseSongDetailHtml(
 export function parseSongScoreHtml(
   html: string,
   difficulty: Difficulty,
+  options: {
+    includeNoRecord?: boolean;
+    versionNumber?: number | null;
+    versionName?: string | null;
+  } = {},
 ): ParsedSongScore[] {
   const $ = cheerio.load(html);
   const scores: ParsedSongScore[] = [];
   const scoreBlockSelector = getScoreBlockSelector(difficulty);
   const scoreNodes = $(scoreBlockSelector).toArray();
+  const catalogFormNodes = $(
+    [
+      "body > div.wrapper.main_wrapper.t_c.o_v > div:nth-child(7) > form",
+      "body > div.wrapper.main_wrapper.t_c.o_v > div:nth-child(8) > div > form",
+      "body > div.wrapper.main_wrapper.t_c.o_v > div:nth-child(9) > form",
+      'form[action*="/record/musicDetail/"]',
+    ].join(", "),
+  ).toArray();
   const nodes =
-    scoreNodes.length > 0
+    options.includeNoRecord
+      ? uniqueNodes([...scoreNodes, ...catalogFormNodes])
+      : scoreNodes.length > 0
       ? scoreNodes
       : $(
           "body > div.wrapper.main_wrapper.t_c.o_v > div:nth-child(8) > div > form",
         ).toArray();
+  const seenScores = new Set<string>();
 
   for (const node of nodes) {
     const root = $(node);
     const form = root.is("form") ? root : root.find("form").first();
     const scope = form.length > 0 ? form : root;
     const container = root.closest(".w_450");
+    const containerScope = container.length > 0 ? container : scope;
     const title = normalizeText(scope.find(".music_name_block").first().text());
     const level = normalizeText(scope.find(".music_lv_block").first().text());
     const scoreBlocks = scope.find(".music_score_block");
     const achievementRate = parseAchievement(scoreBlocks.eq(0).text());
     const dxScoreText = scoreBlocks.eq(1).text();
-    const [dxScore, maxDxScore] = parseDxScorePair(dxScoreText);
-    const kind = parseSongKind(container.find(".music_kind_icon").attr("src"));
+    const [dxScore, maxDxScore, isNoRecord] = parseDxScorePair(dxScoreText);
+    const kind = parseSongKind(containerScope.find(".music_kind_icon").attr("src"));
     const officialIdx =
       scope.find('input[type="hidden"][name="idx"]').attr("value") ?? null;
-    const genre = findGenre($, container);
-    const jacketUrl = findJacketUrl(container);
+    const genre = findGenre($, containerScope);
+    const jacketUrl = findJacketUrl(containerScope);
+    const resolvedMaxDxScore =
+      maxDxScore ?? (options.includeNoRecord && scoreBlocks.length === 0 ? 0 : null);
+    const scoreKey = officialIdx ?? `${title}|${difficulty}`;
 
-    if (!title || !level || maxDxScore === null) {
+    if (
+      !title ||
+      !level ||
+      resolvedMaxDxScore === null ||
+      (isNoRecord && !options.includeNoRecord)
+    ) {
       continue;
     }
+
+    if (seenScores.has(scoreKey)) {
+      continue;
+    }
+    seenScores.add(scoreKey);
 
     scores.push({
       title,
@@ -116,9 +148,11 @@ export function parseSongScoreHtml(
       difficultyLabel: getDifficultyLabel(difficulty),
       level,
       kind,
+      versionNumber: options.versionNumber ?? null,
+      versionName: options.versionName ?? null,
       achievementRate,
       dxScore,
-      maxDxScore,
+      maxDxScore: resolvedMaxDxScore,
       officialIdx,
       genre,
       jacketUrl,
@@ -126,6 +160,17 @@ export function parseSongScoreHtml(
   }
 
   return scores;
+}
+
+function uniqueNodes(nodes: AnyNode[]): AnyNode[] {
+  const seen = new Set<AnyNode>();
+  return nodes.filter((node) => {
+    if (seen.has(node)) {
+      return false;
+    }
+    seen.add(node);
+    return true;
+  });
 }
 
 export function parseSongDetailScoreHtml(
@@ -251,13 +296,15 @@ function parseAchievement(value: string): number | null {
   return parseNullableFloat(cleaned);
 }
 
-function parseDxScorePair(value: string): [number, number | null] {
-  const match = normalizeText(value).match(/([\d,]+)\s*\/\s*([\d,]+)/);
+function parseDxScorePair(value: string): [number, number | null, boolean] {
+  const normalized = normalizeText(value);
+  const match = normalized.match(/([\d,]+)\s*\/\s*([\d,]+)/);
+  const noRecordMatch = normalized.match(/(?:-|―|－|未プレイ|NO PLAY)\s*\/\s*([\d,]+)/i);
   if (!match) {
-    return [0, null];
+    return noRecordMatch ? [0, parseInteger(noRecordMatch[1]), true] : [0, null, false];
   }
 
-  return [parseInteger(match[1]), parseInteger(match[2])];
+  return [parseInteger(match[1]), parseInteger(match[2]), false];
 }
 
 function extractCount(value: string, pattern: RegExp): number | null {

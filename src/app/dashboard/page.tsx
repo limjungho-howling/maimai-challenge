@@ -76,6 +76,11 @@ export default async function DashboardPage() {
                     kind="score"
                     label="점수 갱신"
                   />
+                  <BookmarkletButton
+                    appOrigin={appOrigin}
+                    kind="catalog"
+                    label="곡 정보 수집"
+                  />
                 </div>
               </div>
             </section>

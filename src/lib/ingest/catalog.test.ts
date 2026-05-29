@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { requireCatalogJackets } from "@/lib/ingest/catalog";
+import { summarizeMissingCatalogJackets } from "@/lib/ingest/catalog";
 import type { ParsedSongScore } from "@/lib/maimai/parser";
 
 const baseScore: ParsedSongScore = {
@@ -9,6 +9,8 @@ const baseScore: ParsedSongScore = {
   difficultyLabel: "MASTER",
   level: "13",
   kind: "DX",
+  versionNumber: 25,
+  versionName: "CiRCLE",
   achievementRate: 100,
   dxScore: 1000,
   maxDxScore: 1200,
@@ -18,12 +20,12 @@ const baseScore: ParsedSongScore = {
 };
 
 describe("catalog ingest guards", () => {
-  it("rejects catalog rows that would upsert a null jacket URL", () => {
-    expect(() =>
-      requireCatalogJackets([
+  it("summarizes catalog rows that could not fetch a jacket URL", () => {
+    expect(
+      summarizeMissingCatalogJackets([
         baseScore,
         { ...baseScore, title: "Missing Jacket", officialIdx: "idx-2", jacketUrl: null },
       ]),
-    ).toThrow(/재킷 이미지를 가져오지 못했습니다/);
+    ).toMatch(/재킷 이미지를 가져오지 못한 항목 1개/);
   });
 });

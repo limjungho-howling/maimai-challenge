@@ -70,6 +70,8 @@ describe("maimai parser", () => {
         difficultyLabel: "MASTER",
         level: "13+",
         kind: "DX",
+        versionNumber: null,
+        versionName: null,
         achievementRate: 100.9833,
         dxScore: 1358,
         maxDxScore: 1404,
@@ -83,6 +85,8 @@ describe("maimai parser", () => {
         difficultyLabel: "MASTER",
         level: "11",
         kind: "STANDARD",
+        versionNumber: null,
+        versionName: null,
         achievementRate: 101,
         dxScore: 1807,
         maxDxScore: 1887,
@@ -114,6 +118,19 @@ describe("maimai parser", () => {
         maxDxScore: 1887,
       },
     ]);
+  });
+
+  it("attaches version metadata when parsing version catalog pages", () => {
+    expect(
+      parseSongScoreHtml(songScoreHtml, 3, {
+        versionNumber: 25,
+        versionName: "CiRCLE",
+      })[0],
+    ).toMatchObject({
+      title: "Overdose",
+      versionNumber: 25,
+      versionName: "CiRCLE",
+    });
   });
 
   it("extracts score fields from the music genre form list fallback", () => {
@@ -150,6 +167,63 @@ describe("maimai parser", () => {
     ]);
   });
 
+  it("includes no-record songs for catalog parsing", () => {
+    const html = `
+      <div class="w_450 m_15 p_r f_0">
+        <div class="music_master_score_back pointer p_3">
+          <form>
+            <div class="music_lv_block">13</div>
+            <div class="music_name_block">美しく燃える森</div>
+            <div class="music_score_block">-</div>
+            <div class="music_score_block">- / 1,234</div>
+            <input type="hidden" name="idx" value="no-record-idx">
+          </form>
+        </div>
+        <img src="./music_standard.png" class="music_kind_icon">
+      </div>
+    `;
+
+    expect(parseSongScoreHtml(html, 3)).toEqual([]);
+    expect(parseSongScoreHtml(html, 3, { includeNoRecord: true })).toMatchObject([
+      {
+        title: "美しく燃える森",
+        dxScore: 0,
+        maxDxScore: 1234,
+        officialIdx: "no-record-idx",
+      },
+    ]);
+  });
+
+  it("includes search page detail forms without score blocks for catalog parsing", () => {
+    const html = `
+      <body>
+        <div class="wrapper main_wrapper t_c o_v">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+          <div>
+            <form action="https://maimaidx-eng.com/maimai-mobile/record/musicDetail/" method="get">
+              <div class="music_lv_block">12+</div>
+              <div class="music_name_block">ワールズエンド・ダンスホール</div>
+              <input type="hidden" name="idx" value="search-no-record-idx">
+            </form>
+          </div>
+        </div>
+      </body>
+    `;
+
+    expect(parseSongScoreHtml(html, 3)).toEqual([]);
+    expect(parseSongScoreHtml(html, 3, { includeNoRecord: true })).toMatchObject([
+      {
+        title: "ワールズエンド・ダンスホール",
+        difficulty: 3,
+        difficultyLabel: "MASTER",
+        level: "12+",
+        dxScore: 0,
+        maxDxScore: 0,
+        officialIdx: "search-no-record-idx",
+      },
+    ]);
+  });
+
   it("extracts Re:MASTER DX score from the detail remaster selector", () => {
     expect(
       parseSongDetailScoreHtml(
@@ -157,10 +231,10 @@ describe("maimai parser", () => {
         <div id="remaster">
           <div class="t_l">
             <div class="music_score_block w_120 d_ib t_r f_12">
-              100.9876%
+              -
             </div>
             <div class="music_score_block w_310 m_r_0 d_ib t_r f_12">
-              2,456 / 2,500
+              - / 2,500
             </div>
           </div>
         </div>
@@ -168,8 +242,8 @@ describe("maimai parser", () => {
         4,
       ),
     ).toEqual({
-      achievementRate: 100.9876,
-      dxScore: 2456,
+      achievementRate: null,
+      dxScore: 0,
       maxDxScore: 2500,
     });
   });

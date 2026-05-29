@@ -1,6 +1,25 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { RankGoal } from "@/lib/discord/messages";
+import type { DailyChallengeGoal, RankGoal } from "@/lib/discord/messages";
+
+export const DAILY_LEVEL_OPTIONS = [
+  { label: "전체 레벨", value: "all" },
+  { label: "10+", value: "10+" },
+  { label: "11", value: "11" },
+  { label: "11+", value: "11+" },
+  { label: "12", value: "12" },
+  { label: "12+", value: "12+" },
+  { label: "13", value: "13" },
+  { label: "13+", value: "13+" },
+  { label: "14", value: "14" },
+  { label: "14+", value: "14+" },
+  { label: "15", value: "15" },
+] as const;
+
+export interface DailyChallengeUserOption {
+  label: string;
+  value: string;
+}
 
 export function pickRandomItems<T>(
   items: T[],
@@ -116,4 +135,218 @@ export async function fetchRankGoalsForDiscordUser(
   }
 
   return { playerName, goals };
+}
+
+export async function fetchDailyChallengeUserOptions(
+  supabase: SupabaseClient,
+  discordUserId: string,
+): Promise<DailyChallengeUserOption[]> {
+  const { data: currentProfile, error: currentProfileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("discord_user_id", discordUserId)
+    .maybeSingle();
+
+  if (currentProfileError) {
+    throw currentProfileError;
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, maimai_name, discord_username")
+    .not("maimai_name", "is", null)
+    .order("maimai_name", { ascending: true })
+    .limit(24);
+
+  if (error) {
+    throw error;
+  }
+
+  const currentProfileId = currentProfile ? String(currentProfile.id) : null;
+  const userOptions = (data ?? [])
+    .filter((profile) => String(profile.id) !== currentProfileId)
+    .map((profile) => ({
+      label: String(profile.maimai_name ?? profile.discord_username ?? "Unknown").slice(0, 100),
+      value: String(profile.id),
+    }));
+
+  return [{ label: "전체 유저", value: "all" }, ...userOptions].slice(0, 25);
+}
+
+export async function fetchDailyChallengeGoals({
+  supabase,
+  discordUserId,
+  level,
+  targetProfileId,
+  count = 3,
+}: {
+  supabase: SupabaseClient;
+  discordUserId: string;
+  level: string;
+  targetProfileId: string;
+  count?: number;
+}): Promise<{ playerName: string; targetLabel: string; goals: DailyChallengeGoal[] }> {
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, maimai_name")
+    .eq("discord_user_id", discordUserId)
+    .maybeSingle();
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  if (!profile) {
+    return { playerName: "Unknown", targetLabel: "전체 유저", goals: [] };
+  }
+
+  const profileId = String(profile.id);
+  const playerName = typeof profile.maimai_name === "string" ? profile.maimai_name : "Unknown";
+  const targetLabel = await fetchDailyTargetLabel(supabase, targetProfileId);
+  let eventsQuery = supabase
+    .from("ranking_events")
+    .select("chart_id, actor_profile_id, created_at")
+    .eq("profile_id", profileId)
+    .eq("event_type", "rank_dropped")
+    .not("actor_profile_id", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(500);
+
+  if (targetProfileId !== "all") {
+    eventsQuery = eventsQuery.eq("actor_profile_id", targetProfileId);
+  }
+
+  const { data: events, error: eventsError } = await eventsQuery;
+
+  if (eventsError) {
+    throw eventsError;
+  }
+
+  const eventTargets = uniqueEventTargets(
+    (events ?? []).map((event) => ({
+      chartId: String(event.chart_id),
+      targetProfileId: String(event.actor_profile_id),
+    })),
+  );
+
+  if (eventTargets.length === 0) {
+    return { playerName, targetLabel, goals: [] };
+  }
+
+  const chartIds = [...new Set(eventTargets.map((event) => event.chartId))];
+  const { data: summaries, error: summariesError } = await supabase
+    .from("chart_leaderboard_summary")
+    .select("chart_id, title, difficulty_label, level")
+    .in("chart_id", chartIds);
+
+  if (summariesError) {
+    throw summariesError;
+  }
+
+  const summariesByChartId = new Map(
+    (summaries ?? []).map((summary) => [String(summary.chart_id), summary]),
+  );
+  const { data: rankings, error: rankingsError } = await supabase
+    .from("chart_rankings")
+    .select("chart_id, profile_id, player_name, dx_score, rank")
+    .in("chart_id", chartIds);
+
+  if (rankingsError) {
+    throw rankingsError;
+  }
+
+  const rankingsByChartId = new Map<string, typeof rankings>();
+  for (const ranking of rankings ?? []) {
+    const chartId = String(ranking.chart_id);
+    const existing = rankingsByChartId.get(chartId) ?? [];
+    existing.push(ranking);
+    rankingsByChartId.set(chartId, existing);
+  }
+
+  const candidates: DailyChallengeGoal[] = [];
+  for (const event of eventTargets) {
+    const summary = summariesByChartId.get(event.chartId);
+    if (!summary) {
+      continue;
+    }
+
+    const chartLevel = String(summary.level);
+    if (level !== "all" && chartLevel !== level) {
+      continue;
+    }
+
+    const chartRankings = rankingsByChartId.get(event.chartId) ?? [];
+    const current = chartRankings.find(
+      (ranking) => String(ranking.profile_id) === profileId,
+    );
+    const target = chartRankings.find(
+      (ranking) => String(ranking.profile_id) === event.targetProfileId,
+    );
+
+    if (!current || !target) {
+      continue;
+    }
+
+    const currentDxScore = Number(current.dx_score);
+    const targetDxScore = Number(target.dx_score);
+    const currentRank = Number(current.rank);
+    const targetRank = Number(target.rank);
+
+    if (targetDxScore <= currentDxScore || targetRank >= currentRank) {
+      continue;
+    }
+
+    candidates.push({
+      chartTitle: String(summary.title),
+      level: chartLevel,
+      difficultyLabel: String(summary.difficulty_label),
+      currentRank,
+      currentDxScore,
+      targetPlayerName: String(target.player_name ?? "Unknown"),
+      targetRank,
+      targetDxScore,
+    });
+  }
+
+  return {
+    playerName,
+    targetLabel,
+    goals: pickRandomItems(candidates, count),
+  };
+}
+
+async function fetchDailyTargetLabel(
+  supabase: SupabaseClient,
+  targetProfileId: string,
+): Promise<string> {
+  if (targetProfileId === "all") {
+    return "전체 유저";
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("maimai_name, discord_username")
+    .eq("id", targetProfileId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return "선택한 유저";
+  }
+
+  return String(data.maimai_name ?? data.discord_username ?? "선택한 유저");
+}
+
+function uniqueEventTargets(
+  events: Array<{ chartId: string; targetProfileId: string }>,
+): Array<{ chartId: string; targetProfileId: string }> {
+  const seen = new Set<string>();
+  return events.filter((event) => {
+    const key = `${event.chartId}:${event.targetProfileId}`;
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
 }

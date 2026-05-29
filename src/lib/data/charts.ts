@@ -8,6 +8,8 @@ export interface ChartSummary {
   title: string;
   jacketUrl: string | null;
   kind: string;
+  versionNumber: number | null;
+  versionName: string | null;
   difficulty: number;
   difficultyLabel: string;
   level: string;
@@ -38,12 +40,14 @@ export async function listCharts({
   page,
   pageSize,
   search,
+  version,
 }: {
   difficulty: number | null;
   level: string | null;
   page: number;
   pageSize: number;
   search: string | null;
+  version: number | null;
 }): Promise<{ charts: ChartSummary[]; count: number }> {
   if (!hasSupabasePublicEnv()) {
     return { charts: [], count: 0 };
@@ -65,6 +69,10 @@ export async function listCharts({
 
   if (level) {
     query = query.eq("level", level);
+  }
+
+  if (version !== null) {
+    query = query.eq("version_number", version);
   }
 
   if (search) {
@@ -113,6 +121,48 @@ export async function listChartLevels(): Promise<string[]> {
 
   return [...new Set(rows.map((row) => String(row.level)).filter(Boolean))]
     .sort(compareLevels);
+}
+
+export async function listChartVersions(): Promise<Array<{ number: number; name: string }>> {
+  if (!hasSupabasePublicEnv()) {
+    return [];
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const rows: Array<{ version_number: unknown; version_name: unknown }> = [];
+
+  for (let from = 0; ; from += SELECT_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("chart_leaderboard_summary")
+      .select("version_number,version_name")
+      .in("difficulty", [3, 4])
+      .not("version_number", "is", null)
+      .range(from, from + SELECT_PAGE_SIZE - 1);
+
+    if (error) {
+      console.error(error);
+      return [];
+    }
+
+    rows.push(...(data ?? []));
+
+    if ((data ?? []).length < SELECT_PAGE_SIZE) {
+      break;
+    }
+  }
+
+  const versionsByNumber = new Map<number, string>();
+  for (const row of rows) {
+    const number = Number(row.version_number);
+    const name = typeof row.version_name === "string" ? row.version_name : null;
+    if (Number.isInteger(number) && name) {
+      versionsByNumber.set(number, name);
+    }
+  }
+
+  return [...versionsByNumber.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([number, name]) => ({ number, name }));
 }
 
 export async function getChartSummary(chartId: string): Promise<ChartSummary | null> {
@@ -173,6 +223,11 @@ function mapChartSummary(row: Record<string, unknown>): ChartSummary {
     title: String(row.title),
     jacketUrl: typeof row.jacket_url === "string" ? row.jacket_url : null,
     kind: String(row.kind),
+    versionNumber:
+      row.version_number === null || row.version_number === undefined
+        ? null
+        : Number(row.version_number),
+    versionName: typeof row.version_name === "string" ? row.version_name : null,
     difficulty: Number(row.difficulty),
     difficultyLabel: String(row.difficulty_label),
     level: String(row.level),

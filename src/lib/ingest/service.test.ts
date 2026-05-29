@@ -9,6 +9,8 @@ const baseScore: ParsedSongScore = {
   difficultyLabel: "Re:MASTER",
   level: "14",
   kind: "DX",
+  versionNumber: null,
+  versionName: null,
   achievementRate: 100,
   dxScore: 2000,
   maxDxScore: 2000,

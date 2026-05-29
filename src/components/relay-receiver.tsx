@@ -20,8 +20,12 @@ interface RelayMessage {
   type?: string;
   message?: string;
   difficulty?: number;
+  version?: number;
+  versionName?: string;
   current?: number;
+  failed?: number;
   total?: number;
+  uploadId?: string;
   uploadType?: "score" | "catalog";
   payload?: unknown;
 }
@@ -86,19 +90,31 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
 
       if (event.data.type === "maimai-challenge:progress") {
         const difficulty = event.data.difficulty ?? 0;
+        const current = event.data.current ?? 0;
+        const failed = event.data.failed ?? 0;
+        const total = event.data.total ?? 0;
+        const versionName = event.data.versionName;
         setState({
           status: "collecting",
-          message: `난이도 ${difficulty} 데이터를 받았습니다.`,
-          progress: Math.min(30, 10 + (difficulty + 1) * 4),
+          message:
+            versionName && total > 0
+              ? `${versionName} 난이도 ${difficulty} 데이터를 받았습니다. ${current.toLocaleString("ko-KR")} / ${total.toLocaleString("ko-KR")}${failed > 0 ? ` · 실패 ${failed.toLocaleString("ko-KR")}건은 건너뜁니다` : ""}`
+              : `난이도 ${difficulty} 데이터를 받았습니다.`,
+          progress:
+            total > 0
+              ? Math.min(30, 5 + Math.round((current / total) * 25))
+              : Math.min(30, 10 + (difficulty + 1) * 4),
         });
       }
 
       if (event.data.type === "maimai-challenge:detail-progress") {
         const current = event.data.current ?? 0;
+        const failed = event.data.failed ?? 0;
         const total = Math.max(1, event.data.total ?? 1);
+        const message = event.data.message ?? "곡 재킷 정보를 수집하는 중입니다.";
         setState({
           status: "collecting",
-          message: `곡 재킷 정보를 수집하는 중입니다. ${current.toLocaleString("ko-KR")} / ${total.toLocaleString("ko-KR")}`,
+          message: `${message} ${current.toLocaleString("ko-KR")} / ${total.toLocaleString("ko-KR")}${failed > 0 ? ` · 실패 ${failed.toLocaleString("ko-KR")}건은 건너뜁니다` : ""}`,
           progress: Math.min(45, 30 + Math.round((current / total) * 15)),
         });
       }
@@ -111,8 +127,36 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
         });
       }
 
+      if (event.data.type === "maimai-challenge:collection-complete") {
+        setState({
+          status: "success",
+          message:
+            event.data.message ??
+            "저장 가능한 곡 정보는 DB에 업로드했습니다.",
+          progress: 100,
+        });
+      }
+
       if (event.data.type === "maimai-challenge:payload") {
         const uploadType = event.data.uploadType ?? "score";
+        const uploadId = event.data.uploadId;
+        let uploadCompleted = false;
+        const completeUpload = (ok: boolean, message?: string) => {
+          if (uploadCompleted || !uploadId) {
+            return;
+          }
+
+          uploadCompleted = true;
+          window.opener?.postMessage(
+            {
+              type: "maimai-challenge:upload-complete",
+              uploadId,
+              ok,
+              message,
+            },
+            "https://maimaidx-eng.com",
+          );
+        };
         setState({
           status: "uploading",
           message:
@@ -122,14 +166,27 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
           progress: 32,
         });
 
-        const response = await fetch(
-          uploadType === "catalog" ? "/api/ingest/catalog" : "/api/ingest/maimai",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(event.data.payload),
-          },
-        );
+        let response: Response;
+        try {
+          response = await fetch(
+            uploadType === "catalog" ? "/api/ingest/catalog" : "/api/ingest/maimai",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(event.data.payload),
+            },
+          );
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "업로드 요청에 실패했습니다.";
+          setState({
+            status: "error",
+            message,
+            progress: 100,
+          });
+          completeUpload(false, message);
+          return;
+        }
 
         if (!response.ok) {
           const result = (await response.json()) as { error?: string };
@@ -138,6 +195,7 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
             message: result.error ?? "업로드에 실패했습니다.",
             progress: 100,
           });
+          completeUpload(false, result.error ?? "업로드에 실패했습니다.");
           return;
         }
 
@@ -158,6 +216,10 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
               message: streamEvent.error ?? "업로드 처리 중 오류가 발생했습니다.",
               progress: 100,
             });
+            completeUpload(
+              false,
+              streamEvent.error ?? "업로드 처리 중 오류가 발생했습니다.",
+            );
           }
 
           if (streamEvent.type === "result" && streamEvent.result) {
@@ -171,6 +233,7 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
               message,
               progress: 100,
             });
+            completeUpload(true);
           }
         });
       }
