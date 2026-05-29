@@ -61,9 +61,15 @@ export function SongListSkeleton() {
 export function PlayerLeaderboardSkeleton() {
   return (
     <>
-      <section>
-        <SkeletonBlock className="h-7 w-36" />
-        <SkeletonBlock className="mt-3 h-4 w-80 max-w-full" />
+      <section className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <SkeletonBlock className="h-7 w-36" />
+          <SkeletonBlock className="mt-3 h-4 w-80 max-w-full" />
+        </div>
+        <div className="flex rounded-lg border border-white/10 bg-white/[0.045] p-1">
+          <SkeletonBlock className="h-10 w-28" />
+          <SkeletonBlock className="ml-1 h-10 w-20" />
+        </div>
       </section>
 
       <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">

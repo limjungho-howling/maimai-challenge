@@ -43,7 +43,7 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
           </nav>
         </header>
 
-        <Suspense fallback={<PlayerLeaderboardSkeleton />}>
+        <Suspense fallback={<PlayerLeaderboardSkeleton />} key={tab}>
           <PlayerLeaderboardContent tab={tab} />
         </Suspense>
       </div>
