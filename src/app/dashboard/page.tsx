@@ -6,12 +6,18 @@ import { BookmarkletButton } from "@/components/bookmarklet-button";
 import { getDashboardData } from "@/lib/data/dashboard";
 import { formatKstDateTime } from "@/lib/time";
 
-export default async function DashboardPage() {
+interface DashboardPageProps {
+  searchParams?: Promise<{ error?: string }>;
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const [{ userId, profile, ingestRuns }, headerStore] = await Promise.all([
     getDashboardData(),
     headers(),
   ]);
+  const params = await searchParams;
   const appOrigin = getAppOrigin(headerStore);
+  const authErrorMessage = getAuthErrorMessage(params?.error);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_right,#243326,transparent_30rem),linear-gradient(135deg,#080b12,#111827_52%,#141414)] px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
@@ -42,6 +48,11 @@ export default async function DashboardPage() {
               업로드는 Discord OAuth 로그인 사용자에게 귀속됩니다. 개인 토큰은 사용하지
               않습니다.
             </p>
+            {authErrorMessage ? (
+              <p className="mt-4 rounded-md border border-rose-300/20 bg-rose-300/10 px-3 py-2 text-sm text-rose-100">
+                {authErrorMessage}
+              </p>
+            ) : null}
             <a
               className="mt-5 inline-flex rounded-md bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
               href="/auth/login?next=/dashboard"
@@ -152,4 +163,16 @@ function getAppOrigin(headersList: Headers): string {
   const host = headersList.get("x-forwarded-host") ?? headersList.get("host");
   const proto = headersList.get("x-forwarded-proto") ?? "http";
   return host ? `${proto}://${host}` : "http://localhost:3000";
+}
+
+function getAuthErrorMessage(error: string | undefined): string | null {
+  if (error === "discord_guild_required") {
+    return "운영 중인 Discord 서버에 포함된 유저만 로그인할 수 있습니다.";
+  }
+
+  if (error === "login_failed") {
+    return "Discord 로그인 처리에 실패했습니다. 잠시 후 다시 시도해주세요.";
+  }
+
+  return null;
 }

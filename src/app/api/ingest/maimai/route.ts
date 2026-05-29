@@ -1,5 +1,7 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
+import { CHART_LIST_CACHE_TAG } from "@/lib/data/charts";
 import { ingestPayloadSchema } from "@/lib/ingest/schema";
 import { ingestMaimaiPayload, type IngestProgress } from "@/lib/ingest/service";
 import {
@@ -37,6 +39,7 @@ export async function POST(request: Request) {
             (progress: IngestProgress) => send({ type: "progress", progress }),
           );
 
+          revalidateTag(CHART_LIST_CACHE_TAG, "max");
           send({ type: "result", result });
         } catch (error) {
           send({

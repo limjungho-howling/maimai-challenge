@@ -205,10 +205,11 @@ export async function fetchDailyChallengeGoals({
   const targetLabel = await fetchDailyTargetLabel(supabase, targetProfileId);
   let eventsQuery = supabase
     .from("ranking_events")
-    .select("chart_id, actor_profile_id, created_at")
+    .select("chart_id, actor_profile_id, ingest_run_id, created_at")
     .eq("profile_id", profileId)
     .eq("event_type", "rank_dropped")
     .not("actor_profile_id", "is", null)
+    .not("ingest_run_id", "is", null)
     .order("created_at", { ascending: false })
     .limit(500);
 
@@ -226,6 +227,7 @@ export async function fetchDailyChallengeGoals({
     (events ?? []).map((event) => ({
       chartId: String(event.chart_id),
       targetProfileId: String(event.actor_profile_id),
+      ingestRunId: String(event.ingest_run_id),
     })),
   );
 
@@ -245,6 +247,29 @@ export async function fetchDailyChallengeGoals({
 
   const summariesByChartId = new Map(
     (summaries ?? []).map((summary) => [String(summary.chart_id), summary]),
+  );
+  const targetProfileIds = [
+    ...new Set(eventTargets.map((event) => event.targetProfileId)),
+  ];
+  const { data: targetProfiles, error: targetProfilesError } = await supabase
+    .from("profiles")
+    .select("id, maimai_name, discord_username")
+    .in("id", targetProfileIds);
+
+  if (targetProfilesError) {
+    throw targetProfilesError;
+  }
+
+  const targetNamesByProfileId = new Map(
+    (targetProfiles ?? []).map((profile) => [
+      String(profile.id),
+      String(profile.maimai_name ?? profile.discord_username ?? "Unknown"),
+    ]),
+  );
+  const notificationMessagesByRunId = await fetchSentPersonalLogMessagesByRunId(
+    supabase,
+    profileId,
+    [...new Set(eventTargets.map((event) => event.ingestRunId))],
   );
   const { data: rankings, error: rankingsError } = await supabase
     .from("chart_rankings")
@@ -267,6 +292,19 @@ export async function fetchDailyChallengeGoals({
   for (const event of eventTargets) {
     const summary = summariesByChartId.get(event.chartId);
     if (!summary) {
+      continue;
+    }
+
+    const targetPlayerName =
+      targetNamesByProfileId.get(event.targetProfileId) ?? "Unknown";
+    const runMessages = notificationMessagesByRunId.get(event.ingestRunId) ?? [];
+    if (
+      !hasMatchingPersonalRankDropLog({
+        messages: runMessages,
+        chartTitle: String(summary.title),
+        targetPlayerName,
+      })
+    ) {
       continue;
     }
 
@@ -302,7 +340,7 @@ export async function fetchDailyChallengeGoals({
       difficultyLabel: String(summary.difficulty_label),
       currentRank,
       currentDxScore,
-      targetPlayerName: String(target.player_name ?? "Unknown"),
+      targetPlayerName,
       targetRank,
       targetDxScore,
     });
@@ -337,8 +375,8 @@ async function fetchDailyTargetLabel(
 }
 
 function uniqueEventTargets(
-  events: Array<{ chartId: string; targetProfileId: string }>,
-): Array<{ chartId: string; targetProfileId: string }> {
+  events: Array<{ chartId: string; targetProfileId: string; ingestRunId: string }>,
+): Array<{ chartId: string; targetProfileId: string; ingestRunId: string }> {
   const seen = new Set<string>();
   return events.filter((event) => {
     const key = `${event.chartId}:${event.targetProfileId}`;
@@ -349,4 +387,62 @@ function uniqueEventTargets(
     seen.add(key);
     return true;
   });
+}
+
+async function fetchSentPersonalLogMessagesByRunId(
+  supabase: SupabaseClient,
+  profileId: string,
+  ingestRunIds: string[],
+): Promise<Map<string, string[]>> {
+  if (ingestRunIds.length === 0) {
+    return new Map();
+  }
+
+  const { data, error } = await supabase
+    .from("discord_notifications")
+    .select("ingest_run_id, message")
+    .eq("profile_id", profileId)
+    .eq("notification_type", "personal_channel")
+    .eq("status", "sent")
+    .in("ingest_run_id", ingestRunIds);
+
+  if (error) {
+    throw error;
+  }
+
+  const messagesByRunId = new Map<string, string[]>();
+  for (const row of data ?? []) {
+    const runId = String(row.ingest_run_id);
+    const message = typeof row.message === "string" ? row.message : "";
+    const existing = messagesByRunId.get(runId) ?? [];
+    existing.push(message);
+    messagesByRunId.set(runId, existing);
+  }
+
+  return messagesByRunId;
+}
+
+function hasMatchingPersonalRankDropLog({
+  messages,
+  chartTitle,
+  targetPlayerName,
+}: {
+  messages: string[];
+  chartTitle: string;
+  targetPlayerName: string;
+}): boolean {
+  const normalizedTitle = normalizeDiscordLogText(chartTitle);
+  const normalizedTargetPlayerName = normalizeDiscordLogText(targetPlayerName);
+
+  return messages.some((message) => {
+    const normalizedMessage = normalizeDiscordLogText(message);
+    return (
+      normalizedMessage.includes(normalizedTitle) &&
+      normalizedMessage.includes(normalizedTargetPlayerName)
+    );
+  });
+}
+
+function normalizeDiscordLogText(value: string): string {
+  return value.replace(/[\\*_~`|<>]/g, "").replace(/\s+/g, " ").trim();
 }

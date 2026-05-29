@@ -1,7 +1,12 @@
+import { unstable_cache } from "next/cache";
+import { createClient } from "@supabase/supabase-js";
+
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
+import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
+export const CHART_LIST_CACHE_TAG = "chart-list";
 
 export interface ChartSummary {
   chartId: string;
@@ -49,11 +54,30 @@ export async function listCharts({
   search: string | null;
   version: number | null;
 }): Promise<{ charts: ChartSummary[]; count: number }> {
+  return cachedListCharts({ difficulty, level, page, pageSize, search, version });
+}
+
+const cachedListCharts = unstable_cache(
+  async ({
+    difficulty,
+    level,
+    page,
+    pageSize,
+    search,
+    version,
+  }: {
+    difficulty: number | null;
+    level: string | null;
+    page: number;
+    pageSize: number;
+    search: string | null;
+    version: number | null;
+  }): Promise<{ charts: ChartSummary[]; count: number }> => {
   if (!hasSupabasePublicEnv()) {
     return { charts: [], count: 0 };
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
   let query = supabase
@@ -90,14 +114,22 @@ export async function listCharts({
     charts: (data ?? []).map(mapChartSummary),
     count: count ?? 0,
   };
-}
+  },
+  ["chart-list"],
+  { revalidate: false, tags: [CHART_LIST_CACHE_TAG] },
+);
 
 export async function listChartLevels(): Promise<string[]> {
+  return cachedListChartLevels();
+}
+
+const cachedListChartLevels = unstable_cache(
+  async (): Promise<string[]> => {
   if (!hasSupabasePublicEnv()) {
     return [];
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const rows: Array<{ level: unknown }> = [];
 
   for (let from = 0; ; from += SELECT_PAGE_SIZE) {
@@ -121,14 +153,22 @@ export async function listChartLevels(): Promise<string[]> {
 
   return [...new Set(rows.map((row) => String(row.level)).filter(Boolean))]
     .sort(compareLevels);
-}
+  },
+  ["chart-levels"],
+  { revalidate: false, tags: [CHART_LIST_CACHE_TAG] },
+);
 
 export async function listChartVersions(): Promise<Array<{ number: number; name: string }>> {
+  return cachedListChartVersions();
+}
+
+const cachedListChartVersions = unstable_cache(
+  async (): Promise<Array<{ number: number; name: string }>> => {
   if (!hasSupabasePublicEnv()) {
     return [];
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const rows: Array<{ version_number: unknown; version_name: unknown }> = [];
 
   for (let from = 0; ; from += SELECT_PAGE_SIZE) {
@@ -163,7 +203,10 @@ export async function listChartVersions(): Promise<Array<{ number: number; name:
   return [...versionsByNumber.entries()]
     .sort(([left], [right]) => left - right)
     .map(([number, name]) => ({ number, name }));
-}
+  },
+  ["chart-versions"],
+  { revalidate: false, tags: [CHART_LIST_CACHE_TAG] },
+);
 
 export async function getChartSummary(chartId: string): Promise<ChartSummary | null> {
   if (!hasSupabasePublicEnv()) {
@@ -261,4 +304,14 @@ function levelSortValue(level: string): number {
   }
 
   return Number(match[1]) * 10 + (match[2] ? 1 : 0);
+}
+
+function createSupabasePublicReadClient() {
+  const { url, anonKey } = getSupabasePublicEnv();
+  return createClient(url, anonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
 }
