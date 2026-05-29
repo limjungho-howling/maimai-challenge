@@ -105,6 +105,7 @@ export interface PersonalChannelNotification {
   personalChannelId: string | null;
   playerName: string;
   actorName: string;
+  rankDropTitle: string | null;
   events: PersonalRankDropEvent[];
 }
 
@@ -188,7 +189,10 @@ export async function sendPersonalRankDropNotifications(
   if (!token || !guildId) {
     return notifications.flatMap((notification) =>
       buildPersonalRankDropMessages({
-        ...notification,
+        actorName: notification.actorName,
+        events: notification.events,
+        playerName: notification.playerName,
+        title: notification.rankDropTitle,
         appUrl: getAppUrl(),
       }).map((message) => ({
         type: "personal_channel" as const,
@@ -205,7 +209,10 @@ export async function sendPersonalRankDropNotifications(
 
   for (const notification of notifications) {
     const messages = buildPersonalRankDropMessages({
-      ...notification,
+      actorName: notification.actorName,
+      events: notification.events,
+      playerName: notification.playerName,
+      title: notification.rankDropTitle,
       appUrl: getAppUrl(),
     });
 

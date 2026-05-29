@@ -207,6 +207,7 @@ export async function ingestMaimaiPayload(
       await notifyChannel(
         supabase,
         run.id,
+        user.id,
         player.name,
         scoreUpdates.length,
         actualChangedChartIds.length,
@@ -897,6 +898,7 @@ async function updateIngestRun(
 async function notifyChannel(
   supabase: SupabaseClient,
   ingestRunId: string,
+  actorProfileId: string,
   playerName: string,
   scoreCount: number,
   changedChartCount: number,
@@ -947,7 +949,12 @@ async function notifyChannel(
   const personalResults =
     rankDropEvents.length > 0
       ? await sendPersonalRankDropNotifications(
-          await buildPersonalChannelNotifications(supabase, playerName, rankDropEvents),
+          await buildPersonalChannelNotifications(
+            supabase,
+            actorProfileId,
+            playerName,
+            rankDropEvents,
+          ),
         )
       : [];
   await persistPersonalChannelIds(supabase, personalResults);
@@ -959,6 +966,7 @@ async function notifyChannel(
 
 async function buildPersonalChannelNotifications(
   supabase: SupabaseClient,
+  actorProfileId: string,
   actorName: string,
   rankDropEvents: Array<{
     chartId: string;
@@ -984,6 +992,11 @@ async function buildPersonalChannelNotifications(
   }
 
   const profilesById = new Map((data ?? []).map((profile) => [String(profile.id), profile]));
+  const titleByTargetProfileId = await fetchRankDropMessageTitles(
+    supabase,
+    actorProfileId,
+    profileIds,
+  );
 
   return profileIds.map((profileId) => {
     const profile = profilesById.get(profileId);
@@ -1000,6 +1013,7 @@ async function buildPersonalChannelNotifications(
       playerName:
         typeof profile?.maimai_name === "string" ? profile.maimai_name : "Unknown",
       actorName,
+      rankDropTitle: titleByTargetProfileId.get(profileId) ?? null,
       events: rankDropEvents
         .filter((event) => event.userId === profileId)
         .map((event) => ({
@@ -1015,6 +1029,30 @@ async function buildPersonalChannelNotifications(
         })),
     };
   });
+}
+
+async function fetchRankDropMessageTitles(
+  supabase: SupabaseClient,
+  actorProfileId: string,
+  targetProfileIds: string[],
+): Promise<Map<string, string>> {
+  if (targetProfileIds.length === 0) {
+    return new Map();
+  }
+
+  const { data, error } = await supabase
+    .from("rank_drop_message_titles")
+    .select("target_profile_id, title")
+    .eq("actor_profile_id", actorProfileId)
+    .in("target_profile_id", targetProfileIds);
+
+  if (error) {
+    throw error;
+  }
+
+  return new Map(
+    (data ?? []).map((row) => [String(row.target_profile_id), String(row.title)]),
+  );
 }
 
 async function persistPersonalChannelIds(

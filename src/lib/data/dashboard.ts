@@ -1,5 +1,8 @@
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseServiceClient,
+} from "@/lib/supabase/server";
 
 export interface DashboardProfile {
   id: string;
@@ -9,6 +12,13 @@ export interface DashboardProfile {
   trophy: string | null;
   dmAlertsEnabled: boolean;
   discordUsername: string | null;
+}
+
+export interface DashboardRankDropTitleSetting {
+  targetProfileId: string;
+  targetName: string;
+  discordUsername: string | null;
+  title: string | null;
 }
 
 export interface DashboardIngestRun {
@@ -24,9 +34,10 @@ export async function getDashboardData(): Promise<{
   userId: string | null;
   profile: DashboardProfile | null;
   ingestRuns: DashboardIngestRun[];
+  rankDropTitleSettings: DashboardRankDropTitleSetting[];
 }> {
   if (!hasSupabasePublicEnv()) {
-    return { userId: null, profile: null, ingestRuns: [] };
+    return { userId: null, profile: null, ingestRuns: [], rankDropTitleSettings: [] };
   }
 
   const supabase = await createSupabaseServerClient();
@@ -35,10 +46,14 @@ export async function getDashboardData(): Promise<{
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return { userId: null, profile: null, ingestRuns: [] };
+    return { userId: null, profile: null, ingestRuns: [], rankDropTitleSettings: [] };
   }
 
-  const [{ data: profile }, { data: ingestRuns }] = await Promise.all([
+  const serviceSupabase = process.env.SUPABASE_SERVICE_ROLE_KEY
+    ? createSupabaseServiceClient()
+    : null;
+  const profileListClient = serviceSupabase ?? supabase;
+  const [{ data: profile }, { data: ingestRuns }, { data: profiles }, { data: titleRows }] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -52,7 +67,19 @@ export async function getDashboardData(): Promise<{
       .eq("profile_id", user.id)
       .order("created_at", { ascending: false })
       .limit(8),
+    profileListClient
+      .from("profiles")
+      .select("id, maimai_name, discord_username")
+      .not("maimai_name", "is", null)
+      .order("maimai_name", { ascending: true }),
+    profileListClient
+      .from("rank_drop_message_titles")
+      .select("target_profile_id, title")
+      .eq("actor_profile_id", user.id),
   ]);
+  const titleByTargetProfileId = new Map(
+    (titleRows ?? []).map((row) => [String(row.target_profile_id), String(row.title)]),
+  );
 
   return {
     userId: user.id,
@@ -75,5 +102,13 @@ export async function getDashboardData(): Promise<{
       changedChartCount: Number(run.changed_chart_count),
       createdAt: run.created_at,
     })),
+    rankDropTitleSettings: (profiles ?? [])
+      .filter((item) => item.id !== user.id)
+      .map((item) => ({
+        targetProfileId: String(item.id),
+        targetName: item.maimai_name ?? "미등록",
+        discordUsername: item.discord_username,
+        title: titleByTargetProfileId.get(String(item.id)) ?? null,
+      })),
   };
 }

@@ -1,17 +1,23 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 
-import { updateDmAlerts } from "@/app/dashboard/actions";
+import {
+  updateDmAlerts,
+  updateRankDropMessageTitles,
+} from "@/app/dashboard/actions";
 import { BookmarkletButton } from "@/components/bookmarklet-button";
 import { getDashboardData } from "@/lib/data/dashboard";
 import { formatKstDateTime } from "@/lib/time";
+
+const DEFAULT_RANK_DROP_TITLE =
+  "다음 유저에 의해 해당 곡의 디럭스 스코어 등수가 하락하였습니다.";
 
 interface DashboardPageProps {
   searchParams?: Promise<{ error?: string }>;
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
-  const [{ userId, profile, ingestRuns }, headerStore] = await Promise.all([
+  const [{ userId, profile, ingestRuns, rankDropTitleSettings }, headerStore] = await Promise.all([
     getDashboardData(),
     headers(),
   ]);
@@ -121,6 +127,57 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <button className="rounded-md border border-white/15 px-3 py-2 text-sm text-slate-100 hover:bg-white/10">
                   저장
                 </button>
+              </form>
+            </section>
+
+            <section className="rounded-lg border border-white/10 bg-white/[0.045] p-6">
+              <form action={updateRankDropMessageTitles} className="grid gap-5">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div>
+                    <h2 className="text-xl font-semibold text-white">
+                      개인별 역전 로그 제목
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">
+                      내가 해당 유저를 역전했을 때, 그 유저의 개인 채널에 보낼 메시지 제목입니다.
+                    </p>
+                  </div>
+                </div>
+                <div className="grid gap-3">
+                  {rankDropTitleSettings.length === 0 ? (
+                    <div className="rounded-md border border-white/10 px-3 py-4 text-sm text-slate-300">
+                      설정할 등록 유저가 없습니다.
+                    </div>
+                  ) : (
+                    rankDropTitleSettings.map((setting) => (
+                      <label
+                        className="grid gap-2 rounded-md border border-white/10 p-3 md:grid-cols-[180px_1fr] md:items-center"
+                        key={setting.targetProfileId}
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm font-medium text-white">
+                            {setting.targetName}
+                          </span>
+                          <span className="mt-1 block truncate text-xs text-slate-400">
+                            {setting.discordUsername ?? "Discord 연결됨"}
+                          </span>
+                        </span>
+                        <input
+                          className="h-11 rounded-md border border-white/10 bg-slate-950/60 px-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300"
+                          defaultValue={setting.title ?? ""}
+                          maxLength={120}
+                          name={`rankDropTitle:${setting.targetProfileId}`}
+                          placeholder={DEFAULT_RANK_DROP_TITLE}
+                          type="text"
+                        />
+                      </label>
+                    ))
+                  )}
+                </div>
+                <div>
+                  <button className="rounded-md border border-white/15 px-3 py-2 text-sm text-slate-100 hover:bg-white/10">
+                    제목 저장
+                  </button>
+                </div>
               </form>
             </section>
 

@@ -45,21 +45,28 @@ export interface DailyChallengeGoal {
   targetDxScore: number;
 }
 
+const DEFAULT_PERSONAL_RANK_DROP_TITLE =
+  "다음 유저에 의해 해당 곡의 디럭스 스코어 등수가 하락하였습니다.";
+
 export function buildPersonalRankDropMessages({
   actorName,
   events,
   appUrl,
+  title,
 }: {
   playerName: string;
   actorName: string;
   events: PersonalRankDropEvent[];
   appUrl: string;
+  title?: string | null;
 }): string[] {
   const boldActorName = boldDiscordText(actorName);
+  const messageTitle = title?.trim() || DEFAULT_PERSONAL_RANK_DROP_TITLE;
   return events.map((event) => {
     const previousRank = event.previousRank === null ? "-" : `#${event.previousRank}`;
     return [
-      `${boldActorName}에 의해 다음 곡의 디럭스 스코어 등수가 하락하였습니다.`,
+      messageTitle,
+      `유저 : ${boldActorName}`,
       `${event.chartTitle} [${event.difficultyLabel}]`,
       `  순위: ${previousRank} -> #${event.nextRank}`,
       `  내 DX 스코어: ${event.nextDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,

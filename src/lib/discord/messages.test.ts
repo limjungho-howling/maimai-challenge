@@ -52,10 +52,35 @@ describe("Discord messages", () => {
       appUrl: "https://maimai-challenge.vercel.app",
     })[0];
 
-    expect(message).toContain("**E.HOWL**에 의해 다음 곡의 디럭스 스코어 등수가 하락하였습니다.");
+    expect(message).toContain("다음 유저에 의해 해당 곡의 디럭스 스코어 등수가 하락하였습니다.");
+    expect(message).toContain("유저 : **E.HOWL**");
     expect(message).toContain("내 DX 스코어");
     expect(message).toContain("역전 기록: DX 2,450 (+50)");
     expect(message).toContain("<https://maimai-challenge.vercel.app/charts/chart-1>");
+  });
+
+  it("uses a custom personal channel rank drop title", () => {
+    const message = buildPersonalRankDropMessages({
+      playerName: "CHANA",
+      actorName: "E.HOWL",
+      title: "도전장이 도착했습니다.",
+      events: [
+        {
+          chartId: "chart-1",
+          chartTitle: "Endless World",
+          difficultyLabel: "Re:MASTER",
+          previousRank: 1,
+          nextRank: 2,
+          previousDxScore: 2400,
+          nextDxScore: 2400,
+          actorDxScore: 2450,
+          actorMaxDxScore: 2500,
+        },
+      ],
+      appUrl: "https://maimai-challenge.vercel.app",
+    })[0];
+
+    expect(message.startsWith("도전장이 도착했습니다.\n유저 : **E.HOWL**")).toBe(true);
   });
 
   it("builds separate channel rank up messages", () => {
