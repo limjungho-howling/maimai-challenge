@@ -13,7 +13,7 @@ const DEFAULT_RANK_DROP_TITLE =
   "다음 유저에 의해 해당 곡의 디럭스 스코어 등수가 하락하였습니다.";
 
 interface DashboardPageProps {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; settings?: string }>;
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
@@ -24,6 +24,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const params = await searchParams;
   const appOrigin = getAppOrigin(headerStore);
   const authErrorMessage = getAuthErrorMessage(params?.error);
+  const settingsMessage = getSettingsMessage(params?.settings);
   const isCatalogAdmin = isCatalogBookmarkletAdmin(profile);
 
   return (
@@ -140,6 +141,17 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     <p className="mt-2 text-sm leading-6 text-slate-300">
                       내가 해당 유저를 역전했을 때, 그 유저의 개인 채널에 보낼 메시지 제목입니다.
                     </p>
+                    {settingsMessage ? (
+                      <p
+                        className={`mt-3 rounded-md border px-3 py-2 text-sm ${
+                          settingsMessage.kind === "success"
+                            ? "border-cyan-300/25 bg-cyan-300/10 text-cyan-100"
+                            : "border-rose-300/25 bg-rose-300/10 text-rose-100"
+                        }`}
+                      >
+                        {settingsMessage.text}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="grid gap-3">
@@ -239,6 +251,33 @@ function getAuthErrorMessage(error: string | undefined): string | null {
 
   if (error === "login_failed") {
     return "Discord 로그인 처리에 실패했습니다. 잠시 후 다시 시도해주세요.";
+  }
+
+  return null;
+}
+
+function getSettingsMessage(
+  status: string | undefined,
+): { kind: "success" | "error"; text: string } | null {
+  if (status === "rank-drop-title-saved") {
+    return {
+      kind: "success",
+      text: "개인별 역전 로그 제목을 저장했습니다.",
+    };
+  }
+
+  if (status === "rank-drop-title-error") {
+    return {
+      kind: "error",
+      text: "개인별 역전 로그 제목 저장에 실패했습니다. 잠시 후 다시 시도해주세요.",
+    };
+  }
+
+  if (status === "login-required") {
+    return {
+      kind: "error",
+      text: "설정을 저장하려면 Discord 로그인이 필요합니다.",
+    };
   }
 
   return null;

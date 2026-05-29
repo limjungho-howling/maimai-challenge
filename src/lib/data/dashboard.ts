@@ -53,7 +53,12 @@ export async function getDashboardData(): Promise<{
     ? createSupabaseServiceClient()
     : null;
   const profileListClient = serviceSupabase ?? supabase;
-  const [{ data: profile }, { data: ingestRuns }, { data: profiles }, { data: titleRows }] = await Promise.all([
+  const [
+    { data: profile },
+    { data: ingestRuns },
+    { data: profiles, error: profilesError },
+    { data: titleRows, error: titleRowsError },
+  ] = await Promise.all([
     supabase
       .from("profiles")
       .select(
@@ -77,6 +82,15 @@ export async function getDashboardData(): Promise<{
       .select("target_profile_id, title")
       .eq("actor_profile_id", user.id),
   ]);
+
+  if (profilesError) {
+    console.error("Failed to load dashboard profile list", profilesError);
+  }
+
+  if (titleRowsError) {
+    console.error("Failed to load rank drop message titles", titleRowsError);
+  }
+
   const titleByTargetProfileId = new Map(
     (titleRows ?? []).map((row) => [String(row.target_profile_id), String(row.title)]),
   );

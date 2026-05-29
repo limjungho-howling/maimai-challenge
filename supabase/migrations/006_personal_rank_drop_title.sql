@@ -31,3 +31,5 @@ create policy "Users can delete own rank drop message titles"
   on public.rank_drop_message_titles
   for delete
   using (auth.uid() = actor_profile_id);
+
+notify pgrst, 'reload schema';

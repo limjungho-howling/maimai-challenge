@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { kstNowIsoString } from "@/lib/time";
@@ -34,7 +35,7 @@ export async function updateRankDropMessageTitles(formData: FormData): Promise<v
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return;
+    redirect("/dashboard?settings=login-required");
   }
 
   const entries = [...formData.entries()]
@@ -57,18 +58,29 @@ export async function updateRankDropMessageTitles(formData: FormData): Promise<v
     .map((entry) => entry.targetProfileId);
 
   if (upserts.length > 0) {
-    await supabase
+    const { error } = await supabase
       .from("rank_drop_message_titles")
       .upsert(upserts, { onConflict: "actor_profile_id,target_profile_id" });
+
+    if (error) {
+      console.error("Failed to upsert rank drop message titles", error);
+      redirect("/dashboard?settings=rank-drop-title-error");
+    }
   }
 
   if (deletes.length > 0) {
-    await supabase
+    const { error } = await supabase
       .from("rank_drop_message_titles")
       .delete()
       .eq("actor_profile_id", user.id)
       .in("target_profile_id", deletes);
+
+    if (error) {
+      console.error("Failed to delete rank drop message titles", error);
+      redirect("/dashboard?settings=rank-drop-title-error");
+    }
   }
 
   revalidatePath("/dashboard");
+  redirect("/dashboard?settings=rank-drop-title-saved");
 }

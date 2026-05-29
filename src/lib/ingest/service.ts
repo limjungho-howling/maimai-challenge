@@ -164,6 +164,10 @@ export async function ingestMaimaiPayload(
       total: 100,
     });
     await upsertPlayerScores(supabase, user.id, scoreUpdates, collectedAt);
+    await fillMissingChartMaxDxScores(
+      supabase,
+      scoreUpdates.map((update) => update.chartId),
+    );
 
     await reportProgress(onProgress, {
       stage: "events",
@@ -821,6 +825,70 @@ async function upsertPlayerScores(
       throw error;
     }
   });
+}
+
+async function fillMissingChartMaxDxScores(
+  supabase: SupabaseClient,
+  chartIds: string[],
+): Promise<void> {
+  const uniqueChartIds = [...new Set(chartIds)];
+  if (uniqueChartIds.length === 0) {
+    return;
+  }
+
+  const scoreRows = await mapWithConcurrency(
+    chunks(uniqueChartIds, DB_FILTER_CHUNK_SIZE),
+    DB_CHUNK_CONCURRENCY,
+    async (chunk) => {
+      const { data, error } = await supabase
+        .from("player_scores")
+        .select("chart_id, max_dx_score")
+        .in("chart_id", chunk)
+        .gt("max_dx_score", 0);
+
+      if (error) {
+        throw error;
+      }
+
+      return data ?? [];
+    },
+  );
+  const maxByChartId = new Map<string, number>();
+
+  for (const row of scoreRows.flat()) {
+    const chartId = String(row.chart_id);
+    const maxDxScore = Number(row.max_dx_score);
+    const previousMaxDxScore = maxByChartId.get(chartId) ?? 0;
+    if (maxDxScore > previousMaxDxScore) {
+      maxByChartId.set(chartId, maxDxScore);
+    }
+  }
+
+  const candidates = [...maxByChartId.entries()].map(([chartId, maxDxScore]) => ({
+    chartId,
+    maxDxScore,
+  }));
+
+  await mapWithConcurrency(
+    chunks(candidates, DB_FILTER_CHUNK_SIZE),
+    DB_CHUNK_CONCURRENCY,
+    async (chunk) => {
+      for (const item of chunk) {
+        const { error } = await supabase
+          .from("song_charts")
+          .update({
+            max_dx_score: item.maxDxScore,
+            updated_at: kstNowIsoString(),
+          })
+          .eq("id", item.chartId)
+          .lte("max_dx_score", 0);
+
+        if (error) {
+          throw error;
+        }
+      }
+    },
+  );
 }
 
 async function insertRankingEvents(
