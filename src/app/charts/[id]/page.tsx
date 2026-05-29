@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
+import { ChartDifficultyImage, ChartKindImage } from "@/components/chart-type-images";
 import { getChartSummary, listChartRankings } from "@/lib/data/charts";
 import { getDxStarImageUrl } from "@/lib/maimai/dx-stars";
 import { formatKstDateTime } from "@/lib/time";
@@ -46,12 +47,14 @@ export default async function ChartPage({ params }: ChartPageProps) {
             <h1 className="mt-3 break-words text-3xl font-semibold text-white">
               {chart.title}
             </h1>
-            <p className="mt-2 text-sm text-slate-300">
-              {chart.kind}
-              {chart.versionName ? ` · ${chart.versionName}` : ""} ·{" "}
-              {chart.difficultyLabel} · Lv {chart.level} · 최대 DX{" "}
-              {formatMaxDxScore(chart.maxDxScore)}
-            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-300">
+              <ChartDifficultyImage difficulty={chart.difficulty} />
+              <ChartKindImage kind={chart.kind} />
+              <span>
+                {chart.versionName ? `${chart.versionName} · ` : ""}
+                Lv {chart.level} · 최대 DX {formatMaxDxScore(chart.maxDxScore)}
+              </span>
+            </div>
             </div>
           </div>
           <nav className="flex shrink-0 items-center gap-2">

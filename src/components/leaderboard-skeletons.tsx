@@ -24,25 +24,26 @@ export function SongListSkeleton() {
       </section>
 
       <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
-        <div className="grid grid-cols-[1fr_100px_160px] gap-3 border-b border-white/10 px-4 py-3 max-sm:hidden">
+        <div className="grid grid-cols-[1fr_160px] gap-3 border-b border-white/10 px-4 py-3 max-sm:hidden">
           <SkeletonBlock className="h-4 w-12" />
-          <SkeletonBlock className="h-4 w-16" />
           <SkeletonBlock className="h-4 w-12" />
         </div>
         <div className="divide-y divide-white/10">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
-              className="grid grid-cols-[1fr_100px_160px] gap-3 px-4 py-4 max-sm:grid-cols-1"
+              className="grid grid-cols-[1fr_160px] gap-3 px-4 py-4 max-sm:grid-cols-1"
               key={index}
             >
               <div className="flex min-w-0 items-center gap-3">
                 <SkeletonBlock className="h-14 w-14 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <SkeletonBlock className="h-5 w-3/5" />
-                  <SkeletonBlock className="mt-2 h-4 w-36" />
+                  <div className="mt-2 flex items-center gap-2">
+                    <SkeletonBlock className="h-4 w-20" />
+                    <SkeletonBlock className="h-4 w-20" />
+                  </div>
                 </div>
               </div>
-              <SkeletonBlock className="h-5 w-20" />
               <SkeletonBlock className="h-5 w-28" />
             </div>
           ))}

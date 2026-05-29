@@ -1,7 +1,10 @@
+import { unstable_cache } from "next/cache";
+
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
+export const PLAYER_LEADERBOARD_CACHE_TAG = "player-leaderboard";
 
 export interface PlayerLeaderboardEntry {
   profileId: string;
@@ -32,57 +35,62 @@ interface RankingRow {
 }
 
 export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]> {
-  if (!hasSupabasePublicEnv() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return [];
-  }
+  return cachedListPlayerLeaderboard();
+}
 
-  const supabase = createSupabaseServiceClient();
-  const [profiles, rankings] = await Promise.all([
-    fetchAllProfiles(supabase),
-    fetchAllRankings(supabase),
-  ]);
-  const statsByProfileId = new Map<
-    string,
-    {
-      firstPlaceCount: number;
-      influenceScore: number;
-      influenceBasisPoints: number;
-      scoreCount: number;
-      latestUpdatedAt: string | null;
-    }
-  >();
-
-  for (const ranking of rankings) {
-    const stats = statsByProfileId.get(ranking.profile_id) ?? {
-      firstPlaceCount: 0,
-      influenceScore: 0,
-      influenceBasisPoints: 0,
-      scoreCount: 0,
-      latestUpdatedAt: null,
-    };
-
-    stats.scoreCount += 1;
-    const rank = Number(ranking.rank);
-    if (rank === 1) {
-      stats.firstPlaceCount += 1;
-    }
-    if (rank >= 1 && rank <= 5) {
-      stats.influenceScore += 6 - rank;
-    }
-    if (
-      ranking.updated_at &&
-      (!stats.latestUpdatedAt ||
-        new Date(ranking.updated_at).getTime() > new Date(stats.latestUpdatedAt).getTime())
-    ) {
-      stats.latestUpdatedAt = ranking.updated_at;
+const cachedListPlayerLeaderboard = unstable_cache(
+  async (): Promise<PlayerLeaderboardEntry[]> => {
+    if (!hasSupabasePublicEnv() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      return [];
     }
 
-    statsByProfileId.set(ranking.profile_id, stats);
-  }
-  assignInfluenceBasisPoints(statsByProfileId);
+    const supabase = createSupabaseServiceClient();
+    const [profiles, rankings] = await Promise.all([
+      fetchAllProfiles(supabase),
+      fetchAllRankings(supabase),
+    ]);
+    const statsByProfileId = new Map<
+      string,
+      {
+        firstPlaceCount: number;
+        influenceScore: number;
+        influenceBasisPoints: number;
+        scoreCount: number;
+        latestUpdatedAt: string | null;
+      }
+    >();
 
-  const entries = profiles
-    .map((profile) => {
+    for (const ranking of rankings) {
+      const stats = statsByProfileId.get(ranking.profile_id) ?? {
+        firstPlaceCount: 0,
+        influenceScore: 0,
+        influenceBasisPoints: 0,
+        scoreCount: 0,
+        latestUpdatedAt: null,
+      };
+
+      stats.scoreCount += 1;
+      const rank = Number(ranking.rank);
+      if (rank === 1) {
+        stats.firstPlaceCount += 1;
+      }
+      if (rank >= 1 && rank <= 5) {
+        stats.influenceScore += 6 - rank;
+      }
+      if (
+        ranking.updated_at &&
+        (!stats.latestUpdatedAt ||
+          new Date(ranking.updated_at).getTime() >
+            new Date(stats.latestUpdatedAt).getTime())
+      ) {
+        stats.latestUpdatedAt = ranking.updated_at;
+      }
+
+      statsByProfileId.set(ranking.profile_id, stats);
+    }
+    assignInfluenceBasisPoints(statsByProfileId);
+
+    const entries = profiles.map((profile) => {
       const stats = statsByProfileId.get(profile.id) ?? {
         firstPlaceCount: 0,
         influenceScore: 0,
@@ -104,19 +112,18 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
         scoreCount: stats.scoreCount,
         latestUpdatedAt: stats.latestUpdatedAt,
       };
-    })
-    .map((entry, _index, allEntries) => ({
-      ...entry,
-      influenceRank: calculateRank(
-        entry,
-        allEntries,
-        (item) => item.influenceScore,
-        (left, right) => left.playerName.localeCompare(right.playerName),
-      ),
-    }));
+    });
 
-  return entries
-    .sort((left, right) => {
+    assignCompetitionRanks(
+      entries,
+      (item) => item.influenceScore,
+      (item, rank) => {
+        item.influenceRank = rank;
+      },
+      (left, right) => left.playerName.localeCompare(right.playerName),
+    );
+
+    const sortedEntries = entries.sort((left, right) => {
       if (right.firstPlaceCount !== left.firstPlaceCount) {
         return right.firstPlaceCount - left.firstPlaceCount;
       }
@@ -124,16 +131,27 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
         return right.scoreCount - left.scoreCount;
       }
       return left.playerName.localeCompare(right.playerName);
-    })
-    .map((entry, index, entries) => ({
-      ...entry,
-      rank:
-        index > 0 &&
-        entries[index - 1].firstPlaceCount === entry.firstPlaceCount
-          ? entries[index - 1].rank
-          : index + 1,
-    }));
-}
+    });
+
+    assignCompetitionRanks(
+      sortedEntries,
+      (item) => item.firstPlaceCount,
+      (item, rank) => {
+        item.rank = rank;
+      },
+      (left, right) => {
+        if (right.scoreCount !== left.scoreCount) {
+          return right.scoreCount - left.scoreCount;
+        }
+        return left.playerName.localeCompare(right.playerName);
+      },
+    );
+
+    return sortedEntries;
+  },
+  ["player-leaderboard"],
+  { revalidate: 60, tags: [PLAYER_LEADERBOARD_CACHE_TAG] },
+);
 
 function assignInfluenceBasisPoints(
   statsByProfileId: Map<
@@ -176,70 +194,96 @@ function assignInfluenceBasisPoints(
   }
 }
 
-function calculateRank<T>(
-  entry: T,
+function assignCompetitionRanks<T>(
   entries: T[],
   score: (entry: T) => number,
+  assign: (entry: T, rank: number) => void,
   tieBreak: (left: T, right: T) => number,
-): number {
+): void {
   const sorted = [...entries].sort((left, right) => {
     const scoreDiff = score(right) - score(left);
     return scoreDiff === 0 ? tieBreak(left, right) : scoreDiff;
   });
-  const index = sorted.findIndex((item) => item === entry);
+  let currentRank = 0;
+  let previousScore: number | null = null;
 
-  if (index <= 0) {
-    return 1;
-  }
+  sorted.forEach((entry, index) => {
+    const currentScore = score(entry);
+    if (previousScore === null || currentScore !== previousScore) {
+      currentRank = index + 1;
+      previousScore = currentScore;
+    }
 
-  const previous = sorted[index - 1];
-  return score(previous) === score(entry)
-    ? calculateRank(previous, sorted, score, tieBreak)
-    : index + 1;
+    assign(entry, currentRank);
+  });
 }
 
 async function fetchAllProfiles(
   supabase: ReturnType<typeof createSupabaseServiceClient>,
 ): Promise<ProfileRow[]> {
-  const rows: ProfileRow[] = [];
-
-  for (let from = 0; ; from += SELECT_PAGE_SIZE) {
-    const { data, error } = await supabase
+  return fetchAllPagedRows<ProfileRow>(async (from, to, withCount) => {
+    const { data, count, error } = await supabase
       .from("profiles")
-      .select("id, discord_username, maimai_name, maimai_rating, updated_at")
-      .range(from, from + SELECT_PAGE_SIZE - 1);
+      .select("id, discord_username, maimai_name, maimai_rating, updated_at", {
+        count: withCount ? "exact" : undefined,
+      })
+      .range(from, to);
 
-    if (error) {
-      console.error(error);
-      return [];
-    }
-
-    rows.push(...((data ?? []) as ProfileRow[]));
-    if ((data ?? []).length < SELECT_PAGE_SIZE) {
-      return rows;
-    }
-  }
+    return { count, data: (data ?? []) as ProfileRow[], error };
+  });
 }
 
 async function fetchAllRankings(
   supabase: ReturnType<typeof createSupabaseServiceClient>,
 ): Promise<RankingRow[]> {
-  const rows: RankingRow[] = [];
-
-  for (let from = 0; ; from += SELECT_PAGE_SIZE) {
-    const { data, error } = await supabase
+  return fetchAllPagedRows<RankingRow>(async (from, to, withCount) => {
+    const { data, count, error } = await supabase
       .from("chart_rankings")
-      .select("profile_id, rank, updated_at")
-      .range(from, from + SELECT_PAGE_SIZE - 1);
+      .select("profile_id, rank, updated_at", {
+        count: withCount ? "exact" : undefined,
+      })
+      .range(from, to);
 
-    if (error) {
-      console.error(error);
+    return { count, data: (data ?? []) as RankingRow[], error };
+  });
+}
+
+async function fetchAllPagedRows<T>(
+  fetchPage: (
+    from: number,
+    to: number,
+    withCount: boolean,
+  ) => Promise<{ count: number | null; data: T[]; error: unknown }>,
+): Promise<T[]> {
+  const firstPage = await fetchPage(0, SELECT_PAGE_SIZE - 1, true);
+
+  if (firstPage.error) {
+    console.error(firstPage.error);
+    return [];
+  }
+
+  const totalCount = firstPage.count ?? firstPage.data.length;
+  if (totalCount <= SELECT_PAGE_SIZE || firstPage.data.length < SELECT_PAGE_SIZE) {
+    return firstPage.data;
+  }
+
+  const pageRanges = [];
+  for (let from = SELECT_PAGE_SIZE; from < totalCount; from += SELECT_PAGE_SIZE) {
+    pageRanges.push([from, Math.min(from + SELECT_PAGE_SIZE - 1, totalCount - 1)] as const);
+  }
+
+  const pages = await Promise.all(
+    pageRanges.map(([from, to]) => fetchPage(from, to, false)),
+  );
+  const rows = [...firstPage.data];
+
+  for (const page of pages) {
+    if (page.error) {
+      console.error(page.error);
       return [];
     }
-
-    rows.push(...((data ?? []) as RankingRow[]));
-    if ((data ?? []).length < SELECT_PAGE_SIZE) {
-      return rows;
-    }
+    rows.push(...page.data);
   }
+
+  return rows;
 }

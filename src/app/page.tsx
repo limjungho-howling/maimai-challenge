@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 
+import { ChartDifficultyImage, ChartKindImage } from "@/components/chart-type-images";
 import { SongListSkeleton } from "@/components/leaderboard-skeletons";
 import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
 import { listChartLevels, listChartVersions, listCharts } from "@/lib/data/charts";
@@ -195,9 +196,8 @@ async function SongListContent({ searchParams }: HomePageProps) {
         </form>
 
         <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
-          <div className="grid grid-cols-[1fr_100px_160px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-sm:hidden">
+          <div className="grid grid-cols-[1fr_160px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-sm:hidden">
             <span>곡</span>
-            <span>난이도</span>
             <span>1등</span>
           </div>
           {charts.length === 0 ? (
@@ -208,7 +208,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
             <div className="divide-y divide-white/10">
               {charts.map((chart) => (
                 <Link
-                  className="grid grid-cols-[1fr_100px_160px] gap-3 px-4 py-4 transition hover:bg-white/8 max-sm:grid-cols-1"
+                  className="grid grid-cols-[1fr_160px] gap-3 px-4 py-4 transition hover:bg-white/8 max-sm:grid-cols-1"
                   href={`/charts/${chart.chartId}`}
                   key={chart.chartId}
                 >
@@ -227,11 +227,12 @@ async function SongListContent({ searchParams }: HomePageProps) {
                       ) : null}
                     </div>
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium text-white">{chart.title}</span>
-                        <span className="rounded bg-amber-300/15 px-2 py-0.5 text-xs text-amber-200">
-                          {chart.kind}
+                      <div className="flex max-w-full flex-wrap items-center gap-2">
+                        <span className="rounded-md bg-slate-950/45 px-2 py-1 font-medium text-white ring-1 ring-white/10">
+                          {chart.title}
                         </span>
+                        <ChartDifficultyImage difficulty={chart.difficulty} />
+                        <ChartKindImage kind={chart.kind} />
                       </div>
                       <div className="mt-1 text-xs text-slate-400">
                         Lv {chart.level}
@@ -242,7 +243,6 @@ async function SongListContent({ searchParams }: HomePageProps) {
                       </div>
                     </div>
                   </div>
-                  <div className="text-sm text-cyan-100">{chart.difficultyLabel}</div>
                   <div className="text-sm text-slate-200">
                     {formatLeader(chart.leaderName, chart.leaderCount)}
                   </div>

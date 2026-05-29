@@ -2,6 +2,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { CHART_LIST_CACHE_TAG } from "@/lib/data/charts";
+import { PLAYER_LEADERBOARD_CACHE_TAG } from "@/lib/data/players";
 import { ingestPayloadSchema } from "@/lib/ingest/schema";
 import { ingestMaimaiPayload, type IngestProgress } from "@/lib/ingest/service";
 import {
@@ -40,6 +41,7 @@ export async function POST(request: Request) {
           );
 
           revalidateTag(CHART_LIST_CACHE_TAG, { expire: 0 });
+          revalidateTag(PLAYER_LEADERBOARD_CACHE_TAG, { expire: 0 });
           revalidatePath("/players");
           send({ type: "result", result });
         } catch (error) {

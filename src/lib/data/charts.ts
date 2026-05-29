@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
 export const CHART_LIST_CACHE_TAG = "chart-list";
@@ -325,11 +324,16 @@ const cachedListChartVersions = unstable_cache(
 );
 
 export async function getChartSummary(chartId: string): Promise<ChartSummary | null> {
+  return cachedGetChartSummary(chartId);
+}
+
+const cachedGetChartSummary = unstable_cache(
+  async (chartId: string): Promise<ChartSummary | null> => {
   if (!hasSupabasePublicEnv()) {
     return null;
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data, error } = await supabase
     .from("chart_leaderboard_summary")
     .select("*")
@@ -341,14 +345,22 @@ export async function getChartSummary(chartId: string): Promise<ChartSummary | n
   }
 
   return mapChartSummary(data);
-}
+  },
+  ["chart-summary"],
+  { revalidate: 60, tags: [CHART_LIST_CACHE_TAG] },
+);
 
 export async function listChartRankings(chartId: string): Promise<ChartRanking[]> {
+  return cachedListChartRankings(chartId);
+}
+
+const cachedListChartRankings = unstable_cache(
+  async (chartId: string): Promise<ChartRanking[]> => {
   if (!hasSupabasePublicEnv()) {
     return [];
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabasePublicReadClient();
   const { data, error } = await supabase
     .from("chart_rankings")
     .select("*")
@@ -374,7 +386,10 @@ export async function listChartRankings(chartId: string): Promise<ChartRanking[]
     updatedAt: String(row.updated_at),
     rank: Number(row.rank),
   }));
-}
+  },
+  ["chart-rankings"],
+  { revalidate: 60, tags: [CHART_LIST_CACHE_TAG] },
+);
 
 function mapChartSummary(row: Record<string, unknown>): ChartSummary {
   return {
