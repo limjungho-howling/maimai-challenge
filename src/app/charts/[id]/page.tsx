@@ -83,7 +83,7 @@ export default async function ChartPage({ params }: ChartPageProps) {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-[48px_minmax(120px,1.2fr)_minmax(108px,0.8fr)_minmax(124px,0.8fr)_minmax(88px,0.6fr)_minmax(112px,0.8fr)] gap-x-3 border-b border-white/10 px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400 max-md:hidden">
+              <div className="grid grid-cols-[48px_minmax(120px,1.1fr)_minmax(132px,1fr)_minmax(124px,0.75fr)_minmax(88px,0.55fr)_minmax(112px,0.75fr)] gap-x-3 border-b border-white/10 px-4 py-3 text-left text-xs font-semibold uppercase text-slate-400 max-md:hidden">
                 <span>순위</span>
                 <span>사용자</span>
                 <span className="justify-self-start text-left">DX Score</span>
@@ -94,7 +94,7 @@ export default async function ChartPage({ params }: ChartPageProps) {
               <div className="divide-y divide-white/10">
                 {rankings.map((ranking) => (
                   <div
-                    className="grid min-h-20 grid-cols-[48px_minmax(120px,1.2fr)_minmax(108px,0.8fr)_minmax(124px,0.8fr)_minmax(88px,0.6fr)_minmax(112px,0.8fr)] items-center gap-x-3 gap-y-3 px-4 py-3 max-md:grid-cols-[48px_minmax(0,1fr)] max-md:items-start"
+                    className="grid min-h-20 grid-cols-[48px_minmax(120px,1.1fr)_minmax(132px,1fr)_minmax(124px,0.75fr)_minmax(88px,0.55fr)_minmax(112px,0.75fr)] items-center gap-x-3 gap-y-3 px-4 py-3 max-md:grid-cols-[48px_minmax(0,1fr)] max-md:items-start"
                     key={ranking.profileId}
                   >
                     <div className="font-mono text-lg leading-none text-cyan-100">
@@ -108,9 +108,10 @@ export default async function ChartPage({ params }: ChartPageProps) {
                         {ranking.discordUsername ?? "Discord 연결됨"}
                       </div>
                     </div>
-                    <div className="justify-self-start whitespace-nowrap text-left font-mono text-sm leading-5 text-slate-100 max-md:col-start-2">
-                      {formatDxScorePair(ranking.dxScore, ranking.maxDxScore)}
-                    </div>
+                    <DxScoreCell
+                      dxScore={ranking.dxScore}
+                      maxDxScore={ranking.maxDxScore}
+                    />
                     <div className="flex w-[124px] items-center max-md:col-start-2">
                       <DxStarImage starCount={ranking.dxStarCount} />
                     </div>
@@ -133,12 +134,37 @@ export default async function ChartPage({ params }: ChartPageProps) {
   );
 }
 
+function DxScoreCell({
+  dxScore,
+  maxDxScore,
+}: {
+  dxScore: number;
+  maxDxScore: number;
+}) {
+  return (
+    <div className="flex flex-wrap items-baseline justify-self-start gap-x-2 whitespace-nowrap text-left font-mono leading-5 max-md:col-start-2">
+      <span className="text-sm text-slate-100">
+        {formatDxScorePair(dxScore, maxDxScore)}
+      </span>
+      {maxDxScore > 0 ? (
+        <span className="text-[11px] text-cyan-100/80">
+          {formatDxScoreRatio(dxScore, maxDxScore)}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 function formatDxScorePair(dxScore: number, maxDxScore: number): string {
   if (maxDxScore <= 0) {
     return `${dxScore.toLocaleString("ko-KR")} / 추후 입력 예정`;
   }
 
   return `${dxScore.toLocaleString("ko-KR")} / ${maxDxScore.toLocaleString("ko-KR")}`;
+}
+
+function formatDxScoreRatio(dxScore: number, maxDxScore: number): string {
+  return `${((dxScore / maxDxScore) * 100).toFixed(2)}%`;
 }
 
 function formatMaxDxScore(maxDxScore: number): string {
