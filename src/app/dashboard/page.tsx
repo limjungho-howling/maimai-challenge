@@ -18,6 +18,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const params = await searchParams;
   const appOrigin = getAppOrigin(headerStore);
   const authErrorMessage = getAuthErrorMessage(params?.error);
+  const isCatalogAdmin = isCatalogBookmarkletAdmin(profile);
 
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top_right,#243326,transparent_30rem),linear-gradient(135deg,#080b12,#111827_52%,#141414)] px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
@@ -87,11 +88,20 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     kind="score"
                     label="점수 갱신"
                   />
-                  <BookmarkletButton
-                    appOrigin={appOrigin}
-                    kind="catalog"
-                    label="곡 정보 수집"
-                  />
+                  {isCatalogAdmin ? (
+                    <>
+                      <BookmarkletButton
+                        appOrigin={appOrigin}
+                        kind="catalog"
+                        label="곡 정보 수집"
+                      />
+                      <BookmarkletButton
+                        appOrigin={appOrigin}
+                        kind="new-catalog"
+                        label="신곡 정보 수집"
+                      />
+                    </>
+                  ) : null}
                 </div>
               </div>
             </section>
@@ -175,4 +185,13 @@ function getAuthErrorMessage(error: string | undefined): string | null {
   }
 
   return null;
+}
+
+function isCatalogBookmarkletAdmin(
+  profile: Awaited<ReturnType<typeof getDashboardData>>["profile"],
+): boolean {
+  return (
+    profile?.discordUsername === "howlingsoul" ||
+    profile?.discordUserId === "howlingsoul"
+  );
 }

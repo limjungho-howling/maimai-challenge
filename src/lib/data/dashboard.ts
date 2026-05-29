@@ -3,6 +3,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export interface DashboardProfile {
   id: string;
+  discordUserId: string | null;
   maimaiName: string | null;
   maimaiRating: number | null;
   trophy: string | null;
@@ -41,7 +42,7 @@ export async function getDashboardData(): Promise<{
     supabase
       .from("profiles")
       .select(
-        "id, maimai_name, maimai_rating, trophy, dm_alerts_enabled, discord_username",
+        "id, discord_user_id, maimai_name, maimai_rating, trophy, dm_alerts_enabled, discord_username",
       )
       .eq("id", user.id)
       .maybeSingle(),
@@ -58,6 +59,7 @@ export async function getDashboardData(): Promise<{
     profile: profile
       ? {
           id: profile.id,
+          discordUserId: profile.discord_user_id,
           maimaiName: profile.maimai_name,
           maimaiRating: profile.maimai_rating,
           trophy: profile.trophy,

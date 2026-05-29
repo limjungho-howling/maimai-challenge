@@ -1,7 +1,8 @@
-export type BookmarkletKind = "score" | "catalog";
+export type BookmarkletKind = "score" | "catalog" | "new-catalog";
 
 const SCRIPT_BY_KIND: Record<BookmarkletKind, string> = {
   catalog: "catalog-bookmarklet.js",
+  "new-catalog": "new-catalog-bookmarklet.js",
   score: "bookmarklet.js",
 };
 

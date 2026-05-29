@@ -1,6 +1,7 @@
 (async function () {
   const script = document.currentScript;
   const APP_ORIGIN = script ? new URL(script.src).origin : "";
+  const RUNNER_SCOPE = script ? new URL(script.src).searchParams.get("scope") : "";
   const MAIMAI_ORIGIN = "https://maimaidx-eng.com";
   const MAIMAI_PATH_PREFIX = "/maimai-mobile/";
   const FETCH_RETRY_COUNT = 3;
@@ -10,7 +11,7 @@
   const RECOVERY_ROUND_COUNT = 3;
   const REQUEST_INTERVAL_MS = 100;
   const SCORE_DIFFICULTIES = [3, 4];
-  const VERSIONS = [
+  const ALL_VERSIONS = [
     [0, "maimai"],
     [1, "maimai PLUS"],
     [2, "GreeN"],
@@ -38,6 +39,7 @@
     [24, "PRiSM PLUS"],
     [25, "CiRCLE"],
   ];
+  const VERSIONS = RUNNER_SCOPE === "circle" ? [[25, "CiRCLE"]] : ALL_VERSIONS;
 
   if (
     location.origin !== MAIMAI_ORIGIN ||

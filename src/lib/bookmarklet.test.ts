@@ -20,6 +20,13 @@ describe("buildBookmarklet", () => {
 
     expect(source).toContain("https://example.com/catalog-bookmarklet.js");
   });
+
+  it("returns a new catalog loader that fetches public new-catalog-bookmarklet.js", () => {
+    const href = buildBookmarklet("https://example.com", "new-catalog");
+    const source = decodeURIComponent(href.replace(/^javascript:/, ""));
+
+    expect(source).toContain("https://example.com/new-catalog-bookmarklet.js");
+  });
 });
 
 describe("bookmarklet runner", () => {
@@ -51,5 +58,14 @@ describe("bookmarklet runner", () => {
     expect(source).toContain("maimai-challenge:collection-complete");
     expect(source).toContain("versionName");
     expect(source).toContain("uploadType: \"catalog\"");
+  });
+
+  it("collects only CiRCLE catalog pages from the new catalog loader", () => {
+    const loader = readFileSync("public/new-catalog-bookmarklet.js", "utf8");
+    const runner = readFileSync("public/catalog-bookmarklet-runner.js", "utf8");
+
+    expect(loader).toContain("scope=circle");
+    expect(runner).toContain('RUNNER_SCOPE === "circle"');
+    expect(runner).toContain('[[25, "CiRCLE"]]');
   });
 });
