@@ -208,7 +208,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
             <div className="divide-y divide-white/10">
               {charts.map((chart) => (
                 <Link
-                  className="grid grid-cols-[1fr_160px] gap-3 px-4 py-4 transition hover:bg-white/8 max-sm:grid-cols-1"
+                  className="grid grid-cols-[1fr_160px] items-center gap-3 px-4 py-4 transition hover:bg-white/8 max-sm:grid-cols-1"
                   href={`/charts/${chart.chartId}`}
                   key={chart.chartId}
                 >
@@ -243,7 +243,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
                       </div>
                     </div>
                   </div>
-                  <div className="text-sm text-slate-200">
+                  <div className="self-center text-base font-semibold text-slate-100">
                     {formatLeader(chart.leaderName, chart.leaderCount)}
                   </div>
                 </Link>
