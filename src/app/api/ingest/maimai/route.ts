@@ -1,4 +1,4 @@
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { CHART_LIST_CACHE_TAG } from "@/lib/data/charts";
@@ -40,8 +40,9 @@ export async function POST(request: Request) {
             (progress: IngestProgress) => send({ type: "progress", progress }),
           );
 
-          revalidateTag(CHART_LIST_CACHE_TAG, "max");
-          revalidateTag(PLAYER_LEADERBOARD_CACHE_TAG, "max");
+          revalidateTag(CHART_LIST_CACHE_TAG, { expire: 0 });
+          revalidateTag(PLAYER_LEADERBOARD_CACHE_TAG, { expire: 0 });
+          revalidatePath("/players");
           send({ type: "result", result });
         } catch (error) {
           send({
