@@ -79,6 +79,12 @@ export async function ingestMaimaiPayload(
   });
 
   const player = parsePlayerDataHtml(payload.playerHtml);
+  if (!player.name) {
+    throw new Error(
+      "플레이어 이름을 가져오지 못했습니다. 공식 홈페이지의 playerData 페이지가 정상적으로 로드되는지 확인한 뒤 다시 갱신해주세요.",
+    );
+  }
+
   const collectedAt = payload.collectedAt ?? kstNowIsoString();
   const discordProfile = getDiscordProfile(user);
 

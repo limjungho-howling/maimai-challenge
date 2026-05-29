@@ -40,6 +40,9 @@ describe("bookmarklet runner", () => {
     expect(readyIndex).toBeLessThan(fetchIndex);
     expect(source).toContain("maimai-challenge:relay-ready");
     expect(source).toContain("maimai-challenge:hello");
+    expect(source).toContain("fetchPlayerHtml");
+    expect(source).toContain("hasValidPlayerData");
+    expect(source).toContain("PLAYER_DATA_RETRY_COUNT = 5");
   });
 
   it("collects catalog pages by version with a 0.1 second interval", () => {

@@ -62,6 +62,10 @@ describe("maimai parser", () => {
     });
   });
 
+  it("returns an empty player name when playerData HTML is not loaded", () => {
+    expect(parsePlayerDataHtml("<html><body>login required</body></html>").name).toBe("");
+  });
+
   it("extracts song charts and DX score fields from a difficulty score page", () => {
     expect(parseSongScoreHtml(songScoreHtml, 3)).toEqual([
       {

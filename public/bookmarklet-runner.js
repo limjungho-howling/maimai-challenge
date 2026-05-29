@@ -5,6 +5,7 @@
   const MAIMAI_PATH_PREFIX = "/maimai-mobile/";
   const FETCH_RETRY_COUNT = 3;
   const FETCH_TIMEOUT_MS = 20000;
+  const PLAYER_DATA_RETRY_COUNT = 5;
   const SCORE_DIFFICULTIES = [3, 4];
   const RELAY_READY_TIMEOUT_MS = 120000;
 
@@ -103,26 +104,59 @@
       ? lastError
       : new Error(path + " 로드 실패");
   };
+  const hasValidPlayerData = function (html) {
+    if (!html || !html.includes("name_block") || !html.includes("rating_block")) {
+      return false;
+    }
+
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const name = doc.querySelector(".name_block");
+    return Boolean(name && name.textContent && name.textContent.trim());
+  };
+  const fetchPlayerHtml = async function () {
+    let lastHtml = "";
+
+    for (let attempt = 1; attempt <= PLAYER_DATA_RETRY_COUNT; attempt += 1) {
+      const html = await fetchText(
+        "/maimai-mobile/playerData/?_=" + Date.now() + "_" + attempt,
+      );
+      lastHtml = html;
+
+      if (hasValidPlayerData(html)) {
+        return html;
+      }
+
+      notifyStatus(
+        "플레이어 정보를 다시 확인하는 중입니다. " +
+          attempt +
+          " / " +
+          PLAYER_DATA_RETRY_COUNT,
+      );
+    }
+
+    throw new Error(
+      "플레이어 정보를 가져오지 못했습니다. 공식 홈페이지에서 로그인 상태를 확인한 뒤 다시 실행해주세요. html=" +
+        lastHtml.slice(0, 120).replace(/\s+/g, " "),
+    );
+  };
 
   try {
     await waitForRelayReady();
     notifyStatus("MASTER/Re:MASTER 점수 목록을 수집하는 중입니다.");
 
-    const [playerHtml, scorePages] = await Promise.all([
-      fetchText("/maimai-mobile/playerData/"),
-      Promise.all(
-        SCORE_DIFFICULTIES.map(async function (difficulty) {
-          const html = await fetchText(
-            "/maimai-mobile/record/musicGenre/search/?genre=99&diff=" + difficulty,
-          );
-          relay.postMessage(
-            { type: "maimai-challenge:progress", difficulty },
-            APP_ORIGIN,
-          );
-          return { difficulty, html };
-        }),
-      ),
-    ]);
+    const playerHtml = await fetchPlayerHtml();
+    const scorePages = await Promise.all(
+      SCORE_DIFFICULTIES.map(async function (difficulty) {
+        const html = await fetchText(
+          "/maimai-mobile/record/musicGenre/search/?genre=99&diff=" + difficulty,
+        );
+        relay.postMessage(
+          { type: "maimai-challenge:progress", difficulty },
+          APP_ORIGIN,
+        );
+        return { difficulty, html };
+      }),
+    );
 
     relay.postMessage(
       {
