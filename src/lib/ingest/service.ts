@@ -736,18 +736,7 @@ async function listScoresForCharts(
   const chunkResults = await mapWithConcurrency(
     chunks([...new Set(chartIds)], DB_FILTER_CHUNK_SIZE),
     DB_CHUNK_CONCURRENCY,
-    async (chunk) => {
-      const { data, error } = await supabase
-        .from("player_scores")
-        .select("chart_id, profile_id, dx_score")
-        .in("chart_id", chunk);
-
-      if (error) {
-        throw error;
-      }
-
-      return data ?? [];
-    },
+    (chunk) => listScoresForChartChunk(supabase, chunk),
   );
 
   for (const data of chunkResults) {
@@ -763,6 +752,35 @@ async function listScoresForCharts(
   }
 
   return scoresByChartId;
+}
+
+async function listScoresForChartChunk(
+  supabase: SupabaseClient,
+  chartIds: string[],
+): Promise<Array<{ chart_id: string; profile_id: string; dx_score: number }>> {
+  const rows: Array<{ chart_id: string; profile_id: string; dx_score: number }> = [];
+
+  for (let from = 0; ; from += DB_SELECT_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("player_scores")
+      .select("chart_id, profile_id, dx_score")
+      .in("chart_id", chartIds)
+      .range(from, from + DB_SELECT_PAGE_SIZE - 1);
+
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...((data ?? []) as Array<{
+      chart_id: string;
+      profile_id: string;
+      dx_score: number;
+    }>));
+
+    if ((data ?? []).length < DB_SELECT_PAGE_SIZE) {
+      return rows;
+    }
+  }
 }
 
 async function listPlayerScoresForCharts(
