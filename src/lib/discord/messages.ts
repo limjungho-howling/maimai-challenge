@@ -49,6 +49,7 @@ export interface RecommendedChart {
   chartTitle: string;
   level: string;
   versionName: string | null;
+  kind: string;
   difficultyLabel: string;
   currentDxScore: number | null;
   maxDxScore: number;
@@ -199,7 +200,7 @@ export function buildRecommendMessage({
   const lines = recommendations.flatMap((recommendation, index) => [
     ...(index === 0 ? [] : ["---"]),
     `${index + 1}. ${boldDiscordText(recommendation.chartTitle)} [${recommendation.difficultyLabel}]`,
-    `   Lv ${recommendation.level} · ${recommendation.versionName ?? "버전 미등록"}`,
+    `   Lv ${recommendation.level} · ${recommendation.versionName ?? "버전 미등록"} · ${formatSongKind(recommendation.kind)}`,
     `   내 DX: ${
       recommendation.currentDxScore === null
         ? "미등록"
@@ -237,4 +238,17 @@ function formatDiscordTitle(value: string): string {
 
 function boldDiscordText(value: string): string {
   return `**${value.replace(/([\\*_~`|])/g, "\\$1")}**`;
+}
+
+function formatSongKind(value: string): string {
+  const normalized = value.trim().toUpperCase();
+  if (normalized === "DX") {
+    return "DX";
+  }
+
+  if (normalized === "STANDARD" || normalized === "STD") {
+    return "STANDARD";
+  }
+
+  return value || "타입 미등록";
 }

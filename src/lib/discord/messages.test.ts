@@ -176,6 +176,7 @@ describe("Discord messages", () => {
         chartTitle: "Endless World",
         level: "14+",
         versionName: "CiRCLE",
+        kind: "DX",
         difficultyLabel: "Re:MASTER",
         currentDxScore: 2300,
         maxDxScore: 2451,
@@ -195,7 +196,7 @@ describe("Discord messages", () => {
     expect(message).toContain("## **SILIVARY님의 추천 곡 1개**");
     expect(message).toContain("---\n레벨: 14+");
     expect(message).toContain("1. **Endless World** [Re:MASTER]");
-    expect(message).toContain("Lv 14+ · CiRCLE");
+    expect(message).toContain("Lv 14+ · CiRCLE · DX");
     expect(message).toContain("내 DX: 2,300 / 2,451");
     expect(message).toContain("상위 5명:");
     expect(message).toContain("- #1 **E.HOWL** · DX 2,451");

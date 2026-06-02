@@ -428,6 +428,7 @@ export async function fetchRecommendedCharts({
       level: String(chart.level),
       versionName:
         typeof chart.version_name === "string" ? chart.version_name : null,
+      kind: String(chart.kind ?? "타입 미등록"),
       difficultyLabel: String(chart.difficulty_label),
       currentDxScore: current ? Number(current.dx_score) : null,
       maxDxScore: Number(chart.max_dx_score ?? 0),
@@ -451,6 +452,7 @@ async function fetchRecommendCandidateCharts(
     title: unknown;
     difficulty_label: unknown;
     level: unknown;
+    kind: unknown;
     version_name: unknown;
     max_dx_score: unknown;
   }>
@@ -461,6 +463,7 @@ async function fetchRecommendCandidateCharts(
     title: unknown;
     difficulty_label: unknown;
     level: unknown;
+    kind: unknown;
     version_name: unknown;
     max_dx_score: unknown;
   }> = [];
@@ -469,7 +472,7 @@ async function fetchRecommendCandidateCharts(
     const to = from + pageSize - 1;
     let query = supabase
       .from("chart_leaderboard_summary")
-      .select("chart_id, title, difficulty_label, level, version_name, max_dx_score")
+      .select("chart_id, title, difficulty_label, level, kind, version_name, max_dx_score")
       .in("difficulty", [3, 4])
       .gt("max_dx_score", 0)
       .order("title", { ascending: true })
