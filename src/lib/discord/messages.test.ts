@@ -173,6 +173,7 @@ describe("Discord messages", () => {
   it("builds recommend messages with chart metadata and top scores", () => {
     const recommendations: RecommendedChart[] = [
       {
+        chartId: "chart-1",
         chartTitle: "Endless World",
         level: "14+",
         versionName: "CiRCLE",
@@ -191,6 +192,7 @@ describe("Discord messages", () => {
       playerName: "SILIVARY",
       levelLabel: "14+",
       recommendations,
+      appUrl: "https://maimai-challenge.vercel.app",
     });
 
     expect(message).toContain("## **SILIVARY님의 추천 곡 1개**");
@@ -198,6 +200,7 @@ describe("Discord messages", () => {
     expect(message).toContain("1. **Endless World** [Re:MASTER]");
     expect(message).toContain("Lv 14+ · CiRCLE · DX");
     expect(message).toContain("내 DX: 2,300 / 2,451");
+    expect(message).toContain("곡 랭킹: <https://maimai-challenge.vercel.app/charts/chart-1>");
     expect(message).toContain("상위 5명:");
     expect(message).toContain("- #1 **E.HOWL** · DX 2,451");
     expect(message).toContain("- #2 **CHANA** · DX 2,400");

@@ -109,6 +109,7 @@ async function handleMessageComponent(
         playerName,
         levelLabel: getDailyLevelLabel(value),
         recommendations,
+        appUrl: getAppUrl(),
       }),
     );
   }
@@ -219,6 +220,14 @@ function commandResponse(content: string, components: unknown[] = []) {
 
 function getDailyLevelLabel(level: string): string {
   return DAILY_LEVEL_OPTIONS.find((option) => option.value === level)?.label ?? level;
+}
+
+function getAppUrl(): string {
+  return (
+    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.replace(/^/, "https://") ??
+    "https://maimai-challenge.vercel.app"
+  );
 }
 
 function verifyDiscordSignature(request: Request, body: string): boolean {

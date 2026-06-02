@@ -424,6 +424,7 @@ export async function fetchRecommendedCharts({
     );
 
     return {
+      chartId: String(chart.chart_id),
       chartTitle: String(chart.title),
       level: String(chart.level),
       versionName:

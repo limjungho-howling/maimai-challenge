@@ -46,6 +46,7 @@ export interface DailyChallengeGoal {
 }
 
 export interface RecommendedChart {
+  chartId: string;
   chartTitle: string;
   level: string;
   versionName: string | null;
@@ -183,10 +184,12 @@ export function buildRecommendMessage({
   playerName,
   levelLabel,
   recommendations,
+  appUrl,
 }: {
   playerName: string;
   levelLabel: string;
   recommendations: RecommendedChart[];
+  appUrl: string;
 }): string {
   if (recommendations.length === 0) {
     return [
@@ -206,6 +209,7 @@ export function buildRecommendMessage({
         ? "미등록"
         : recommendation.currentDxScore.toLocaleString("ko-KR")
     } / ${recommendation.maxDxScore.toLocaleString("ko-KR")}`,
+    `   곡 랭킹: <${trimTrailingSlash(appUrl)}/charts/${recommendation.chartId}>`,
     "   상위 5명:",
     ...(recommendation.topScores.length > 0
       ? recommendation.topScores.map(
