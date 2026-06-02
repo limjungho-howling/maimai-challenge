@@ -197,18 +197,19 @@ export function buildRecommendMessage({
   }
 
   const lines = recommendations.flatMap((recommendation, index) => [
-    `${index + 1}. ${recommendation.chartTitle} [${recommendation.difficultyLabel}]`,
+    ...(index === 0 ? [] : ["---"]),
+    `${index + 1}. ${boldDiscordText(recommendation.chartTitle)} [${recommendation.difficultyLabel}]`,
     `   Lv ${recommendation.level} · ${recommendation.versionName ?? "버전 미등록"}`,
     `   내 DX: ${
       recommendation.currentDxScore === null
         ? "미등록"
         : recommendation.currentDxScore.toLocaleString("ko-KR")
     } / ${recommendation.maxDxScore.toLocaleString("ko-KR")}`,
-    "   상위 5명",
+    "   상위 5명:",
     ...(recommendation.topScores.length > 0
       ? recommendation.topScores.map(
           (score) =>
-            `   #${score.rank} ${boldDiscordText(score.playerName)} · DX ${score.dxScore.toLocaleString("ko-KR")}`,
+            `   - #${score.rank} ${boldDiscordText(score.playerName)} · DX ${score.dxScore.toLocaleString("ko-KR")}`,
         )
       : ["   등록된 랭킹 없음"]),
   ]);

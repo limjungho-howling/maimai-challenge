@@ -194,11 +194,11 @@ describe("Discord messages", () => {
 
     expect(message).toContain("## **SILIVARY님의 추천 곡 1개**");
     expect(message).toContain("---\n레벨: 14+");
-    expect(message).toContain("Endless World [Re:MASTER]");
+    expect(message).toContain("1. **Endless World** [Re:MASTER]");
     expect(message).toContain("Lv 14+ · CiRCLE");
     expect(message).toContain("내 DX: 2,300 / 2,451");
-    expect(message).toContain("상위 5명");
-    expect(message).toContain("#1 **E.HOWL** · DX 2,451");
-    expect(message).toContain("#2 **CHANA** · DX 2,400");
+    expect(message).toContain("상위 5명:");
+    expect(message).toContain("- #1 **E.HOWL** · DX 2,451");
+    expect(message).toContain("- #2 **CHANA** · DX 2,400");
   });
 });
