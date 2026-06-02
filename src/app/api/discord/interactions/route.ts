@@ -2,12 +2,17 @@ import { createPublicKey, verify } from "node:crypto";
 
 import { NextResponse } from "next/server";
 
-import { buildDailyChallengeMessage, buildRankGoalMessage } from "@/lib/discord/messages";
+import {
+  buildDailyChallengeMessage,
+  buildRankGoalMessage,
+  buildRecommendMessage,
+} from "@/lib/discord/messages";
 import {
   DAILY_LEVEL_OPTIONS,
   fetchDailyChallengeGoals,
   fetchDailyChallengeUserOptions,
   fetchRankGoalsForDiscordUser,
+  fetchRecommendedCharts,
 } from "@/lib/discord/goals";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
@@ -59,8 +64,12 @@ export async function POST(request: Request) {
     return dailyLevelPrompt();
   }
 
+  if (["recommend", "추천"].includes(commandName)) {
+    return recommendLevelPrompt();
+  }
+
   if (!["goals", "goal", "목표"].includes(commandName)) {
-    return commandResponse("지원하지 않는 명령어입니다. `/goals` 또는 `/daily`를 사용해주세요.");
+    return commandResponse("지원하지 않는 명령어입니다. `/goals`, `/daily`, `/recommend`를 사용해주세요.");
   }
 
   const supabase = createSupabaseServiceClient();
@@ -86,6 +95,24 @@ async function handleMessageComponent(
     return dailyUserPrompt(value, userOptions);
   }
 
+  if (customId === "recommend_level") {
+    const supabase = createSupabaseServiceClient();
+    const { playerName, recommendations } = await fetchRecommendedCharts({
+      supabase,
+      discordUserId,
+      level: value,
+      count: 3,
+    });
+
+    return commandResponse(
+      buildRecommendMessage({
+        playerName,
+        levelLabel: getDailyLevelLabel(value),
+        recommendations,
+      }),
+    );
+  }
+
   if (customId.startsWith("daily_user:")) {
     const level = decodeURIComponent(customId.slice("daily_user:".length));
     const targetProfileId = value || "all";
@@ -109,7 +136,7 @@ async function handleMessageComponent(
     );
   }
 
-  return commandResponse("지원하지 않는 선택 메뉴입니다. `/daily`를 다시 실행해주세요.");
+  return commandResponse("지원하지 않는 선택 메뉴입니다. `/daily` 또는 `/recommend`를 다시 실행해주세요.");
 }
 
 function dailyLevelPrompt() {
@@ -148,6 +175,27 @@ function dailyUserPrompt(
           min_values: 1,
           max_values: 1,
           options: userOptions.map((option) => ({
+            label: option.label,
+            value: option.value,
+          })),
+        },
+      ],
+    },
+  ]);
+}
+
+function recommendLevelPrompt() {
+  return commandResponse("어떤 레벨의 곡을 추천받으시겠습니까?", [
+    {
+      type: DISCORD_ACTION_ROW,
+      components: [
+        {
+          type: DISCORD_STRING_SELECT,
+          custom_id: "recommend_level",
+          placeholder: "추천 레벨 선택",
+          min_values: 1,
+          max_values: 1,
+          options: DAILY_LEVEL_OPTIONS.map((option) => ({
             label: option.label,
             value: option.value,
           })),

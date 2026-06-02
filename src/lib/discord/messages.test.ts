@@ -5,8 +5,10 @@ import {
   buildDailyChallengeMessage,
   buildPersonalRankDropMessages,
   buildRankGoalMessage,
+  buildRecommendMessage,
   type DailyChallengeGoal,
   type RankGoal,
+  type RecommendedChart,
 } from "@/lib/discord/messages";
 
 describe("Discord messages", () => {
@@ -166,5 +168,37 @@ describe("Discord messages", () => {
     expect(message).toContain("Endless World [Re:MASTER] · Lv 14+");
     expect(message).toContain("내 기록: #3 · DX 2,400");
     expect(message).toContain("목표: #2 **E.HOWL** · DX 2,450");
+  });
+
+  it("builds recommend messages with chart metadata and top scores", () => {
+    const recommendations: RecommendedChart[] = [
+      {
+        chartTitle: "Endless World",
+        level: "14+",
+        versionName: "CiRCLE",
+        difficultyLabel: "Re:MASTER",
+        currentDxScore: 2300,
+        maxDxScore: 2451,
+        topScores: [
+          { playerName: "E.HOWL", dxScore: 2451, rank: 1 },
+          { playerName: "CHANA", dxScore: 2400, rank: 2 },
+        ],
+      },
+    ];
+
+    const message = buildRecommendMessage({
+      playerName: "SILIVARY",
+      levelLabel: "14+",
+      recommendations,
+    });
+
+    expect(message).toContain("## **SILIVARY님의 추천 곡 1개**");
+    expect(message).toContain("---\n레벨: 14+");
+    expect(message).toContain("Endless World [Re:MASTER]");
+    expect(message).toContain("Lv 14+ · CiRCLE");
+    expect(message).toContain("내 DX: 2,300 / 2,451");
+    expect(message).toContain("상위 5명");
+    expect(message).toContain("#1 **E.HOWL** · DX 2,451");
+    expect(message).toContain("#2 **CHANA** · DX 2,400");
   });
 });

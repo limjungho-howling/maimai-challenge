@@ -45,6 +45,20 @@ export interface DailyChallengeGoal {
   targetDxScore: number;
 }
 
+export interface RecommendedChart {
+  chartTitle: string;
+  level: string;
+  versionName: string | null;
+  difficultyLabel: string;
+  currentDxScore: number | null;
+  maxDxScore: number;
+  topScores: Array<{
+    playerName: string;
+    dxScore: number;
+    rank: number;
+  }>;
+}
+
 const DEFAULT_PERSONAL_RANK_DROP_TITLE =
   "다음 유저에 의해 해당 곡의 디럭스 스코어 등수가 하락하였습니다.";
 
@@ -160,6 +174,49 @@ export function buildDailyChallengeMessage({
     "---",
     `레벨: ${levelLabel}`,
     `대상: ${targetLabel}`,
+    ...lines,
+  ].join("\n");
+}
+
+export function buildRecommendMessage({
+  playerName,
+  levelLabel,
+  recommendations,
+}: {
+  playerName: string;
+  levelLabel: string;
+  recommendations: RecommendedChart[];
+}): string {
+  if (recommendations.length === 0) {
+    return [
+      formatDiscordTitle(`${playerName}님, 선택한 레벨의 추천 곡이 없습니다.`),
+      "---",
+      `레벨: ${levelLabel}`,
+      "등록된 차트 또는 랭킹 기록이 있는 곡을 찾지 못했습니다.",
+    ].join("\n");
+  }
+
+  const lines = recommendations.flatMap((recommendation, index) => [
+    `${index + 1}. ${recommendation.chartTitle} [${recommendation.difficultyLabel}]`,
+    `   Lv ${recommendation.level} · ${recommendation.versionName ?? "버전 미등록"}`,
+    `   내 DX: ${
+      recommendation.currentDxScore === null
+        ? "미등록"
+        : recommendation.currentDxScore.toLocaleString("ko-KR")
+    } / ${recommendation.maxDxScore.toLocaleString("ko-KR")}`,
+    "   상위 5명",
+    ...(recommendation.topScores.length > 0
+      ? recommendation.topScores.map(
+          (score) =>
+            `   #${score.rank} ${boldDiscordText(score.playerName)} · DX ${score.dxScore.toLocaleString("ko-KR")}`,
+        )
+      : ["   등록된 랭킹 없음"]),
+  ]);
+
+  return [
+    formatDiscordTitle(`${playerName}님의 추천 곡 ${recommendations.length}개`),
+    "---",
+    `레벨: ${levelLabel}`,
     ...lines,
   ].join("\n");
 }

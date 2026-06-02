@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { DailyChallengeGoal, RankGoal } from "@/lib/discord/messages";
+import type {
+  DailyChallengeGoal,
+  RankGoal,
+  RecommendedChart,
+} from "@/lib/discord/messages";
 
 export const DAILY_LEVEL_OPTIONS = [
   { label: "전체 레벨", value: "all" },
@@ -351,6 +355,143 @@ export async function fetchDailyChallengeGoals({
     targetLabel,
     goals: pickRandomItems(candidates, count),
   };
+}
+
+export async function fetchRecommendedCharts({
+  supabase,
+  discordUserId,
+  level,
+  count = 3,
+}: {
+  supabase: SupabaseClient;
+  discordUserId: string;
+  level: string;
+  count?: number;
+}): Promise<{ playerName: string; recommendations: RecommendedChart[] }> {
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, maimai_name")
+    .eq("discord_user_id", discordUserId)
+    .maybeSingle();
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  if (!profile) {
+    return { playerName: "Unknown", recommendations: [] };
+  }
+
+  const profileId = String(profile.id);
+  const playerName = typeof profile.maimai_name === "string" ? profile.maimai_name : "Unknown";
+  const candidates = await fetchRecommendCandidateCharts(supabase, level);
+  const pickedCharts = pickRandomItems(candidates, count);
+
+  if (pickedCharts.length === 0) {
+    return { playerName, recommendations: [] };
+  }
+
+  const pickedChartIds = pickedCharts.map((chart) => String(chart.chart_id));
+  const { data: rankings, error: rankingsError } = await supabase
+    .from("chart_rankings")
+    .select("chart_id, profile_id, player_name, dx_score, rank")
+    .in("chart_id", pickedChartIds);
+
+  if (rankingsError) {
+    throw rankingsError;
+  }
+
+  const rankingsByChartId = new Map<string, NonNullable<typeof rankings>>();
+  for (const ranking of rankings ?? []) {
+    const chartId = String(ranking.chart_id);
+    const existing = rankingsByChartId.get(chartId) ?? [];
+    existing.push(ranking);
+    rankingsByChartId.set(chartId, existing);
+  }
+
+  const recommendations = pickedCharts.map((chart) => {
+    const chartRankings = (rankingsByChartId.get(String(chart.chart_id)) ?? [])
+      .sort((left, right) => {
+        const rankDelta = Number(left.rank) - Number(right.rank);
+        if (rankDelta !== 0) {
+          return rankDelta;
+        }
+
+        return Number(right.dx_score) - Number(left.dx_score);
+      });
+    const current = chartRankings.find(
+      (ranking) => String(ranking.profile_id) === profileId,
+    );
+
+    return {
+      chartTitle: String(chart.title),
+      level: String(chart.level),
+      versionName:
+        typeof chart.version_name === "string" ? chart.version_name : null,
+      difficultyLabel: String(chart.difficulty_label),
+      currentDxScore: current ? Number(current.dx_score) : null,
+      maxDxScore: Number(chart.max_dx_score ?? 0),
+      topScores: chartRankings.slice(0, 5).map((ranking) => ({
+        playerName: String(ranking.player_name ?? "Unknown"),
+        dxScore: Number(ranking.dx_score),
+        rank: Number(ranking.rank),
+      })),
+    };
+  });
+
+  return { playerName, recommendations };
+}
+
+async function fetchRecommendCandidateCharts(
+  supabase: SupabaseClient,
+  level: string,
+): Promise<
+  Array<{
+    chart_id: unknown;
+    title: unknown;
+    difficulty_label: unknown;
+    level: unknown;
+    version_name: unknown;
+    max_dx_score: unknown;
+  }>
+> {
+  const pageSize = 1000;
+  const rows: Array<{
+    chart_id: unknown;
+    title: unknown;
+    difficulty_label: unknown;
+    level: unknown;
+    version_name: unknown;
+    max_dx_score: unknown;
+  }> = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const to = from + pageSize - 1;
+    let query = supabase
+      .from("chart_leaderboard_summary")
+      .select("chart_id, title, difficulty_label, level, version_name, max_dx_score")
+      .in("difficulty", [3, 4])
+      .gt("max_dx_score", 0)
+      .order("title", { ascending: true })
+      .range(from, to);
+
+    if (level !== "all") {
+      query = query.eq("level", level);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...(data ?? []));
+
+    if (!data || data.length < pageSize) {
+      break;
+    }
+  }
+
+  return rows;
 }
 
 async function fetchDailyTargetLabel(
