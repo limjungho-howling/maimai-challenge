@@ -8,6 +8,9 @@ export interface PersonalRankDropEvent
   chartId: string;
   chartTitle: string;
   difficultyLabel: string;
+  level: string;
+  versionName: string | null;
+  kind: string;
   actorDxScore: number;
   actorMaxDxScore: number;
 }
@@ -17,6 +20,9 @@ export interface ChannelRankUpEvent
   chartId: string;
   chartTitle: string;
   difficultyLabel: string;
+  level: string;
+  versionName: string | null;
+  kind: string;
   actorDxScore: number;
   actorMaxDxScore: number;
 }
@@ -84,7 +90,7 @@ export function buildPersonalRankDropMessages({
       formatDiscordTitle(messageTitle),
       "---",
       `유저 : ${boldActorName}`,
-      `${event.chartTitle} [${event.difficultyLabel}]`,
+      `${boldDiscordText(event.chartTitle)} [${event.difficultyLabel}] · Lv ${event.level} · ${event.versionName ?? "버전 미등록"} · ${formatSongKind(event.kind)}`,
       `  순위: ${previousRank} -> #${event.nextRank}`,
       `  내 DX 스코어: ${event.nextDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
       `  역전 기록: DX ${event.actorDxScore.toLocaleString("ko-KR")} (${formatSignedDifference(event.actorDxScore - event.nextDxScore)})`,
@@ -110,7 +116,7 @@ export function buildChannelRankUpMessages({
         `${actorName}의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.`,
       ),
       "---",
-      `${event.chartTitle} [${event.difficultyLabel}]`,
+      `${boldDiscordText(event.chartTitle)} [${event.difficultyLabel}] · Lv ${event.level} · ${event.versionName ?? "버전 미등록"} · ${formatSongKind(event.kind)}`,
       `  순위: ${previousRank} -> #${event.nextRank}`,
       `  DX 스코어: ${event.actorDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
       `  곡 랭킹: <${trimTrailingSlash(appUrl)}/charts/${event.chartId}>`,

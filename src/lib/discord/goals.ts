@@ -20,9 +20,42 @@ export const DAILY_LEVEL_OPTIONS = [
   { label: "15", value: "15" },
 ] as const;
 
+const DAILY_EVENT_PAGE_SIZE = 1000;
+const DAILY_ALL_EVENT_MAX_ROWS = 1000;
+const DAILY_TARGET_EVENT_MAX_ROWS = 5000;
+const DAILY_FILTER_CHUNK_SIZE = 100;
+
 export interface DailyChallengeUserOption {
   label: string;
   value: string;
+}
+
+interface DailyRankDropEventRow {
+  chart_id: unknown;
+  actor_profile_id: unknown;
+  ingest_run_id: unknown;
+  created_at: unknown;
+}
+
+interface DailyChartSummaryRow {
+  chart_id: unknown;
+  title: unknown;
+  difficulty_label: unknown;
+  level: unknown;
+}
+
+interface DailyTargetProfileRow {
+  id: unknown;
+  maimai_name: unknown;
+  discord_username: unknown;
+}
+
+interface DailyRankingRow {
+  chart_id: unknown;
+  profile_id: unknown;
+  player_name: unknown;
+  dx_score: unknown;
+  rank: unknown;
 }
 
 export function pickRandomItems<T>(
@@ -207,28 +240,14 @@ export async function fetchDailyChallengeGoals({
   const profileId = String(profile.id);
   const playerName = typeof profile.maimai_name === "string" ? profile.maimai_name : "Unknown";
   const targetLabel = await fetchDailyTargetLabel(supabase, targetProfileId);
-  let eventsQuery = supabase
-    .from("ranking_events")
-    .select("chart_id, actor_profile_id, ingest_run_id, created_at")
-    .eq("profile_id", profileId)
-    .eq("event_type", "rank_dropped")
-    .not("actor_profile_id", "is", null)
-    .not("ingest_run_id", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(500);
-
-  if (targetProfileId !== "all") {
-    eventsQuery = eventsQuery.eq("actor_profile_id", targetProfileId);
-  }
-
-  const { data: events, error: eventsError } = await eventsQuery;
-
-  if (eventsError) {
-    throw eventsError;
-  }
+  const events = await fetchDailyRankDropEvents({
+    supabase,
+    profileId,
+    targetProfileId,
+  });
 
   const eventTargets = uniqueEventTargets(
-    (events ?? []).map((event) => ({
+    events.map((event) => ({
       chartId: String(event.chart_id),
       targetProfileId: String(event.actor_profile_id),
       ingestRunId: String(event.ingest_run_id),
@@ -240,32 +259,18 @@ export async function fetchDailyChallengeGoals({
   }
 
   const chartIds = [...new Set(eventTargets.map((event) => event.chartId))];
-  const { data: summaries, error: summariesError } = await supabase
-    .from("chart_leaderboard_summary")
-    .select("chart_id, title, difficulty_label, level")
-    .in("chart_id", chartIds);
-
-  if (summariesError) {
-    throw summariesError;
-  }
+  const summaries = await fetchDailyChartSummaries(supabase, chartIds);
 
   const summariesByChartId = new Map(
-    (summaries ?? []).map((summary) => [String(summary.chart_id), summary]),
+    summaries.map((summary) => [String(summary.chart_id), summary]),
   );
   const targetProfileIds = [
     ...new Set(eventTargets.map((event) => event.targetProfileId)),
   ];
-  const { data: targetProfiles, error: targetProfilesError } = await supabase
-    .from("profiles")
-    .select("id, maimai_name, discord_username")
-    .in("id", targetProfileIds);
-
-  if (targetProfilesError) {
-    throw targetProfilesError;
-  }
+  const targetProfiles = await fetchDailyTargetProfiles(supabase, targetProfileIds);
 
   const targetNamesByProfileId = new Map(
-    (targetProfiles ?? []).map((profile) => [
+    targetProfiles.map((profile) => [
       String(profile.id),
       String(profile.maimai_name ?? profile.discord_username ?? "Unknown"),
     ]),
@@ -275,17 +280,10 @@ export async function fetchDailyChallengeGoals({
     profileId,
     [...new Set(eventTargets.map((event) => event.ingestRunId))],
   );
-  const { data: rankings, error: rankingsError } = await supabase
-    .from("chart_rankings")
-    .select("chart_id, profile_id, player_name, dx_score, rank")
-    .in("chart_id", chartIds);
-
-  if (rankingsError) {
-    throw rankingsError;
-  }
+  const rankings = await fetchDailyRankings(supabase, chartIds);
 
   const rankingsByChartId = new Map<string, typeof rankings>();
-  for (const ranking of rankings ?? []) {
+  for (const ranking of rankings) {
     const chartId = String(ranking.chart_id);
     const existing = rankingsByChartId.get(chartId) ?? [];
     existing.push(ranking);
@@ -498,6 +496,116 @@ async function fetchRecommendCandidateCharts(
   return rows;
 }
 
+async function fetchDailyChartSummaries(
+  supabase: SupabaseClient,
+  chartIds: string[],
+): Promise<DailyChartSummaryRow[]> {
+  const rows: DailyChartSummaryRow[] = [];
+
+  for (const chunk of chunkArray(chartIds, DAILY_FILTER_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("chart_leaderboard_summary")
+      .select("chart_id, title, difficulty_label, level")
+      .in("chart_id", chunk);
+
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...((data ?? []) as DailyChartSummaryRow[]));
+  }
+
+  return rows;
+}
+
+async function fetchDailyTargetProfiles(
+  supabase: SupabaseClient,
+  profileIds: string[],
+): Promise<DailyTargetProfileRow[]> {
+  const rows: DailyTargetProfileRow[] = [];
+
+  for (const chunk of chunkArray(profileIds, DAILY_FILTER_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, maimai_name, discord_username")
+      .in("id", chunk);
+
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...((data ?? []) as DailyTargetProfileRow[]));
+  }
+
+  return rows;
+}
+
+async function fetchDailyRankings(
+  supabase: SupabaseClient,
+  chartIds: string[],
+): Promise<DailyRankingRow[]> {
+  const rows: DailyRankingRow[] = [];
+
+  for (const chunk of chunkArray(chartIds, DAILY_FILTER_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("chart_rankings")
+      .select("chart_id, profile_id, player_name, dx_score, rank")
+      .in("chart_id", chunk);
+
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...((data ?? []) as DailyRankingRow[]));
+  }
+
+  return rows;
+}
+
+async function fetchDailyRankDropEvents({
+  supabase,
+  profileId,
+  targetProfileId,
+}: {
+  supabase: SupabaseClient;
+  profileId: string;
+  targetProfileId: string;
+}): Promise<DailyRankDropEventRow[]> {
+  const maxRows =
+    targetProfileId === "all" ? DAILY_ALL_EVENT_MAX_ROWS : DAILY_TARGET_EVENT_MAX_ROWS;
+  const rows: DailyRankDropEventRow[] = [];
+
+  for (let from = 0; from < maxRows; from += DAILY_EVENT_PAGE_SIZE) {
+    const to = Math.min(from + DAILY_EVENT_PAGE_SIZE, maxRows) - 1;
+    let query = supabase
+      .from("ranking_events")
+      .select("chart_id, actor_profile_id, ingest_run_id, created_at")
+      .eq("profile_id", profileId)
+      .eq("event_type", "rank_dropped")
+      .not("actor_profile_id", "is", null)
+      .not("ingest_run_id", "is", null)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (targetProfileId !== "all") {
+      query = query.eq("actor_profile_id", targetProfileId);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...((data ?? []) as DailyRankDropEventRow[]));
+
+    if (!data || data.length < DAILY_EVENT_PAGE_SIZE) {
+      break;
+    }
+  }
+
+  return rows;
+}
+
 async function fetchDailyTargetLabel(
   supabase: SupabaseClient,
   targetProfileId: string,
@@ -543,20 +651,25 @@ async function fetchSentPersonalLogMessagesByRunId(
     return new Map();
   }
 
-  const { data, error } = await supabase
-    .from("discord_notifications")
-    .select("ingest_run_id, message")
-    .eq("profile_id", profileId)
-    .eq("notification_type", "personal_channel")
-    .eq("status", "sent")
-    .in("ingest_run_id", ingestRunIds);
+  const rows: Array<{ ingest_run_id: unknown; message: unknown }> = [];
+  for (const chunk of chunkArray(ingestRunIds, DAILY_FILTER_CHUNK_SIZE)) {
+    const { data, error } = await supabase
+      .from("discord_notifications")
+      .select("ingest_run_id, message")
+      .eq("profile_id", profileId)
+      .eq("notification_type", "personal_channel")
+      .eq("status", "sent")
+      .in("ingest_run_id", chunk);
 
-  if (error) {
-    throw error;
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...(data ?? []));
   }
 
   const messagesByRunId = new Map<string, string[]>();
-  for (const row of data ?? []) {
+  for (const row of rows) {
     const runId = String(row.ingest_run_id);
     const message = typeof row.message === "string" ? row.message : "";
     const existing = messagesByRunId.get(runId) ?? [];
@@ -565,6 +678,16 @@ async function fetchSentPersonalLogMessagesByRunId(
   }
 
   return messagesByRunId;
+}
+
+function chunkArray<T>(items: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+
+  for (let index = 0; index < items.length; index += chunkSize) {
+    chunks.push(items.slice(index, index + chunkSize));
+  }
+
+  return chunks;
 }
 
 function hasMatchingPersonalRankDropLog({

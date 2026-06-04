@@ -22,6 +22,9 @@ describe("Discord messages", () => {
             chartId: "chart-1",
             chartTitle: "Endless World",
             difficultyLabel: "Re:MASTER",
+            level: "14+",
+            versionName: "CiRCLE",
+            kind: "DX",
             previousRank: 1,
             nextRank: 2,
             previousDxScore: 2400,
@@ -33,7 +36,7 @@ describe("Discord messages", () => {
         appUrl: "https://maimai-challenge.vercel.app",
       }),
     ).toEqual([
-      expect.stringContaining("Endless World [Re:MASTER]"),
+      expect.stringContaining("**Endless World** [Re:MASTER]"),
     ]);
     const message = buildPersonalRankDropMessages({
       playerName: "CHANA",
@@ -43,6 +46,9 @@ describe("Discord messages", () => {
           chartId: "chart-1",
           chartTitle: "Endless World",
           difficultyLabel: "Re:MASTER",
+          level: "14+",
+          versionName: "CiRCLE",
+          kind: "DX",
           previousRank: 1,
           nextRank: 2,
           previousDxScore: 2400,
@@ -57,6 +63,7 @@ describe("Discord messages", () => {
     expect(message).toContain("## **다음 유저에 의해 해당 곡의 디럭스 스코어 등수가 하락하였습니다.**");
     expect(message).toContain("---\n유저 : **E.HOWL**");
     expect(message).toContain("유저 : **E.HOWL**");
+    expect(message).toContain("**Endless World** [Re:MASTER] · Lv 14+ · CiRCLE · DX");
     expect(message).toContain("내 DX 스코어");
     expect(message).toContain("역전 기록: DX 2,450 (+50)");
     expect(message).toContain("<https://maimai-challenge.vercel.app/charts/chart-1>");
@@ -72,6 +79,9 @@ describe("Discord messages", () => {
           chartId: "chart-1",
           chartTitle: "Endless World",
           difficultyLabel: "Re:MASTER",
+          level: "14+",
+          versionName: "CiRCLE",
+          kind: "DX",
           previousRank: 1,
           nextRank: 2,
           previousDxScore: 2400,
@@ -94,6 +104,9 @@ describe("Discord messages", () => {
           chartId: "chart-2",
           chartTitle: "Song B",
           difficultyLabel: "MASTER",
+          level: "13",
+          versionName: "PRiSM PLUS",
+          kind: "STANDARD",
           previousRank: 3,
           nextRank: 1,
           actorDxScore: 2400,
@@ -104,8 +117,7 @@ describe("Discord messages", () => {
     })[0];
 
     expect(message).toContain("## **E.HOWL의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.**");
-    expect(message).toContain("---\nSong B [MASTER]");
-    expect(message).toContain("Song B [MASTER]");
+    expect(message).toContain("---\n**Song B** [MASTER] · Lv 13 · PRiSM PLUS · STANDARD");
     expect(message).toContain("순위: #3 -> #1");
     expect(message).toContain("DX 스코어: 2,400 / 2,500");
     expect(message).toContain("<https://maimai-challenge.vercel.app/charts/chart-2>");

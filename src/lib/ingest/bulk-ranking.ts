@@ -8,6 +8,9 @@ export interface BulkRankingUpdate {
   chartId: string;
   title: string;
   difficultyLabel: string;
+  level: string;
+  versionName: string | null;
+  kind: string;
   dxScore: number;
   maxDxScore: number;
 }
@@ -19,6 +22,9 @@ export interface BulkRankingResult {
     RankingEvent & {
       chartTitle: string;
       difficultyLabel: string;
+      level: string;
+      versionName: string | null;
+      kind: string;
       actorDxScore: number;
       actorMaxDxScore: number;
     }
@@ -27,6 +33,9 @@ export interface BulkRankingResult {
     RankingEvent & {
       chartTitle: string;
       difficultyLabel: string;
+      level: string;
+      versionName: string | null;
+      kind: string;
       actorDxScore: number;
       actorMaxDxScore: number;
     }
@@ -79,6 +88,9 @@ export function detectBulkRankingEvents({
           ...event,
           chartTitle: update.title,
           difficultyLabel: update.difficultyLabel,
+          level: update.level,
+          versionName: update.versionName,
+          kind: update.kind,
           actorDxScore: update.dxScore,
           actorMaxDxScore: update.maxDxScore,
         });
@@ -92,6 +104,9 @@ export function detectBulkRankingEvents({
         ...event,
         chartTitle: update.title,
         difficultyLabel: update.difficultyLabel,
+        level: update.level,
+        versionName: update.versionName,
+        kind: update.kind,
         actorDxScore: update.dxScore,
         actorMaxDxScore: update.maxDxScore,
       });

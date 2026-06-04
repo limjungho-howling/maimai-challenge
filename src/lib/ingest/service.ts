@@ -31,6 +31,9 @@ interface CatalogChart {
   chartId: string;
   title: string;
   difficultyLabel: string;
+  level: string;
+  versionName: string | null;
+  kind: string;
 }
 
 interface IngestResult {
@@ -157,6 +160,9 @@ export async function ingestMaimaiPayload(
         chartId,
         title: chart.title,
         difficultyLabel: chart.difficultyLabel,
+        level: chart.level,
+        versionName: chart.versionName,
+        kind: chart.kind,
         dxScore: score.dxScore,
         maxDxScore: score.maxDxScore,
       })),
@@ -697,7 +703,7 @@ async function listCatalogCharts(
   for (let from = 0; ; from += DB_SELECT_PAGE_SIZE) {
     const { data, error } = await supabase
       .from("chart_leaderboard_summary")
-      .select("chart_id,title,kind,difficulty,difficulty_label")
+      .select("chart_id,title,kind,difficulty,difficulty_label,level,version_name")
       .in("difficulty", [3, 4])
       .range(from, from + DB_SELECT_PAGE_SIZE - 1);
 
@@ -720,6 +726,10 @@ async function listCatalogCharts(
         chartId: String(row.chart_id),
         title: String(row.title),
         difficultyLabel: String(row.difficulty_label),
+        level: String(row.level),
+        versionName:
+          typeof row.version_name === "string" ? row.version_name : null,
+        kind: String(row.kind),
       },
     );
   }
@@ -1036,6 +1046,9 @@ async function notifyChannel(
     userId: string;
     chartTitle: string;
     difficultyLabel: string;
+    level: string;
+    versionName: string | null;
+    kind: string;
     previousDxScore: number | null;
     nextDxScore: number;
     previousRank: number | null;
@@ -1048,6 +1061,9 @@ async function notifyChannel(
     userId: string;
     chartTitle: string;
     difficultyLabel: string;
+    level: string;
+    versionName: string | null;
+    kind: string;
     previousDxScore: number | null;
     nextDxScore: number;
     previousRank: number | null;
@@ -1064,6 +1080,9 @@ async function notifyChannel(
             chartId: event.chartId,
             chartTitle: event.chartTitle,
             difficultyLabel: event.difficultyLabel,
+            level: event.level,
+            versionName: event.versionName,
+            kind: event.kind,
             previousRank: event.previousRank,
             nextRank: event.nextRank,
             actorDxScore: event.actorDxScore,
@@ -1102,6 +1121,9 @@ async function buildPersonalChannelNotifications(
     userId: string;
     chartTitle: string;
     difficultyLabel: string;
+    level: string;
+    versionName: string | null;
+    kind: string;
     previousDxScore: number | null;
     nextDxScore: number;
     previousRank: number | null;
@@ -1149,6 +1171,9 @@ async function buildPersonalChannelNotifications(
           chartId: event.chartId,
           chartTitle: event.chartTitle,
           difficultyLabel: event.difficultyLabel,
+          level: event.level,
+          versionName: event.versionName,
+          kind: event.kind,
           previousDxScore: event.previousDxScore,
           nextDxScore: event.nextDxScore,
           previousRank: event.previousRank,
