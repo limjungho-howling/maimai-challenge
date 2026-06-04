@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { DISCORD_HEADING_TITLE_MAX_LENGTH } from "@/lib/discord/title";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { kstNowIsoString } from "@/lib/time";
 
@@ -42,7 +43,10 @@ export async function updateRankDropMessageTitles(formData: FormData): Promise<v
     .filter(([key]) => key.startsWith("rankDropTitle:"))
     .map(([key, value]) => ({
       targetProfileId: key.replace("rankDropTitle:", ""),
-      title: typeof value === "string" ? value.trim().slice(0, 120) : "",
+      title:
+        typeof value === "string"
+          ? value.trim().slice(0, DISCORD_HEADING_TITLE_MAX_LENGTH)
+          : "",
     }));
 
   const upserts = entries

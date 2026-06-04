@@ -6,6 +6,7 @@ import {
   updateRankDropMessageTitles,
 } from "@/app/dashboard/actions";
 import { BookmarkletButton } from "@/components/bookmarklet-button";
+import { RankDropTitleInput } from "@/components/rank-drop-title-input";
 import { getDashboardData } from "@/lib/data/dashboard";
 import { formatKstDateTime } from "@/lib/time";
 
@@ -173,13 +174,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                             {setting.discordUsername ?? "Discord 연결됨"}
                           </span>
                         </span>
-                        <input
-                          className="h-11 rounded-md border border-white/10 bg-slate-950/60 px-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300"
+                        <RankDropTitleInput
                           defaultValue={setting.title ?? ""}
-                          maxLength={120}
                           name={`rankDropTitle:${setting.targetProfileId}`}
                           placeholder={DEFAULT_RANK_DROP_TITLE}
-                          type="text"
                         />
                       </label>
                     ))

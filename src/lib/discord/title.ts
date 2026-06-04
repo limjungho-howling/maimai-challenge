@@ -1,0 +1,1 @@
+export const DISCORD_HEADING_TITLE_MAX_LENGTH = 60;

@@ -121,7 +121,6 @@ export function buildChannelRankUpMessages({
   events: ChannelRankUpEvent[];
   appUrl: string;
 }): string[] {
-  const boldActorName = boldDiscordText(actorName);
   return events.map((event) => {
     const previousRank = event.previousRank === null ? "-" : `#${event.previousRank}`;
     return [

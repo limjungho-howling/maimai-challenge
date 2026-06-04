@@ -519,7 +519,13 @@ async function upsertSongs(
   const songsWithJackets = songs.filter((song) => song.jacket_url);
   const songsWithoutJackets = songs
     .filter((song) => !song.jacket_url)
-    .map(({ jacket_url: _jacketUrl, ...song }) => song);
+    .map((song) => ({
+      title: song.title,
+      kind: song.kind,
+      version_number: song.version_number,
+      version_name: song.version_name,
+      updated_at: song.updated_at,
+    }));
   const idsByKey = new Map<string, string>();
 
   const upsertSongChunks = async <T extends { title: string; kind: SongKind }>(
