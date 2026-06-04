@@ -280,7 +280,10 @@ export async function fetchDailyChallengeGoals({
     profileId,
     [...new Set(eventTargets.map((event) => event.ingestRunId))],
   );
-  const rankings = await fetchDailyRankings(supabase, chartIds);
+  const rankings = await fetchDailyRankings(supabase, chartIds, [
+    profileId,
+    ...targetProfileIds,
+  ]);
 
   const rankingsByChartId = new Map<string, typeof rankings>();
   for (const ranking of rankings) {
@@ -543,14 +546,17 @@ async function fetchDailyTargetProfiles(
 async function fetchDailyRankings(
   supabase: SupabaseClient,
   chartIds: string[],
+  profileIds: string[],
 ): Promise<DailyRankingRow[]> {
   const rows: DailyRankingRow[] = [];
+  const uniqueProfileIds = [...new Set(profileIds)];
 
   for (const chunk of chunkArray(chartIds, DAILY_FILTER_CHUNK_SIZE)) {
     const { data, error } = await supabase
       .from("chart_rankings")
       .select("chart_id, profile_id, player_name, dx_score, rank")
-      .in("chart_id", chunk);
+      .in("chart_id", chunk)
+      .in("profile_id", uniqueProfileIds);
 
     if (error) {
       throw error;
