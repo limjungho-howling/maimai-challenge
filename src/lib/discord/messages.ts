@@ -51,6 +51,19 @@ export interface DailyChallengeGoal {
   targetDxScore: number;
 }
 
+export interface RivalChallengeGoal {
+  chartTitle: string;
+  level: string;
+  versionName: string | null;
+  kind: string;
+  difficultyLabel: string;
+  currentRank: number;
+  currentDxScore: number;
+  targetPlayerName: string;
+  targetRank: number;
+  targetDxScore: number;
+}
+
 export interface RecommendedChart {
   chartId: string;
   chartTitle: string;
@@ -179,6 +192,42 @@ export function buildDailyChallengeMessage({
 
   return [
     formatDiscordTitle(`${playerName}님의 오늘의 도전장 ${goals.length}개`),
+    "---",
+    `레벨: ${levelLabel}`,
+    `대상: ${targetLabel}`,
+    ...lines,
+  ].join("\n");
+}
+
+export function buildRivalChallengeMessage({
+  playerName,
+  levelLabel,
+  targetLabel,
+  goals,
+}: {
+  playerName: string;
+  levelLabel: string;
+  targetLabel: string;
+  goals: RivalChallengeGoal[];
+}): string {
+  if (goals.length === 0) {
+    return [
+      formatDiscordTitle(`${playerName}님, 선택한 조건의 라이벌 목표가 없습니다.`),
+      "---",
+      `레벨: ${levelLabel}`,
+      `대상: ${targetLabel}`,
+      "내 DX 스코어가 대상 유저보다 낮은 곡만 표시합니다.",
+    ].join("\n");
+  }
+
+  const lines = goals.flatMap((goal, index) => [
+    `${index + 1}. ${boldDiscordText(goal.chartTitle)} [${goal.difficultyLabel}] · Lv ${goal.level} · ${goal.versionName ?? "버전 미등록"} · ${formatSongKind(goal.kind)}`,
+    `   내 기록: #${goal.currentRank} · DX ${goal.currentDxScore.toLocaleString("ko-KR")}`,
+    `   목표: #${goal.targetRank} ${boldDiscordText(goal.targetPlayerName)} · DX ${goal.targetDxScore.toLocaleString("ko-KR")}`,
+  ]);
+
+  return [
+    formatDiscordTitle(`${playerName}님의 라이벌 목표 ${goals.length}개`),
     "---",
     `레벨: ${levelLabel}`,
     `대상: ${targetLabel}`,

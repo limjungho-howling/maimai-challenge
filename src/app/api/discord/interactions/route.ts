@@ -7,6 +7,7 @@ import {
   buildDailyChallengeMessage,
   buildRankGoalMessage,
   buildRecommendMessage,
+  buildRivalChallengeMessage,
 } from "@/lib/discord/messages";
 import {
   DAILY_LEVEL_OPTIONS,
@@ -14,6 +15,7 @@ import {
   fetchDailyChallengeUserOptions,
   fetchRankGoalsForDiscordUser,
   fetchRecommendedCharts,
+  fetchRivalChallengeGoals,
 } from "@/lib/discord/goals";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
@@ -77,8 +79,12 @@ export async function POST(request: Request) {
     return recommendLevelPrompt();
   }
 
+  if (["rival", "라이벌"].includes(commandName)) {
+    return rivalLevelPrompt();
+  }
+
   if (!["goals", "goal", "목표"].includes(commandName)) {
-    return commandResponse("지원하지 않는 명령어입니다. `/goals`, `/daily`, `/recommend`를 사용해주세요.");
+    return commandResponse("지원하지 않는 명령어입니다. `/goals`, `/daily`, `/recommend`, `/rival`을 사용해주세요.");
   }
 
   const supabase = createSupabaseServiceClient();
@@ -109,6 +115,15 @@ async function handleMessageComponent({
     const supabase = createSupabaseServiceClient();
     const userOptions = await fetchDailyChallengeUserOptions(supabase, discordUserId);
     return dailyUserPrompt(value, userOptions);
+  }
+
+  if (customId === "rival_level") {
+    const supabase = createSupabaseServiceClient();
+    const userOptions = await fetchDailyChallengeUserOptions(supabase, discordUserId);
+    return rivalUserPrompt(
+      value,
+      userOptions.filter((option) => option.value !== "all"),
+    );
   }
 
   if (customId === "recommend_level") {
@@ -172,7 +187,49 @@ async function handleMessageComponent({
     return deferredCommandResponse("도전장 목표를 찾는 중입니다.");
   }
 
-  return commandResponse("지원하지 않는 선택 메뉴입니다. `/daily` 또는 `/recommend`를 다시 실행해주세요.");
+  if (customId.startsWith("rival_user:")) {
+    const level = decodeURIComponent(customId.slice("rival_user:".length));
+    const targetProfileId = value;
+
+    if (!applicationId || !interactionToken) {
+      return commandResponse("Discord interaction 후속 응답 정보를 확인하지 못했습니다.");
+    }
+
+    after(async () => {
+      try {
+        const supabase = createSupabaseServiceClient();
+        const { playerName, targetLabel, goals } = await fetchRivalChallengeGoals({
+          supabase,
+          discordUserId,
+          level,
+          targetProfileId,
+          count: 3,
+        });
+        const levelLabel = getDailyLevelLabel(level);
+
+        await updateDeferredInteractionResponse({
+          applicationId,
+          interactionToken,
+          content: buildRivalChallengeMessage({
+            playerName,
+            levelLabel,
+            targetLabel,
+            goals,
+          }),
+        });
+      } catch (error) {
+        await updateDeferredInteractionResponse({
+          applicationId,
+          interactionToken,
+          content: `라이벌 목표를 불러오는 중 오류가 발생했습니다: ${getErrorMessage(error)}`,
+        });
+      }
+    });
+
+    return deferredCommandResponse("라이벌 목표를 찾는 중입니다.");
+  }
+
+  return commandResponse("지원하지 않는 선택 메뉴입니다. `/daily`, `/recommend`, `/rival`을 다시 실행해주세요.");
 }
 
 function dailyLevelPrompt() {
@@ -232,6 +289,51 @@ function recommendLevelPrompt() {
           min_values: 1,
           max_values: 1,
           options: DAILY_LEVEL_OPTIONS.map((option) => ({
+            label: option.label,
+            value: option.value,
+          })),
+        },
+      ],
+    },
+  ]);
+}
+
+function rivalLevelPrompt() {
+  return commandResponse("어떤 레벨에 대해 라이벌 목표를 받으시겠습니까?", [
+    {
+      type: DISCORD_ACTION_ROW,
+      components: [
+        {
+          type: DISCORD_STRING_SELECT,
+          custom_id: "rival_level",
+          placeholder: "레벨 선택",
+          min_values: 1,
+          max_values: 1,
+          options: DAILY_LEVEL_OPTIONS.map((option) => ({
+            label: option.label,
+            value: option.value,
+          })),
+        },
+      ],
+    },
+  ]);
+}
+
+function rivalUserPrompt(
+  level: string,
+  userOptions: Array<{ label: string; value: string }>,
+) {
+  return commandResponse("어떤 유저를 목표로 삼으시겠습니까?", [
+    {
+      type: DISCORD_ACTION_ROW,
+      components: [
+        {
+          type: DISCORD_STRING_SELECT,
+          custom_id: `rival_user:${encodeURIComponent(level)}`,
+          placeholder: "대상 유저 선택",
+          min_values: 1,
+          max_values: 1,
+          options: userOptions.map((option) => ({
             label: option.label,
             value: option.value,
           })),

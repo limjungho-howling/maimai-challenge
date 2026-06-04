@@ -6,9 +6,11 @@ import {
   buildPersonalRankDropMessages,
   buildRankGoalMessage,
   buildRecommendMessage,
+  buildRivalChallengeMessage,
   type DailyChallengeGoal,
   type RankGoal,
   type RecommendedChart,
+  type RivalChallengeGoal,
 } from "@/lib/discord/messages";
 
 describe("Discord messages", () => {
@@ -216,5 +218,36 @@ describe("Discord messages", () => {
     expect(message).toContain("상위 5명:");
     expect(message).toContain("- #1 **E.HOWL** · DX 2,451");
     expect(message).toContain("- #2 **CHANA** · DX 2,400");
+  });
+
+  it("builds rival challenge messages with target records", () => {
+    const goals: RivalChallengeGoal[] = [
+      {
+        chartTitle: "スーパーシンメトリー",
+        level: "13+",
+        versionName: "UNiVERSE",
+        kind: "DX",
+        difficultyLabel: "MASTER",
+        currentRank: 11,
+        currentDxScore: 2936,
+        targetPlayerName: "Ｔ＿ＫＫα",
+        targetRank: 7,
+        targetDxScore: 2957,
+      },
+    ];
+
+    const message = buildRivalChallengeMessage({
+      playerName: "Ｅ．ＨＯＷＬ",
+      levelLabel: "13+",
+      targetLabel: "Ｔ＿ＫＫα",
+      goals,
+    });
+
+    expect(message).toContain("## **Ｅ．ＨＯＷＬ님의 라이벌 목표 1개**");
+    expect(message).toContain("---\n레벨: 13+");
+    expect(message).toContain("대상: Ｔ＿ＫＫα");
+    expect(message).toContain("**スーパーシンメトリー** [MASTER] · Lv 13+ · UNiVERSE · DX");
+    expect(message).toContain("내 기록: #11 · DX 2,936");
+    expect(message).toContain("목표: #7 **Ｔ＿ＫＫα** · DX 2,957");
   });
 });

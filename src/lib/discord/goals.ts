@@ -4,6 +4,7 @@ import type {
   DailyChallengeGoal,
   RankGoal,
   RecommendedChart,
+  RivalChallengeGoal,
 } from "@/lib/discord/messages";
 
 export const DAILY_LEVEL_OPTIONS = [
@@ -56,6 +57,15 @@ interface DailyRankingRow {
   player_name: unknown;
   dx_score: unknown;
   rank: unknown;
+}
+
+interface RivalChartSummaryRow {
+  chart_id: unknown;
+  title: unknown;
+  difficulty_label: unknown;
+  level: unknown;
+  version_name: unknown;
+  kind: unknown;
 }
 
 export function pickRandomItems<T>(
@@ -358,6 +368,98 @@ export async function fetchDailyChallengeGoals({
   };
 }
 
+export async function fetchRivalChallengeGoals({
+  supabase,
+  discordUserId,
+  level,
+  targetProfileId,
+  count = 3,
+}: {
+  supabase: SupabaseClient;
+  discordUserId: string;
+  level: string;
+  targetProfileId: string;
+  count?: number;
+}): Promise<{ playerName: string; targetLabel: string; goals: RivalChallengeGoal[] }> {
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("id, maimai_name")
+    .eq("discord_user_id", discordUserId)
+    .maybeSingle();
+
+  if (profileError) {
+    throw profileError;
+  }
+
+  if (!profile || targetProfileId === "all") {
+    return { playerName: "Unknown", targetLabel: "대상 유저", goals: [] };
+  }
+
+  const profileId = String(profile.id);
+  const playerName = typeof profile.maimai_name === "string" ? profile.maimai_name : "Unknown";
+  const targetLabel = await fetchDailyTargetLabel(supabase, targetProfileId);
+  const summaries = await fetchRivalCandidateCharts(supabase, level);
+
+  if (summaries.length === 0) {
+    return { playerName, targetLabel, goals: [] };
+  }
+
+  const chartIds = summaries.map((summary) => String(summary.chart_id));
+  const rankings = await fetchDailyRankings(supabase, chartIds, [
+    profileId,
+    targetProfileId,
+  ]);
+  const rankingsByChartId = new Map<string, DailyRankingRow[]>();
+
+  for (const ranking of rankings) {
+    const chartId = String(ranking.chart_id);
+    const existing = rankingsByChartId.get(chartId) ?? [];
+    existing.push(ranking);
+    rankingsByChartId.set(chartId, existing);
+  }
+
+  const candidates: RivalChallengeGoal[] = [];
+  for (const summary of summaries) {
+    const chartRankings = rankingsByChartId.get(String(summary.chart_id)) ?? [];
+    const current = chartRankings.find(
+      (ranking) => String(ranking.profile_id) === profileId,
+    );
+    const target = chartRankings.find(
+      (ranking) => String(ranking.profile_id) === targetProfileId,
+    );
+
+    if (!current || !target) {
+      continue;
+    }
+
+    const currentDxScore = Number(current.dx_score);
+    const targetDxScore = Number(target.dx_score);
+    if (currentDxScore >= targetDxScore) {
+      continue;
+    }
+
+    candidates.push({
+      chartTitle: String(summary.title),
+      level: String(summary.level),
+      versionName:
+        typeof summary.version_name === "string" ? summary.version_name : null,
+      kind: String(summary.kind ?? "타입 미등록"),
+      difficultyLabel: String(summary.difficulty_label),
+      currentRank: Number(current.rank),
+      currentDxScore,
+      targetPlayerName: String(target.player_name ?? targetLabel),
+      targetRank: Number(target.rank),
+      targetDxScore,
+    });
+  }
+
+  return {
+    playerName,
+    targetLabel,
+    goals: pickRandomItems(candidates, count),
+  };
+}
+
 export async function fetchRecommendedCharts({
   supabase,
   discordUserId,
@@ -490,6 +592,41 @@ async function fetchRecommendCandidateCharts(
     }
 
     rows.push(...(data ?? []));
+
+    if (!data || data.length < pageSize) {
+      break;
+    }
+  }
+
+  return rows;
+}
+
+async function fetchRivalCandidateCharts(
+  supabase: SupabaseClient,
+  level: string,
+): Promise<RivalChartSummaryRow[]> {
+  const pageSize = 1000;
+  const rows: RivalChartSummaryRow[] = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const to = from + pageSize - 1;
+    let query = supabase
+      .from("chart_leaderboard_summary")
+      .select("chart_id, title, difficulty_label, level, version_name, kind")
+      .in("difficulty", [3, 4])
+      .order("title", { ascending: true })
+      .range(from, to);
+
+    if (level !== "all") {
+      query = query.eq("level", level);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
+
+    rows.push(...((data ?? []) as RivalChartSummaryRow[]));
 
     if (!data || data.length < pageSize) {
       break;
