@@ -1,5 +1,6 @@
 import { createPublicKey, verify } from "node:crypto";
 
+import { after } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
@@ -23,6 +24,7 @@ const DISCORD_APPLICATION_COMMAND = 2;
 const DISCORD_MESSAGE_COMPONENT = 3;
 const DISCORD_PONG_RESPONSE = 1;
 const DISCORD_CHANNEL_MESSAGE_RESPONSE = 4;
+const DISCORD_DEFERRED_CHANNEL_MESSAGE_RESPONSE = 5;
 const DISCORD_EPHEMERAL_FLAG = 64;
 const DISCORD_SUPPRESS_EMBEDS_FLAG = 4;
 const DISCORD_ACTION_ROW = 1;
@@ -38,6 +40,8 @@ export async function POST(request: Request) {
   const interaction = JSON.parse(body) as {
     type?: number;
     data?: { name?: string; custom_id?: string; values?: string[] };
+    application_id?: string;
+    token?: string;
     member?: { user?: { id?: string } };
     user?: { id?: string };
   };
@@ -52,7 +56,12 @@ export async function POST(request: Request) {
   }
 
   if (interaction.type === DISCORD_MESSAGE_COMPONENT) {
-    return handleMessageComponent(interaction.data, discordUserId);
+    return handleMessageComponent({
+      data: interaction.data,
+      discordUserId,
+      applicationId: interaction.application_id,
+      interactionToken: interaction.token,
+    });
   }
 
   if (interaction.type !== DISCORD_APPLICATION_COMMAND) {
@@ -82,10 +91,17 @@ export async function POST(request: Request) {
   return commandResponse(buildRankGoalMessage(playerName, goals));
 }
 
-async function handleMessageComponent(
-  data: { custom_id?: string; values?: string[] } | undefined,
-  discordUserId: string,
-) {
+async function handleMessageComponent({
+  data,
+  discordUserId,
+  applicationId,
+  interactionToken,
+}: {
+  data: { custom_id?: string; values?: string[] } | undefined;
+  discordUserId: string;
+  applicationId?: string;
+  interactionToken?: string;
+}) {
   const customId = data?.custom_id ?? "";
   const value = data?.values?.[0] ?? "";
 
@@ -117,24 +133,43 @@ async function handleMessageComponent(
   if (customId.startsWith("daily_user:")) {
     const level = decodeURIComponent(customId.slice("daily_user:".length));
     const targetProfileId = value || "all";
-    const supabase = createSupabaseServiceClient();
-    const { playerName, targetLabel, goals } = await fetchDailyChallengeGoals({
-      supabase,
-      discordUserId,
-      level,
-      targetProfileId,
-      count: 3,
-    });
-    const levelLabel = getDailyLevelLabel(level);
 
-    return commandResponse(
-      buildDailyChallengeMessage({
-        playerName,
-        levelLabel,
-        targetLabel,
-        goals,
-      }),
-    );
+    if (!applicationId || !interactionToken) {
+      return commandResponse("Discord interaction 후속 응답 정보를 확인하지 못했습니다.");
+    }
+
+    after(async () => {
+      try {
+        const supabase = createSupabaseServiceClient();
+        const { playerName, targetLabel, goals } = await fetchDailyChallengeGoals({
+          supabase,
+          discordUserId,
+          level,
+          targetProfileId,
+          count: 3,
+        });
+        const levelLabel = getDailyLevelLabel(level);
+
+        await updateDeferredInteractionResponse({
+          applicationId,
+          interactionToken,
+          content: buildDailyChallengeMessage({
+            playerName,
+            levelLabel,
+            targetLabel,
+            goals,
+          }),
+        });
+      } catch (error) {
+        await updateDeferredInteractionResponse({
+          applicationId,
+          interactionToken,
+          content: `도전장 목표를 불러오는 중 오류가 발생했습니다: ${getErrorMessage(error)}`,
+        });
+      }
+    });
+
+    return deferredCommandResponse("도전장 목표를 찾는 중입니다.");
   }
 
   return commandResponse("지원하지 않는 선택 메뉴입니다. `/daily` 또는 `/recommend`를 다시 실행해주세요.");
@@ -218,6 +253,45 @@ function commandResponse(content: string, components: unknown[] = []) {
   });
 }
 
+function deferredCommandResponse(content: string) {
+  return NextResponse.json({
+    type: DISCORD_DEFERRED_CHANNEL_MESSAGE_RESPONSE,
+    data: {
+      content,
+      flags: DISCORD_EPHEMERAL_FLAG | DISCORD_SUPPRESS_EMBEDS_FLAG,
+      allowed_mentions: { parse: [] },
+    },
+  });
+}
+
+async function updateDeferredInteractionResponse({
+  applicationId,
+  interactionToken,
+  content,
+}: {
+  applicationId: string;
+  interactionToken: string;
+  content: string;
+}) {
+  const response = await fetch(
+    `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}/messages/@original`,
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content,
+        flags: DISCORD_EPHEMERAL_FLAG | DISCORD_SUPPRESS_EMBEDS_FLAG,
+        allowed_mentions: { parse: [] },
+        components: [],
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Discord follow-up failed: ${response.status} ${await response.text()}`);
+  }
+}
+
 function getDailyLevelLabel(level: string): string {
   return DAILY_LEVEL_OPTIONS.find((option) => option.value === level)?.label ?? level;
 }
@@ -258,4 +332,8 @@ function verifyDiscordSignature(request: Request, body: string): boolean {
   } catch {
     return false;
   }
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : "Unknown error";
 }
