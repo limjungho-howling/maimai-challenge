@@ -32,10 +32,10 @@ export function RankDropTitleInput({
         value={value}
       />
       <span className="flex items-center justify-between gap-3 text-xs">
-        <span className={isAtLimit ? "text-amber-200" : "text-slate-500"}>
+        <span className="text-amber-200">
           {isAtLimit
             ? `최대 ${DISCORD_HEADING_TITLE_MAX_LENGTH}자까지 입력할 수 있습니다.`
-            : "Discord 제목 영역에서 잘리지 않도록 제한됩니다."}
+            : ""}
         </span>
         <span className="shrink-0 text-slate-500">
           {value.length}/{DISCORD_HEADING_TITLE_MAX_LENGTH}
