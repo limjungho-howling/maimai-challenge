@@ -77,11 +77,13 @@ export async function listPlayerLeaderboard(
     rankings,
     monthlyChallengeCounts,
     monthlyChallengePoints,
+    totalChartCount,
   ] = await Promise.all([
     fetchAllProfiles(supabase),
     fetchAllRankings(supabase),
     fetchMonthlyChallengeCounts(supabase, monthKey),
     fetchMonthlyChallengePoints(supabase, monthKey),
+    fetchTotalChartCount(supabase),
   ]);
   const monthlyChallengeEntries = buildMonthlyChallengeLeaderboard(
     profiles,
@@ -180,14 +182,10 @@ export async function listPlayerLeaderboard(
       latestUpdatedAt: stats.latestUpdatedAt,
     };
   });
-  const fiveStarTotal = entries.reduce(
-    (sum, entry) => sum + entry.fiveStarCount,
-    0,
-  );
 
-  if (fiveStarTotal > 0) {
+  if (totalChartCount > 0) {
     for (const entry of entries) {
-      entry.fiveStarPercent = (entry.fiveStarCount / fiveStarTotal) * 100;
+      entry.fiveStarPercent = (entry.fiveStarCount / totalChartCount) * 100;
     }
   }
 
@@ -459,6 +457,22 @@ async function fetchAllRankings(
 
     return { count, data: (data ?? []) as RankingRow[], error };
   });
+}
+
+async function fetchTotalChartCount(
+  supabase: ReturnType<typeof createSupabaseServiceClient>,
+): Promise<number> {
+  const { count, error } = await supabase
+    .from("song_charts")
+    .select("id", { count: "exact", head: true })
+    .in("difficulty", [3, 4]);
+
+  if (error) {
+    console.error(error);
+    return 0;
+  }
+
+  return count ?? 0;
 }
 
 async function fetchMonthlyChallengeCounts(

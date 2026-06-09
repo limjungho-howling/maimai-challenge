@@ -102,7 +102,7 @@ async function PlayerLeaderboardContent({
               : isMonthlyChallengeTab
               ? "전체-도전장-로그 채널에 성공적으로 발송된 등수 상승 로그 수로 순위를 계산합니다."
               : isFiveStarTab
-                ? "최대 DX 스코어의 97% 이상을 달성한 5성 차트 수로 순위를 계산합니다."
+                ? "전체 MASTER/Re:MASTER 차트 중 최대 DX 스코어의 97% 이상을 달성한 비율을 표시합니다."
               : isInfluenceTab
                 ? "전체 곡의 1~5등 점수를 합산해 각 유저의 비율을 계산합니다."
                 : "동점 1등은 각 유저 모두 1등 곡 수에 포함됩니다."}
@@ -151,58 +151,46 @@ async function PlayerLeaderboardContent({
       </section>
 
       {isFiveStarTab ? (
-        <>
-          <PlayerSharePieChart
-            emptyMessage="5성 달성 기록이 있는 유저가 아직 없습니다."
-            players={players.map((player) => ({
-              profileId: player.profileId,
-              playerName: player.playerName,
-              percent: player.fiveStarPercent,
-              value: player.fiveStarCount,
-            }))}
-            unit="개"
-          />
-          <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
-            <div className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-md:hidden">
-              <span>순위</span>
-              <span>유저</span>
-              <span>5성</span>
-              <span>비율</span>
-              <span>최근 갱신</span>
-            </div>
-            {players.length === 0 ? (
-              <EmptyPlayers />
-            ) : (
-              <div className="divide-y divide-white/10">
-                {[...players]
-                  .sort((left, right) => {
-                    if (right.fiveStarCount !== left.fiveStarCount) {
-                      return right.fiveStarCount - left.fiveStarCount;
-                    }
-                    return left.playerName.localeCompare(right.playerName);
-                  })
-                  .map((player) => (
-                    <div
-                      className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 px-4 py-4 max-md:grid-cols-2"
-                      key={player.profileId}
-                    >
-                      <div className="font-mono text-lg text-cyan-100">
-                        #{player.fiveStarRank}
-                      </div>
-                      <PlayerIdentity player={player} />
-                      <div className="font-mono text-sm text-slate-100">
-                        {player.fiveStarCount.toLocaleString("ko-KR")}개
-                      </div>
-                      <div className="font-mono text-sm text-slate-100">
-                        {player.fiveStarPercent.toFixed(2)}%
-                      </div>
-                      <UpdatedAt value={player.latestUpdatedAt} />
+        <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
+          <div className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-md:hidden">
+            <span>순위</span>
+            <span>유저</span>
+            <span>5성</span>
+            <span>비율</span>
+            <span>최근 갱신</span>
+          </div>
+          {players.length === 0 ? (
+            <EmptyPlayers />
+          ) : (
+            <div className="divide-y divide-white/10">
+              {[...players]
+                .sort((left, right) => {
+                  if (right.fiveStarCount !== left.fiveStarCount) {
+                    return right.fiveStarCount - left.fiveStarCount;
+                  }
+                  return left.playerName.localeCompare(right.playerName);
+                })
+                .map((player) => (
+                  <div
+                    className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 px-4 py-4 max-md:grid-cols-2"
+                    key={player.profileId}
+                  >
+                    <div className="font-mono text-lg text-cyan-100">
+                      #{player.fiveStarRank}
                     </div>
-                  ))}
-              </div>
-            )}
-          </section>
-        </>
+                    <PlayerIdentity player={player} />
+                    <div className="font-mono text-sm text-slate-100">
+                      {player.fiveStarCount.toLocaleString("ko-KR")}개
+                    </div>
+                    <div className="font-mono text-sm text-slate-100">
+                      {player.fiveStarPercent.toFixed(2)}%
+                    </div>
+                    <UpdatedAt value={player.latestUpdatedAt} />
+                  </div>
+                ))}
+            </div>
+          )}
+        </section>
       ) : isMonthlyChallengePointTab ? (
         <>
           <PlayerSharePieChart
