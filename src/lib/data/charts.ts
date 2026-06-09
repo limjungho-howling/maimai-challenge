@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
+import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
 export const CHART_LIST_CACHE_TAG = "chart-list";
@@ -373,7 +374,13 @@ const cachedListChartRankings = unstable_cache(
     return [];
   }
 
-  return (data ?? []).map((row) => ({
+  const rankings = data ?? [];
+  const changedAtByProfileId = await fetchLatestChartRankingChangeTimes(
+    chartId,
+    rankings.map((row) => String(row.profile_id)),
+  );
+
+  return rankings.map((row) => ({
     chartId: String(row.chart_id),
     profileId: String(row.profile_id),
     playerName: row.player_name ?? "Unknown",
@@ -383,13 +390,48 @@ const cachedListChartRankings = unstable_cache(
     dxScore: Number(row.dx_score),
     maxDxScore: Number(row.max_dx_score),
     dxStarCount: Number(row.dx_star_count ?? 0),
-    updatedAt: String(row.updated_at),
+    updatedAt:
+      changedAtByProfileId.get(String(row.profile_id)) ?? String(row.updated_at),
     rank: Number(row.rank),
   }));
   },
   ["chart-rankings"],
   { revalidate: 60, tags: [CHART_LIST_CACHE_TAG] },
 );
+
+async function fetchLatestChartRankingChangeTimes(
+  chartId: string,
+  profileIds: string[],
+): Promise<Map<string, string>> {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || profileIds.length === 0) {
+    return new Map();
+  }
+
+  const supabase = createSupabaseServiceClient();
+  const { data, error } = await supabase
+    .from("ranking_events")
+    .select("profile_id, created_at")
+    .eq("chart_id", chartId)
+    .in("profile_id", [...new Set(profileIds)])
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return new Map();
+  }
+
+  const changedAtByProfileId = new Map<string, string>();
+
+  for (const row of data ?? []) {
+    const profileId = String(row.profile_id);
+
+    if (!changedAtByProfileId.has(profileId) && typeof row.created_at === "string") {
+      changedAtByProfileId.set(profileId, row.created_at);
+    }
+  }
+
+  return changedAtByProfileId;
+}
 
 function mapChartSummary(row: Record<string, unknown>): ChartSummary {
   return {

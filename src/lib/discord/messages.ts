@@ -107,7 +107,7 @@ export function buildPersonalRankDropMessages({
       `  순위: ${previousRank} -> #${event.nextRank}`,
       `  내 DX 스코어: ${event.nextDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
       `  역전 기록: DX ${event.actorDxScore.toLocaleString("ko-KR")} (${formatSignedDifference(event.actorDxScore - event.nextDxScore)})`,
-      `  곡 랭킹: <${trimTrailingSlash(appUrl)}/charts/${event.chartId}>`,
+      `  곡 랭킹: ${formatChartRankingLink(appUrl, event.chartId)}`,
     ].join("\n");
   });
 }
@@ -131,7 +131,7 @@ export function buildChannelRankUpMessages({
       `${boldDiscordText(event.chartTitle)} [${event.difficultyLabel}] · Lv ${event.level} · ${event.versionName ?? "버전 미등록"} · ${formatSongKind(event.kind)}`,
       `  순위: ${previousRank} -> #${event.nextRank}`,
       `  DX 스코어: ${event.actorDxScore.toLocaleString("ko-KR")} / ${event.actorMaxDxScore.toLocaleString("ko-KR")}`,
-      `  곡 랭킹: <${trimTrailingSlash(appUrl)}/charts/${event.chartId}>`,
+      `  곡 랭킹: ${formatChartRankingLink(appUrl, event.chartId)}`,
     ].join("\n");
   });
 }
@@ -263,7 +263,7 @@ export function buildRecommendMessage({
         ? "미등록"
         : recommendation.currentDxScore.toLocaleString("ko-KR")
     } / ${recommendation.maxDxScore.toLocaleString("ko-KR")}`,
-    `   곡 랭킹: <${trimTrailingSlash(appUrl)}/charts/${recommendation.chartId}>`,
+    `   곡 랭킹: ${formatChartRankingLink(appUrl, recommendation.chartId)}`,
     "   상위 5명:",
     ...(recommendation.topScores.length > 0
       ? recommendation.topScores.map(
@@ -283,6 +283,10 @@ export function buildRecommendMessage({
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/g, "");
+}
+
+function formatChartRankingLink(appUrl: string, chartId: string): string {
+  return `[보기](<${trimTrailingSlash(appUrl)}/charts/${chartId}>)`;
 }
 
 function formatSignedDifference(value: number): string {

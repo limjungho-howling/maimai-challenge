@@ -7,12 +7,15 @@ export interface PlayerLeaderboardEntry {
   profileId: string;
   rank: number;
   influenceRank: number;
+  fiveStarRank: number;
   monthlyChallengeRank: number;
   monthlyChallengePointRank: number;
   playerName: string;
   discordUsername: string | null;
   maimaiRating: number | null;
   firstPlaceCount: number;
+  fiveStarCount: number;
+  fiveStarPercent: number;
   influenceScore: number;
   influencePercent: number;
   monthlyChallengeCount: number;
@@ -32,6 +35,7 @@ interface ProfileRow {
 }
 
 interface RankingRow {
+  dx_star_count: number | null;
   profile_id: string;
   rank: number;
   updated_at: string | null;
@@ -97,6 +101,7 @@ export async function listPlayerLeaderboard(
     string,
     {
       firstPlaceCount: number;
+      fiveStarCount: number;
       influenceScore: number;
       influenceBasisPoints: number;
       scoreCount: number;
@@ -107,6 +112,7 @@ export async function listPlayerLeaderboard(
   for (const ranking of rankings) {
     const stats = statsByProfileId.get(ranking.profile_id) ?? {
       firstPlaceCount: 0,
+      fiveStarCount: 0,
       influenceScore: 0,
       influenceBasisPoints: 0,
       scoreCount: 0,
@@ -117,6 +123,9 @@ export async function listPlayerLeaderboard(
     const rank = Number(ranking.rank);
     if (rank === 1) {
       stats.firstPlaceCount += 1;
+    }
+    if (Number(ranking.dx_star_count) === 5) {
+      stats.fiveStarCount += 1;
     }
     if (rank >= 1 && rank <= 5) {
       stats.influenceScore += 6 - rank;
@@ -139,6 +148,7 @@ export async function listPlayerLeaderboard(
     const monthlyChallengePoint = monthlyChallengePointsByProfileId.get(profile.id);
     const stats = statsByProfileId.get(profile.id) ?? {
       firstPlaceCount: 0,
+      fiveStarCount: 0,
       influenceScore: 0,
       influenceBasisPoints: 0,
       scoreCount: 0,
@@ -149,6 +159,7 @@ export async function listPlayerLeaderboard(
       profileId: profile.id,
       rank: 0,
       influenceRank: 0,
+      fiveStarRank: 0,
       monthlyChallengeRank: monthlyChallenge?.monthlyChallengeRank ?? 0,
       monthlyChallengePointRank:
         monthlyChallengePoint?.monthlyChallengePointRank ?? 0,
@@ -156,6 +167,8 @@ export async function listPlayerLeaderboard(
       discordUsername: profile.discord_username,
       maimaiRating: profile.maimai_rating,
       firstPlaceCount: stats.firstPlaceCount,
+      fiveStarCount: stats.fiveStarCount,
+      fiveStarPercent: 0,
       influenceScore: stats.influenceScore,
       influencePercent: stats.influenceBasisPoints / 100,
       monthlyChallengeCount: monthlyChallenge?.monthlyChallengeCount ?? 0,
@@ -167,12 +180,30 @@ export async function listPlayerLeaderboard(
       latestUpdatedAt: stats.latestUpdatedAt,
     };
   });
+  const fiveStarTotal = entries.reduce(
+    (sum, entry) => sum + entry.fiveStarCount,
+    0,
+  );
+
+  if (fiveStarTotal > 0) {
+    for (const entry of entries) {
+      entry.fiveStarPercent = (entry.fiveStarCount / fiveStarTotal) * 100;
+    }
+  }
 
   assignCompetitionRanks(
     entries,
     (item) => item.influenceScore,
     (item, rank) => {
       item.influenceRank = rank;
+    },
+    (left, right) => left.playerName.localeCompare(right.playerName),
+  );
+  assignCompetitionRanks(
+    entries,
+    (item) => item.fiveStarCount,
+    (item, rank) => {
+      item.fiveStarRank = rank;
     },
     (left, right) => left.playerName.localeCompare(right.playerName),
   );
@@ -421,7 +452,7 @@ async function fetchAllRankings(
   return fetchAllPagedRows<RankingRow>(async (from, to, withCount) => {
     const { data, count, error } = await supabase
       .from("chart_rankings")
-      .select("profile_id, rank, updated_at", {
+      .select("profile_id, rank, dx_star_count, updated_at", {
         count: withCount ? "exact" : undefined,
       })
       .range(from, to);

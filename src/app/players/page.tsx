@@ -13,6 +13,7 @@ import { formatKstDateTime } from "@/lib/time";
 export const dynamic = "force-dynamic";
 
 type PlayerRankTab =
+  | "five-stars"
   | "firsts"
   | "influence"
   | "monthly-challenge-points"
@@ -70,6 +71,7 @@ async function PlayerLeaderboardContent({
 }) {
   const players = await listPlayerLeaderboard(selectedMonth);
   const monthOptions = listChallengeMonthOptions();
+  const isFiveStarTab = tab === "five-stars";
   const isInfluenceTab = tab === "influence";
   const isMonthlyChallengePointTab = tab === "monthly-challenge-points";
   const isMonthlyChallengeTab = tab === "monthly-challenges";
@@ -88,6 +90,8 @@ async function PlayerLeaderboardContent({
               ? "월별 등수 상승 정도"
               : isMonthlyChallengeTab
               ? "월별 도전장 전송 개수"
+              : isFiveStarTab
+                ? "5성 개수"
               : isInfluenceTab
                 ? "영향력 순위"
                 : "1등 달성 곡 수"}
@@ -97,6 +101,8 @@ async function PlayerLeaderboardContent({
               ? "월별 등수 상승 폭을 합산합니다. 한 곡에서 10위에서 3위로 상승하면 7점으로 계산합니다."
               : isMonthlyChallengeTab
               ? "전체-도전장-로그 채널에 성공적으로 발송된 등수 상승 로그 수로 순위를 계산합니다."
+              : isFiveStarTab
+                ? "최대 DX 스코어의 97% 이상을 달성한 5성 차트 수로 순위를 계산합니다."
               : isInfluenceTab
                 ? "전체 곡의 1~5등 점수를 합산해 각 유저의 비율을 계산합니다."
                 : "동점 1등은 각 유저 모두 1등 곡 수에 포함됩니다."}
@@ -122,13 +128,14 @@ async function PlayerLeaderboardContent({
               </button>
             </form>
           ) : null}
-          <div className="flex rounded-lg border border-white/10 bg-white/[0.045] p-1">
+          <div className="flex flex-wrap rounded-lg border border-white/10 bg-white/[0.045] p-1">
             <TabLink
-              active={!isInfluenceTab && !usesMonthFilter}
+              active={!isFiveStarTab && !isInfluenceTab && !usesMonthFilter}
               href="/players"
               label="1등 달성곡 수"
             />
             <TabLink active={isInfluenceTab} href="/players?tab=influence" label="영향력" />
+            <TabLink active={isFiveStarTab} href="/players?tab=five-stars" label="5성 개수" />
             <TabLink
               active={isMonthlyChallengeTab}
               href={`/players?tab=monthly-challenges&month=${selectedMonth}`}
@@ -143,7 +150,60 @@ async function PlayerLeaderboardContent({
         </div>
       </section>
 
-      {isMonthlyChallengePointTab ? (
+      {isFiveStarTab ? (
+        <>
+          <PlayerSharePieChart
+            emptyMessage="5성 달성 기록이 있는 유저가 아직 없습니다."
+            players={players.map((player) => ({
+              profileId: player.profileId,
+              playerName: player.playerName,
+              percent: player.fiveStarPercent,
+              value: player.fiveStarCount,
+            }))}
+            unit="개"
+          />
+          <section className="overflow-hidden rounded-lg border border-white/10 bg-white/[0.045]">
+            <div className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 border-b border-white/10 px-4 py-3 text-xs font-semibold uppercase text-slate-400 max-md:hidden">
+              <span>순위</span>
+              <span>유저</span>
+              <span>5성</span>
+              <span>비율</span>
+              <span>최근 갱신</span>
+            </div>
+            {players.length === 0 ? (
+              <EmptyPlayers />
+            ) : (
+              <div className="divide-y divide-white/10">
+                {[...players]
+                  .sort((left, right) => {
+                    if (right.fiveStarCount !== left.fiveStarCount) {
+                      return right.fiveStarCount - left.fiveStarCount;
+                    }
+                    return left.playerName.localeCompare(right.playerName);
+                  })
+                  .map((player) => (
+                    <div
+                      className="grid grid-cols-[80px_1fr_140px_140px_180px] gap-3 px-4 py-4 max-md:grid-cols-2"
+                      key={player.profileId}
+                    >
+                      <div className="font-mono text-lg text-cyan-100">
+                        #{player.fiveStarRank}
+                      </div>
+                      <PlayerIdentity player={player} />
+                      <div className="font-mono text-sm text-slate-100">
+                        {player.fiveStarCount.toLocaleString("ko-KR")}개
+                      </div>
+                      <div className="font-mono text-sm text-slate-100">
+                        {player.fiveStarPercent.toFixed(2)}%
+                      </div>
+                      <UpdatedAt value={player.latestUpdatedAt} />
+                    </div>
+                  ))}
+              </div>
+            )}
+          </section>
+        </>
+      ) : isMonthlyChallengePointTab ? (
         <>
           <PlayerSharePieChart
             emptyMessage="선택한 달에 등수 상승 기록이 아직 없습니다."
@@ -413,6 +473,7 @@ function EmptyPlayers() {
 
 function parsePlayerRankTab(value: string | undefined): PlayerRankTab {
   if (
+    value === "five-stars" ||
     value === "influence" ||
     value === "monthly-challenge-points" ||
     value === "monthly-challenges"

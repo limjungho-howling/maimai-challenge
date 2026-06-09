@@ -68,7 +68,8 @@ describe("Discord messages", () => {
     expect(message).toContain("**Endless World** [Re:MASTER] · Lv 14+ · CiRCLE · DX");
     expect(message).toContain("내 DX 스코어");
     expect(message).toContain("역전 기록: DX 2,450 (+50)");
-    expect(message).toContain("<https://maimai-challenge.vercel.app/charts/chart-1>");
+    expect(message).toContain("곡 랭킹: [보기](<https://maimai-challenge.vercel.app/charts/chart-1>)");
+    expect(message).not.toContain("곡 랭킹: <https://maimai-challenge.vercel.app/charts/chart-1>");
   });
 
   it("uses a custom personal channel rank drop title", () => {
@@ -122,7 +123,8 @@ describe("Discord messages", () => {
     expect(message).toContain("---\n**Song B** [MASTER] · Lv 13 · PRiSM PLUS · STANDARD");
     expect(message).toContain("순위: #3 -> #1");
     expect(message).toContain("DX 스코어: 2,400 / 2,500");
-    expect(message).toContain("<https://maimai-challenge.vercel.app/charts/chart-2>");
+    expect(message).toContain("곡 랭킹: [보기](<https://maimai-challenge.vercel.app/charts/chart-2>)");
+    expect(message).not.toContain("곡 랭킹: <https://maimai-challenge.vercel.app/charts/chart-2>");
   });
 
   it("builds a rank goal message with higher scores above the user", () => {
@@ -214,7 +216,8 @@ describe("Discord messages", () => {
     expect(message).toContain("1. **Endless World** [Re:MASTER]");
     expect(message).toContain("Lv 14+ · CiRCLE · DX");
     expect(message).toContain("내 DX: 2,300 / 2,451");
-    expect(message).toContain("곡 랭킹: <https://maimai-challenge.vercel.app/charts/chart-1>");
+    expect(message).toContain("곡 랭킹: [보기](<https://maimai-challenge.vercel.app/charts/chart-1>)");
+    expect(message).not.toContain("곡 랭킹: <https://maimai-challenge.vercel.app/charts/chart-1>");
     expect(message).toContain("상위 5명:");
     expect(message).toContain("- #1 **E.HOWL** · DX 2,451");
     expect(message).toContain("- #2 **CHANA** · DX 2,400");
