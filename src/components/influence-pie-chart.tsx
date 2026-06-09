@@ -27,6 +27,8 @@ const CHART_COLORS = [
   "#2dd4bf",
   "#f472b6",
 ];
+const MOBILE_LABEL_EDGE_PADDING = 74;
+const DESKTOP_LABEL_EDGE_PADDING = 96;
 
 export function PlayerSharePieChart({
   emptyMessage,
@@ -60,7 +62,7 @@ export function PlayerSharePieChart({
 
   return (
     <section className="grid gap-5 rounded-lg border border-white/10 bg-white/[0.045] p-5 lg:grid-cols-[minmax(0,1fr)_260px]">
-      <div className="h-[420px] min-w-0">
+      <div className="flex h-[360px] min-w-0 items-center sm:h-[min(48vw,460px)] lg:h-[min(42vw,500px)]">
         <ResponsiveContainer height="100%" width="100%">
           <PieChart>
             <Pie
@@ -69,11 +71,11 @@ export function PlayerSharePieChart({
               data={chartData}
               dataKey="percent"
               endAngle={-270}
-              innerRadius={82}
+              innerRadius="34%"
               label={renderPieLabel}
               labelLine={{ stroke: "#94a3b8", strokeWidth: 1 }}
               nameKey="playerName"
-              outerRadius={144}
+              outerRadius="56%"
               paddingAngle={1}
               startAngle={90}
               stroke="#0f172a"
@@ -136,12 +138,19 @@ function renderPieLabel({
   midAngle,
   outerRadius,
   payload,
+  viewBox,
 }: {
   cx?: number;
   cy?: number;
   midAngle?: number;
   outerRadius?: number;
   payload?: PlayerSharePieChartItem;
+  viewBox?: {
+    height?: number;
+    width?: number;
+    x?: number;
+    y?: number;
+  };
 }) {
   if (
     typeof cx !== "number" ||
@@ -154,17 +163,30 @@ function renderPieLabel({
     return null;
   }
 
-  const radius = outerRadius + 34;
+  const chartWidth = viewBox?.width;
+  const chartX = viewBox?.x ?? 0;
+  const isMobileWidth = typeof chartWidth === "number" && chartWidth < 520;
+  const radius = outerRadius + (isMobileWidth ? 18 : 30);
   const radians = (-midAngle * Math.PI) / 180;
-  const x = cx + radius * Math.cos(radians);
+  const rawX = cx + radius * Math.cos(radians);
   const y = cy + radius * Math.sin(radians);
-  const anchor = x > cx ? "start" : "end";
+  const edgePadding = isMobileWidth
+    ? MOBILE_LABEL_EDGE_PADDING
+    : DESKTOP_LABEL_EDGE_PADDING;
+  const minX = chartX + edgePadding;
+  const maxX =
+    typeof chartWidth === "number"
+      ? chartX + chartWidth - edgePadding
+      : Number.POSITIVE_INFINITY;
+  const x = Math.min(Math.max(rawX, minX), maxX);
+  const anchor = rawX > cx ? "start" : "end";
+  const fontSize = isMobileWidth ? 11 : 12;
 
   return (
     <text
       dominantBaseline="central"
       fill="#e2e8f0"
-      fontSize={12}
+      fontSize={fontSize}
       textAnchor={anchor}
       x={x}
       y={y}

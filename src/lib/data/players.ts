@@ -7,12 +7,18 @@ export interface PlayerLeaderboardEntry {
   profileId: string;
   rank: number;
   influenceRank: number;
+  monthlyChallengeRank: number;
+  monthlyChallengePointRank: number;
   playerName: string;
   discordUsername: string | null;
   maimaiRating: number | null;
   firstPlaceCount: number;
   influenceScore: number;
   influencePercent: number;
+  monthlyChallengeCount: number;
+  monthlyChallengePercent: number;
+  monthlyChallengePointPercent: number;
+  monthlyChallengePoints: number;
   scoreCount: number;
   latestUpdatedAt: string | null;
 }
@@ -31,16 +37,62 @@ interface RankingRow {
   updated_at: string | null;
 }
 
-export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]> {
+export interface MonthlyChallengeCountRow {
+  profile_id: string;
+  count: number;
+}
+
+export interface MonthlyChallengePointRow {
+  profile_id: string;
+  points: number;
+}
+
+interface DiscordNotificationRow {
+  ingest_runs: { profile_id: string | null } | { profile_id: string | null }[] | null;
+}
+
+interface RankingEventRow {
+  actor_profile_id: string | null;
+  next_rank: number;
+  previous_rank: number | null;
+  profile_id: string;
+}
+
+const FIRST_CHALLENGE_MONTH = "2026-06";
+
+export async function listPlayerLeaderboard(
+  monthKey = getCurrentKstMonthKey(),
+): Promise<PlayerLeaderboardEntry[]> {
   if (!hasSupabasePublicEnv() || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return [];
   }
 
   const supabase = createSupabaseServiceClient();
-  const [profiles, rankings] = await Promise.all([
+  const [
+    profiles,
+    rankings,
+    monthlyChallengeCounts,
+    monthlyChallengePoints,
+  ] = await Promise.all([
     fetchAllProfiles(supabase),
     fetchAllRankings(supabase),
+    fetchMonthlyChallengeCounts(supabase, monthKey),
+    fetchMonthlyChallengePoints(supabase, monthKey),
   ]);
+  const monthlyChallengeEntries = buildMonthlyChallengeLeaderboard(
+    profiles,
+    monthlyChallengeCounts,
+  );
+  const monthlyChallengePointEntries = buildMonthlyChallengePointLeaderboard(
+    profiles,
+    monthlyChallengePoints,
+  );
+  const monthlyChallengeByProfileId = new Map(
+    monthlyChallengeEntries.map((entry) => [entry.profileId, entry]),
+  );
+  const monthlyChallengePointsByProfileId = new Map(
+    monthlyChallengePointEntries.map((entry) => [entry.profileId, entry]),
+  );
   const statsByProfileId = new Map<
     string,
     {
@@ -83,6 +135,8 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
   assignInfluenceBasisPoints(statsByProfileId);
 
   const entries = profiles.map((profile) => {
+    const monthlyChallenge = monthlyChallengeByProfileId.get(profile.id);
+    const monthlyChallengePoint = monthlyChallengePointsByProfileId.get(profile.id);
     const stats = statsByProfileId.get(profile.id) ?? {
       firstPlaceCount: 0,
       influenceScore: 0,
@@ -95,12 +149,20 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
       profileId: profile.id,
       rank: 0,
       influenceRank: 0,
+      monthlyChallengeRank: monthlyChallenge?.monthlyChallengeRank ?? 0,
+      monthlyChallengePointRank:
+        monthlyChallengePoint?.monthlyChallengePointRank ?? 0,
       playerName: profile.maimai_name ?? profile.discord_username ?? "미등록",
       discordUsername: profile.discord_username,
       maimaiRating: profile.maimai_rating,
       firstPlaceCount: stats.firstPlaceCount,
       influenceScore: stats.influenceScore,
       influencePercent: stats.influenceBasisPoints / 100,
+      monthlyChallengeCount: monthlyChallenge?.monthlyChallengeCount ?? 0,
+      monthlyChallengePercent: monthlyChallenge?.monthlyChallengePercent ?? 0,
+      monthlyChallengePointPercent:
+        monthlyChallengePoint?.monthlyChallengePointPercent ?? 0,
+      monthlyChallengePoints: monthlyChallengePoint?.monthlyChallengePoints ?? 0,
       scoreCount: stats.scoreCount,
       latestUpdatedAt: stats.latestUpdatedAt,
     };
@@ -140,6 +202,114 @@ export async function listPlayerLeaderboard(): Promise<PlayerLeaderboardEntry[]>
   );
 
   return sortedEntries;
+}
+
+export function buildMonthlyChallengePointLeaderboard(
+  profiles: ProfileRow[],
+  challengePoints: MonthlyChallengePointRow[],
+): Pick<
+  PlayerLeaderboardEntry,
+  | "profileId"
+  | "playerName"
+  | "discordUsername"
+  | "maimaiRating"
+  | "monthlyChallengePointPercent"
+  | "monthlyChallengePointRank"
+  | "monthlyChallengePoints"
+>[] {
+  const pointsByProfileId = new Map(
+    challengePoints.map((row) => [row.profile_id, Number(row.points)]),
+  );
+  const entries = profiles.map((profile) => ({
+    profileId: profile.id,
+    playerName: profile.maimai_name ?? profile.discord_username ?? "미등록",
+    discordUsername: profile.discord_username,
+    maimaiRating: profile.maimai_rating,
+    monthlyChallengePointPercent: 0,
+    monthlyChallengePointRank: 0,
+    monthlyChallengePoints: pointsByProfileId.get(profile.id) ?? 0,
+  }));
+  const totalPoints = entries.reduce(
+    (sum, entry) => sum + entry.monthlyChallengePoints,
+    0,
+  );
+
+  if (totalPoints > 0) {
+    for (const entry of entries) {
+      entry.monthlyChallengePointPercent =
+        (entry.monthlyChallengePoints / totalPoints) * 100;
+    }
+  }
+
+  assignCompetitionRanks(
+    entries,
+    (item) => item.monthlyChallengePoints,
+    (item, rank) => {
+      item.monthlyChallengePointRank = rank;
+    },
+    (left, right) => left.playerName.localeCompare(right.playerName),
+  );
+
+  return entries.sort((left, right) => {
+    if (right.monthlyChallengePoints !== left.monthlyChallengePoints) {
+      return right.monthlyChallengePoints - left.monthlyChallengePoints;
+    }
+    return left.playerName.localeCompare(right.playerName);
+  });
+}
+
+export function buildMonthlyChallengeLeaderboard(
+  profiles: ProfileRow[],
+  challengeCounts: MonthlyChallengeCountRow[],
+): Pick<
+  PlayerLeaderboardEntry,
+  | "profileId"
+  | "playerName"
+  | "discordUsername"
+  | "maimaiRating"
+  | "monthlyChallengeCount"
+  | "monthlyChallengePercent"
+  | "monthlyChallengeRank"
+>[] {
+  const countsByProfileId = new Map(
+    challengeCounts.map((row) => [row.profile_id, Number(row.count)]),
+  );
+  const entries = profiles.map((profile) => ({
+    profileId: profile.id,
+    playerName: profile.maimai_name ?? profile.discord_username ?? "미등록",
+    discordUsername: profile.discord_username,
+    maimaiRating: profile.maimai_rating,
+    monthlyChallengeCount: countsByProfileId.get(profile.id) ?? 0,
+    monthlyChallengePercent: 0,
+    monthlyChallengeRank: 0,
+  }));
+  const totalCount = entries.reduce(
+    (sum, entry) => sum + entry.monthlyChallengeCount,
+    0,
+  );
+
+  if (totalCount > 0) {
+    for (const entry of entries) {
+      entry.monthlyChallengePercent =
+        (entry.monthlyChallengeCount / totalCount) * 100;
+    }
+  }
+
+  assignCompetitionRanks(
+    entries,
+    (item) => item.monthlyChallengeCount,
+    (item, rank) => {
+      item.monthlyChallengeRank = rank;
+    },
+    (left, right) => left.playerName.localeCompare(right.playerName),
+  );
+
+  return entries.sort((left, right) => {
+    if (right.monthlyChallengeCount !== left.monthlyChallengeCount) {
+      return right.monthlyChallengeCount - left.monthlyChallengeCount;
+    }
+    return left.playerName.localeCompare(right.playerName);
+  });
 }
 
 function assignInfluenceBasisPoints(
@@ -207,6 +377,29 @@ function assignCompetitionRanks<T>(
   });
 }
 
+export function listChallengeMonthOptions(
+  now = new Date(),
+): Array<{ value: string; label: string }> {
+  const currentMonth = getCurrentKstMonthKey(now);
+  const months: Array<{ value: string; label: string }> = [];
+  let cursor = FIRST_CHALLENGE_MONTH;
+
+  while (cursor <= currentMonth) {
+    months.push({ value: cursor, label: formatMonthLabel(cursor) });
+    cursor = getNextMonthKey(cursor);
+  }
+
+  return months.reverse();
+}
+
+export function normalizeChallengeMonth(value: string | undefined): string {
+  const options = listChallengeMonthOptions();
+  const latestMonth = options[0]?.value ?? FIRST_CHALLENGE_MONTH;
+  const matchedMonth = options.find((option) => option.value === value);
+
+  return matchedMonth?.value ?? latestMonth;
+}
+
 async function fetchAllProfiles(
   supabase: ReturnType<typeof createSupabaseServiceClient>,
 ): Promise<ProfileRow[]> {
@@ -235,6 +428,97 @@ async function fetchAllRankings(
 
     return { count, data: (data ?? []) as RankingRow[], error };
   });
+}
+
+async function fetchMonthlyChallengeCounts(
+  supabase: ReturnType<typeof createSupabaseServiceClient>,
+  monthKey: string,
+): Promise<MonthlyChallengeCountRow[]> {
+  const { start, end } = getKstMonthRange(monthKey);
+  const rows = await fetchAllPagedRows<DiscordNotificationRow>(
+    async (from, to, withCount) => {
+      const { data, count, error } = await supabase
+        .from("discord_notifications")
+        .select("ingest_runs(profile_id)", {
+          count: withCount ? "exact" : undefined,
+        })
+        .eq("notification_type", "channel")
+        .eq("status", "sent")
+        .ilike("message", "%등수가 상승하였습니다.%")
+        .gte("created_at", start)
+        .lt("created_at", end)
+        .not("ingest_run_id", "is", null)
+        .range(from, to);
+
+      return { count, data: (data ?? []) as DiscordNotificationRow[], error };
+    },
+  );
+  const countsByProfileId = new Map<string, number>();
+
+  for (const row of rows) {
+    const run = Array.isArray(row.ingest_runs)
+      ? row.ingest_runs[0]
+      : row.ingest_runs;
+    const profileId = run?.profile_id;
+
+    if (!profileId) {
+      continue;
+    }
+
+    countsByProfileId.set(profileId, (countsByProfileId.get(profileId) ?? 0) + 1);
+  }
+
+  return [...countsByProfileId.entries()].map(([profile_id, count]) => ({
+    profile_id,
+    count,
+  }));
+}
+
+async function fetchMonthlyChallengePoints(
+  supabase: ReturnType<typeof createSupabaseServiceClient>,
+  monthKey: string,
+): Promise<MonthlyChallengePointRow[]> {
+  const { start, end } = getKstMonthRange(monthKey);
+  const rows = await fetchAllPagedRows<RankingEventRow>(
+    async (from, to, withCount) => {
+      const { data, count, error } = await supabase
+        .from("ranking_events")
+        .select("profile_id, actor_profile_id, previous_rank, next_rank", {
+          count: withCount ? "exact" : undefined,
+        })
+        .eq("event_type", "rank_changed")
+        .gte("created_at", start)
+        .lt("created_at", end)
+        .not("previous_rank", "is", null)
+        .range(from, to);
+
+      return { count, data: (data ?? []) as RankingEventRow[], error };
+    },
+  );
+  const pointsByProfileId = new Map<string, number>();
+
+  for (const row of rows) {
+    const previousRank = row.previous_rank;
+
+    if (
+      previousRank === null ||
+      row.next_rank >= previousRank ||
+      row.actor_profile_id !== row.profile_id
+    ) {
+      continue;
+    }
+
+    const points = previousRank - row.next_rank;
+    pointsByProfileId.set(
+      row.profile_id,
+      (pointsByProfileId.get(row.profile_id) ?? 0) + points,
+    );
+  }
+
+  return [...pointsByProfileId.entries()].map(([profile_id, points]) => ({
+    profile_id,
+    points,
+  }));
 }
 
 async function fetchAllPagedRows<T>(
@@ -275,4 +559,37 @@ async function fetchAllPagedRows<T>(
   }
 
   return rows;
+}
+
+function getCurrentKstMonthKey(now = new Date()): string {
+  const kstFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+  });
+
+  return kstFormatter.format(now);
+}
+
+function getKstMonthRange(monthKey: string): { start: string; end: string } {
+  return {
+    start: `${monthKey}-01T00:00:00+09:00`,
+    end: `${getNextMonthKey(monthKey)}-01T00:00:00+09:00`,
+  };
+}
+
+function getNextMonthKey(monthKey: string): string {
+  const [yearText, monthText] = monthKey.split("-");
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const nextYear = month === 12 ? year + 1 : year;
+  const nextMonth = month === 12 ? 1 : month + 1;
+
+  return `${nextYear}-${String(nextMonth).padStart(2, "0")}`;
+}
+
+function formatMonthLabel(monthKey: string): string {
+  const [year, month] = monthKey.split("-");
+
+  return `${year}년 ${Number(month)}월`;
 }
