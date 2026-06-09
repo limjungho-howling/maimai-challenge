@@ -60,7 +60,10 @@ export default async function PlayersPage({ searchParams }: PlayersPageProps) {
           </nav>
         </header>
 
-        <Suspense fallback={<PlayerLeaderboardSkeleton />} key={`${tab}:${selectedMonth}`}>
+        <Suspense
+          fallback={<PlayerLeaderboardSkeleton showShareChart={tab !== "five-stars"} />}
+          key={`${tab}:${selectedMonth}`}
+        >
           <PlayerLeaderboardContent selectedMonth={selectedMonth} tab={tab} />
         </Suspense>
       </div>
