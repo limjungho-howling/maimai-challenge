@@ -71,6 +71,12 @@ export default async function ChartPage({ params }: ChartPageProps) {
               유저 순위
             </Link>
             <Link
+              className="rounded-md border border-white/10 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+              href="/weekly"
+            >
+              주간 랭킹
+            </Link>
+            <Link
               className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
               href="/dashboard"
             >

@@ -8,6 +8,7 @@ import {
   type DiscordNotificationResult,
   type PersonalChannelNotification,
 } from "@/lib/discord/notifier";
+import { recordWeeklyChallengeEntries } from "@/lib/data/weekly";
 import { summarizeMissingCatalogJackets } from "@/lib/ingest/catalog";
 import { detectBulkRankingEvents } from "@/lib/ingest/bulk-ranking";
 import { mapWithConcurrency } from "@/lib/ingest/chunk-utils";
@@ -176,6 +177,24 @@ export async function ingestMaimaiPayload(
       total: 100,
     });
     await upsertPlayerScores(supabase, user.id, scoreUpdates, collectedAt);
+
+    await reportProgress(onProgress, {
+      stage: "scores",
+      message: "주간 랭킹 기록을 반영하는 중입니다.",
+      current: 70,
+      total: 100,
+    });
+    await recordWeeklyChallengeEntries(supabase, {
+      ingestRunId: run.id,
+      profileId: user.id,
+      submittedAt: collectedAt,
+      updates: scoreUpdates.map(({ chartId, score }) => ({
+        achievementRate: score.achievementRate,
+        chartId,
+        dxScore: score.dxScore,
+        maxDxScore: score.maxDxScore,
+      })),
+    });
 
     await reportProgress(onProgress, {
       stage: "scores",
