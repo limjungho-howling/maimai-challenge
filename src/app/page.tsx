@@ -2,10 +2,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 
+import { ChartSortSelect } from "@/components/chart-sort-select";
 import { ChartDifficultyImage, ChartKindImage } from "@/components/chart-type-images";
 import { SongListSkeleton } from "@/components/leaderboard-skeletons";
-import { RANKING_DIFFICULTIES, getDifficultyLabel } from "@/lib/maimai/constants";
-import { listChartLevels, listChartVersions, listCharts } from "@/lib/data/charts";
+import {
+  type ChartSort,
+  listChartLevels,
+  listChartVersions,
+  listCharts,
+} from "@/lib/data/charts";
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatKstDateTime } from "@/lib/time";
@@ -19,6 +24,7 @@ interface HomePageProps {
     level?: string;
     page?: string;
     q?: string;
+    sort?: string;
     version?: string;
   }>;
 }
@@ -94,6 +100,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
   const leaderProfileId = parseTextParam(params.leader);
   const level = parseTextParam(params.level);
   const search = parseTextParam(params.q);
+  const sort = parseChartSort(params.sort);
   const version = parseVersion(params.version);
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const [{ charts, count }, levels, versions] = await Promise.all([
@@ -104,6 +111,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
       page,
       pageSize: PAGE_SIZE,
       search,
+      sort,
       version,
     }),
     listChartLevels(),
@@ -119,7 +127,9 @@ async function SongListContent({ searchParams }: HomePageProps) {
             <p className="mt-1 text-sm text-slate-300">
               {leaderProfileId
                 ? "선택한 유저가 1등을 달성한 곡만 표시됩니다."
-                : "최근 점수 또는 순위 변동이 생긴 곡이 먼저 표시됩니다."}
+                : sort === "fewest-five-stars"
+                  ? "5성 달성 유저가 적은 곡이 먼저 표시됩니다."
+                  : "최근 점수 또는 순위 변동이 생긴 곡이 먼저 표시됩니다."}
             </p>
             {leaderProfileId ? (
               <Link className="mt-2 inline-flex text-sm text-cyan-200 hover:text-cyan-100" href="/">
@@ -127,20 +137,9 @@ async function SongListContent({ searchParams }: HomePageProps) {
               </Link>
             ) : null}
           </div>
-          <div className="flex flex-wrap gap-2">
-            <DifficultyLink
-              active={difficulty === null}
-              href={filterHref({ difficulty: null, leaderProfileId, level, search, version })}
-              label="전체"
-            />
-            {RANKING_DIFFICULTIES.map((item) => (
-              <DifficultyLink
-                active={difficulty === item}
-                href={filterHref({ difficulty: item, leaderProfileId, level, search, version })}
-                key={item}
-                label={getDifficultyLabel(item)}
-              />
-            ))}
+          <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+            <span className="text-sm font-semibold text-slate-200">정렬 기준</span>
+            <ChartSortSelect value={sort} />
           </div>
         </section>
 
@@ -150,6 +149,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
         >
           {difficulty !== null ? <input name="diff" type="hidden" value={difficulty} /> : null}
           {leaderProfileId ? <input name="leader" type="hidden" value={leaderProfileId} /> : null}
+          {sort !== "recent" ? <input name="sort" type="hidden" value={sort} /> : null}
           <label className="min-w-0">
             <span className="sr-only">곡 이름 검색</span>
             <input
@@ -261,6 +261,7 @@ async function SongListContent({ searchParams }: HomePageProps) {
               level,
               page: page - 1,
               search,
+              sort,
               version,
             })}
             label="이전"
@@ -276,35 +277,13 @@ async function SongListContent({ searchParams }: HomePageProps) {
               level,
               page: page + 1,
               search,
+              sort,
               version,
             })}
             label="다음"
           />
         </nav>
     </>
-  );
-}
-
-function DifficultyLink({
-  active,
-  href,
-  label,
-}: {
-  active: boolean;
-  href: string;
-  label: string;
-}) {
-  return (
-    <Link
-      className={`rounded-md px-3 py-2 text-sm font-medium ${
-        active
-          ? "bg-cyan-300 text-slate-950"
-          : "border border-white/10 text-slate-200 hover:bg-white/10"
-      }`}
-      href={href}
-    >
-      {label}
-    </Link>
   );
 }
 
@@ -337,12 +316,16 @@ function PageLink({
 
 function parseDifficulty(value: string | undefined): number | null {
   const parsed = Number.parseInt(value ?? "", 10);
-  return RANKING_DIFFICULTIES.includes(parsed as never) ? parsed : null;
+  return parsed === 3 || parsed === 4 ? parsed : null;
 }
 
 function parseVersion(value: string | undefined): number | null {
   const parsed = Number.parseInt(value ?? "", 10);
   return Number.isInteger(parsed) && parsed >= 0 && parsed <= 25 ? parsed : null;
+}
+
+function parseChartSort(value: string | undefined): ChartSort {
+  return value === "fewest-five-stars" ? "fewest-five-stars" : "recent";
 }
 
 function parseTextParam(value: string | undefined): string | null {
@@ -356,6 +339,7 @@ function pageHref({
   level,
   page,
   search,
+  sort,
   version,
 }: {
   difficulty: number | null;
@@ -363,29 +347,12 @@ function pageHref({
   level: string | null;
   page: number;
   search: string | null;
+  sort: ChartSort;
   version: number | null;
 }): string {
-  const params = buildSearchParams({ difficulty, leaderProfileId, level, search, version });
+  const params = buildSearchParams({ difficulty, leaderProfileId, level, search, sort, version });
   params.set("page", String(page));
   return `/?${params.toString()}`;
-}
-
-function filterHref({
-  difficulty,
-  leaderProfileId,
-  level,
-  search,
-  version,
-}: {
-  difficulty: number | null;
-  leaderProfileId: string | null;
-  level: string | null;
-  search: string | null;
-  version: number | null;
-}): string {
-  const params = buildSearchParams({ difficulty, leaderProfileId, level, search, version });
-  const query = params.toString();
-  return query ? `/?${query}` : "/";
 }
 
 function buildSearchParams({
@@ -393,12 +360,14 @@ function buildSearchParams({
   leaderProfileId,
   level,
   search,
+  sort,
   version,
 }: {
   difficulty: number | null;
   leaderProfileId: string | null;
   level: string | null;
   search: string | null;
+  sort: ChartSort;
   version: number | null;
 }): URLSearchParams {
   const params = new URLSearchParams();
@@ -413,6 +382,9 @@ function buildSearchParams({
   }
   if (search) {
     params.set("q", search);
+  }
+  if (sort !== "recent") {
+    params.set("sort", sort);
   }
   if (version !== null) {
     params.set("version", String(version));

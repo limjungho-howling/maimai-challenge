@@ -6,7 +6,9 @@ import { getSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
+const CHART_ID_FILTER_CHUNK_SIZE = 100;
 export const CHART_LIST_CACHE_TAG = "chart-list";
+const CHART_LIST_CACHE_VERSION = "v3";
 
 export interface ChartSummary {
   chartId: string;
@@ -25,6 +27,8 @@ export interface ChartSummary {
   leaderName: string | null;
   leaderCount: number;
 }
+
+export type ChartSort = "fewest-five-stars" | "recent";
 
 export interface ChartRanking {
   chartId: string;
@@ -46,6 +50,7 @@ export async function listCharts({
   page,
   pageSize,
   search,
+  sort,
   version,
 }: {
   difficulty: number | null;
@@ -54,6 +59,7 @@ export async function listCharts({
   page: number;
   pageSize: number;
   search: string | null;
+  sort: ChartSort;
   version: number | null;
 }): Promise<{ charts: ChartSummary[]; count: number }> {
   return cachedListCharts({
@@ -63,6 +69,7 @@ export async function listCharts({
     page,
     pageSize,
     search,
+    sort,
     version,
   });
 }
@@ -75,6 +82,7 @@ const cachedListCharts = unstable_cache(
     page,
     pageSize,
     search,
+    sort,
     version,
   }: {
     difficulty: number | null;
@@ -83,6 +91,7 @@ const cachedListCharts = unstable_cache(
     page: number;
     pageSize: number;
     search: string | null;
+    sort: ChartSort;
     version: number | null;
   }): Promise<{ charts: ChartSummary[]; count: number }> => {
   if (!hasSupabasePublicEnv()) {
@@ -92,6 +101,13 @@ const cachedListCharts = unstable_cache(
   const supabase = createSupabasePublicReadClient();
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
+  let rows = await fetchAllChartSummaries(supabase, {
+    difficulty,
+    level,
+    search,
+    sort,
+    version,
+  });
 
   if (leaderProfileId) {
     const firstPlaceChartIds = await fetchFirstPlaceChartIds(supabase, leaderProfileId);
@@ -99,55 +115,15 @@ const cachedListCharts = unstable_cache(
       return { charts: [], count: 0 };
     }
 
-    const filteredRows = (await fetchAllChartSummaries(supabase, {
-      difficulty,
-      level,
-      search,
-      version,
-    })).filter((row) => firstPlaceChartIds.has(String(row.chart_id)));
-
-    return {
-      charts: filteredRows.slice(from, to + 1).map(mapChartSummary),
-      count: filteredRows.length,
-    };
-  }
-
-  let query = supabase
-    .from("chart_leaderboard_summary")
-    .select("*", { count: "exact" })
-    .order("last_changed_at", { ascending: false, nullsFirst: false })
-    .order("title", { ascending: true })
-    .range(from, to);
-
-  if (difficulty !== null) {
-    query = query.eq("difficulty", difficulty);
-  }
-
-  if (level) {
-    query = query.eq("level", level);
-  }
-
-  if (version !== null) {
-    query = query.eq("version_number", version);
-  }
-
-  if (search) {
-    query = query.ilike("title", `%${escapeLikePattern(search)}%`);
-  }
-
-  const { data, count, error } = await query;
-
-  if (error) {
-    console.error(error);
-    return { charts: [], count: 0 };
+    rows = rows.filter((row) => firstPlaceChartIds.has(String(row.chart_id)));
   }
 
   return {
-    charts: (data ?? []).map(mapChartSummary),
-    count: count ?? 0,
+    charts: rows.slice(from, to + 1).map(mapChartSummary),
+    count: rows.length,
   };
   },
-  ["chart-list"],
+  ["chart-list", CHART_LIST_CACHE_VERSION],
   { revalidate: false, tags: [CHART_LIST_CACHE_TAG] },
 );
 
@@ -186,11 +162,13 @@ async function fetchAllChartSummaries(
     difficulty,
     level,
     search,
+    sort,
     version,
   }: {
     difficulty: number | null;
     level: string | null;
     search: string | null;
+    sort: ChartSort;
     version: number | null;
   },
 ): Promise<Array<Record<string, unknown>>> {
@@ -202,6 +180,7 @@ async function fetchAllChartSummaries(
       .select("*")
       .order("last_changed_at", { ascending: false, nullsFirst: false })
       .order("title", { ascending: true })
+      .order("chart_id", { ascending: true })
       .range(from, from + SELECT_PAGE_SIZE - 1);
 
     if (difficulty !== null) {
@@ -230,9 +209,99 @@ async function fetchAllChartSummaries(
     rows.push(...((data ?? []) as Array<Record<string, unknown>>));
 
     if ((data ?? []).length < SELECT_PAGE_SIZE) {
-      return rows;
+      return sort === "fewest-five-stars"
+        ? sortChartsByFewestFiveStars(supabase, rows)
+        : rows;
     }
   }
+}
+
+async function sortChartsByFewestFiveStars(
+  supabase: ReturnType<typeof createSupabasePublicReadClient>,
+  rows: Array<Record<string, unknown>>,
+): Promise<Array<Record<string, unknown>>> {
+  if (rows.length === 0) {
+    return rows;
+  }
+
+  const fiveStarCountsByChartId = await fetchFiveStarCountsByChartId(
+    supabase,
+    rows.map((row) => String(row.chart_id)),
+  );
+
+  return [...rows].sort((left, right) => {
+    const leftFiveStars = fiveStarCountsByChartId.get(String(left.chart_id)) ?? 0;
+    const rightFiveStars = fiveStarCountsByChartId.get(String(right.chart_id)) ?? 0;
+
+    if (leftFiveStars !== rightFiveStars) {
+      return leftFiveStars - rightFiveStars;
+    }
+
+    return compareDefaultChartOrder(left, right);
+  });
+}
+
+async function fetchFiveStarCountsByChartId(
+  supabase: ReturnType<typeof createSupabasePublicReadClient>,
+  chartIds: string[],
+): Promise<Map<string, number>> {
+  const countsByChartId = new Map<string, number>();
+  const uniqueChartIds = [...new Set(chartIds)];
+
+  for (let index = 0; index < uniqueChartIds.length; index += CHART_ID_FILTER_CHUNK_SIZE) {
+    const chunk = uniqueChartIds.slice(index, index + CHART_ID_FILTER_CHUNK_SIZE);
+
+    for (let from = 0; ; from += SELECT_PAGE_SIZE) {
+      const to = from + SELECT_PAGE_SIZE - 1;
+      const { data, error } = await supabase
+        .from("player_scores")
+        .select("chart_id,profile_id")
+        .eq("dx_star_count", 5)
+        .in("chart_id", chunk)
+        .order("chart_id", { ascending: true })
+        .order("profile_id", { ascending: true })
+        .range(from, to);
+
+      if (error) {
+        console.error(error);
+        return new Map();
+      }
+
+      for (const row of data ?? []) {
+        const chartId = String(row.chart_id);
+        countsByChartId.set(chartId, (countsByChartId.get(chartId) ?? 0) + 1);
+      }
+
+      if ((data ?? []).length < SELECT_PAGE_SIZE) {
+        break;
+      }
+    }
+  }
+
+  return countsByChartId;
+}
+
+function compareDefaultChartOrder(
+  left: Record<string, unknown>,
+  right: Record<string, unknown>,
+): number {
+  const leftChangedAt = parseSortableTime(left.last_changed_at);
+  const rightChangedAt = parseSortableTime(right.last_changed_at);
+
+  if (leftChangedAt !== rightChangedAt) {
+    return rightChangedAt - leftChangedAt;
+  }
+
+  const titleOrder = String(left.title).localeCompare(String(right.title));
+  if (titleOrder !== 0) {
+    return titleOrder;
+  }
+
+  return String(left.chart_id).localeCompare(String(right.chart_id));
+}
+
+function parseSortableTime(value: unknown): number {
+  return typeof value === "string" ? new Date(value).getTime() || 0 : 0;
 }
 
 export async function listChartLevels(): Promise<string[]> {
