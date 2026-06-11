@@ -184,7 +184,13 @@ export async function ingestMaimaiPayload(
       current: 66,
       total: 100,
     });
-    await upsertPlayerScores(supabase, user.id, scoreUpdates, collectedAt);
+    await upsertPlayerScores(
+      supabase,
+      user.id,
+      scoreUpdates,
+      collectedAt,
+      previousScoresByChartId,
+    );
 
     await reportProgress(onProgress, {
       stage: "scores",
@@ -879,8 +885,8 @@ async function listPlayerScoresForCharts(
   supabase: SupabaseClient,
   profileId: string,
   chartIds: string[],
-): Promise<Map<string, number>> {
-  const scoresByChartId = new Map<string, number>();
+): Promise<Map<string, { dxScore: number; updatedAt: string }>> {
+  const scoresByChartId = new Map<string, { dxScore: number; updatedAt: string }>();
 
   const chunkResults = await mapWithConcurrency(
     chunks([...new Set(chartIds)], DB_FILTER_CHUNK_SIZE),
@@ -888,7 +894,7 @@ async function listPlayerScoresForCharts(
     async (chunk) => {
       const { data, error } = await supabase
         .from("player_scores")
-        .select("chart_id, dx_score")
+        .select("chart_id, dx_score, updated_at")
         .eq("profile_id", profileId)
         .in("chart_id", chunk);
 
@@ -902,7 +908,10 @@ async function listPlayerScoresForCharts(
 
   for (const data of chunkResults) {
     for (const row of data) {
-      scoresByChartId.set(String(row.chart_id), Number(row.dx_score));
+      scoresByChartId.set(String(row.chart_id), {
+        dxScore: Number(row.dx_score),
+        updatedAt: String(row.updated_at),
+      });
     }
   }
 
@@ -911,12 +920,12 @@ async function listPlayerScoresForCharts(
 
 function detectChangedChartIds(
   updates: Array<{ chartId: string; score: ParsedSongScore }>,
-  previousScoresByChartId: Map<string, number>,
+  previousScoresByChartId: Map<string, { dxScore: number }>,
 ): string[] {
   return [
     ...new Set(
       updates
-        .filter(({ chartId, score }) => previousScoresByChartId.get(chartId) !== score.dxScore)
+        .filter(({ chartId, score }) => previousScoresByChartId.get(chartId)?.dxScore !== score.dxScore)
         .map(({ chartId }) => chartId),
     ),
   ];
@@ -927,17 +936,15 @@ async function upsertPlayerScores(
   profileId: string,
   updates: Array<{ chartId: string; score: ParsedSongScore }>,
   collectedAt: string,
+  previousScoresByChartId: Map<string, { dxScore: number; updatedAt: string }>,
 ): Promise<void> {
-  const rows = updates.map(({ chartId, score }) => ({
-    profile_id: profileId,
-    chart_id: chartId,
-    achievement_rate: score.achievementRate,
-    dx_score: score.dxScore,
-    max_dx_score: score.maxDxScore,
-    official_idx: score.officialIdx,
-    collected_at: collectedAt,
-    updated_at: kstNowIsoString(),
-  }));
+  const rows = buildPlayerScoreRows({
+    collectedAt,
+    now: kstNowIsoString(),
+    previousScoresByChartId,
+    profileId,
+    updates,
+  });
 
   await mapWithConcurrency(chunks(rows, DB_CHUNK_SIZE), DB_CHUNK_CONCURRENCY, async (chunk) => {
     const { error } = await supabase
@@ -947,6 +954,47 @@ async function upsertPlayerScores(
     if (error) {
       throw error;
     }
+  });
+}
+
+export function buildPlayerScoreRows({
+  collectedAt,
+  now,
+  previousScoresByChartId,
+  profileId,
+  updates,
+}: {
+  collectedAt: string;
+  now: string;
+  previousScoresByChartId: Map<string, { dxScore: number; updatedAt: string }>;
+  profileId: string;
+  updates: Array<{ chartId: string; score: ParsedSongScore }>;
+}): Array<{
+  achievement_rate: number | null;
+  chart_id: string;
+  collected_at: string;
+  dx_score: number;
+  max_dx_score: number;
+  official_idx: string | null;
+  profile_id: string;
+  updated_at: string;
+}> {
+  return updates.map(({ chartId, score }) => {
+    const previousScore = previousScoresByChartId.get(chartId);
+
+    return {
+      profile_id: profileId,
+      chart_id: chartId,
+      achievement_rate: score.achievementRate,
+      dx_score: score.dxScore,
+      max_dx_score: score.maxDxScore,
+      official_idx: score.officialIdx,
+      collected_at: collectedAt,
+      updated_at:
+        previousScore && previousScore.dxScore === score.dxScore
+          ? previousScore.updatedAt
+          : now,
+    };
   });
 }
 

@@ -3,7 +3,6 @@ import { createClient } from "@supabase/supabase-js";
 
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { getSupabasePublicEnv } from "@/lib/supabase/env";
-import { createSupabaseServiceClient } from "@/lib/supabase/server";
 
 const SELECT_PAGE_SIZE = 1000;
 const CHART_ID_FILTER_CHUNK_SIZE = 100;
@@ -443,63 +442,29 @@ const cachedListChartRankings = unstable_cache(
     return [];
   }
 
-  const rankings = data ?? [];
-  const changedAtByProfileId = await fetchLatestChartRankingChangeTimes(
-    chartId,
-    rankings.map((row) => String(row.profile_id)),
-  );
-
-  return rankings.map((row) => ({
-    chartId: String(row.chart_id),
-    profileId: String(row.profile_id),
-    playerName: row.player_name ?? "Unknown",
-    discordUsername: row.discord_username,
-    achievementRate:
-      row.achievement_rate === null ? null : Number(row.achievement_rate),
-    dxScore: Number(row.dx_score),
-    maxDxScore: Number(row.max_dx_score),
-    dxStarCount: Number(row.dx_star_count ?? 0),
-    updatedAt:
-      changedAtByProfileId.get(String(row.profile_id)) ?? String(row.updated_at),
-    rank: Number(row.rank),
-  }));
+  return mapChartRankingRows(data ?? []);
   },
   ["chart-rankings"],
   { revalidate: 60, tags: [CHART_LIST_CACHE_TAG] },
 );
 
-async function fetchLatestChartRankingChangeTimes(
-  chartId: string,
-  profileIds: string[],
-): Promise<Map<string, string>> {
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || profileIds.length === 0) {
-    return new Map();
-  }
-
-  const supabase = createSupabaseServiceClient();
-  const { data, error } = await supabase
-    .from("ranking_events")
-    .select("profile_id, created_at")
-    .eq("chart_id", chartId)
-    .in("profile_id", [...new Set(profileIds)])
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error(error);
-    return new Map();
-  }
-
-  const changedAtByProfileId = new Map<string, string>();
-
-  for (const row of data ?? []) {
-    const profileId = String(row.profile_id);
-
-    if (!changedAtByProfileId.has(profileId) && typeof row.created_at === "string") {
-      changedAtByProfileId.set(profileId, row.created_at);
-    }
-  }
-
-  return changedAtByProfileId;
+export function mapChartRankingRows(
+  rows: Array<Record<string, unknown>>,
+): ChartRanking[] {
+  return rows.map((row) => ({
+    chartId: String(row.chart_id),
+    profileId: String(row.profile_id),
+    playerName: typeof row.player_name === "string" ? row.player_name : "Unknown",
+    discordUsername:
+      typeof row.discord_username === "string" ? row.discord_username : null,
+    achievementRate:
+      row.achievement_rate === null ? null : Number(row.achievement_rate),
+    dxScore: Number(row.dx_score),
+    maxDxScore: Number(row.max_dx_score),
+    dxStarCount: Number(row.dx_star_count ?? 0),
+    updatedAt: String(row.updated_at),
+    rank: Number(row.rank),
+  }));
 }
 
 function mapChartSummary(row: Record<string, unknown>): ChartSummary {
