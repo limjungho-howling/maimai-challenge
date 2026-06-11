@@ -18,6 +18,7 @@ export interface WeeklyScoreUpdate {
   chartId: string;
   dxScore: number;
   maxDxScore: number;
+  playedAt?: string;
 }
 
 export interface WeeklyEntryUpsert {
@@ -85,7 +86,7 @@ export function buildWeeklyEntryUpserts({
         : update.maxDxScore,
       pick_id: pick.pickId,
       profile_id: profileId,
-      submitted_at: submittedAt,
+      submitted_at: update.playedAt ?? submittedAt,
       week_id: pick.weekId,
     });
   }

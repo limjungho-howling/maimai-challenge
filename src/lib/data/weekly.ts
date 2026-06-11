@@ -169,6 +169,13 @@ export async function recordWeeklyChallengeEntries(
       return;
     }
 
+    const eligibleUpdates = updates.filter((update) =>
+      isWeeklyScoreUpdateInWindow(update, activeWindow),
+    );
+    if (eligibleUpdates.length === 0) {
+      return;
+    }
+
     const week = await ensureWeek(supabase, activeWindow);
     const picks = await ensureWeekPicks(supabase, week.id);
     const picksByChartId = new Map<string, WeeklyPickReference>(
@@ -183,7 +190,7 @@ export async function recordWeeklyChallengeEntries(
     );
     const matchedPickIds = [
       ...new Set(
-        updates
+        eligibleUpdates
           .map((update) => picksByChartId.get(update.chartId)?.pickId)
           .filter((pickId): pickId is string => Boolean(pickId)),
       ),
@@ -204,7 +211,7 @@ export async function recordWeeklyChallengeEntries(
       picksByChartId,
       profileId,
       submittedAt,
-      updates,
+      updates: eligibleUpdates,
     });
 
     if (rows.length === 0) {
@@ -232,6 +239,18 @@ export async function recordWeeklyChallengeEntries(
 
     throw error;
   }
+}
+
+function isWeeklyScoreUpdateInWindow(
+  update: WeeklyScoreUpdate,
+  activeWindow: WeeklyChallengeWindow,
+): boolean {
+  if (!update.playedAt) {
+    return true;
+  }
+
+  const updateWindow = getCurrentWeeklyChallengeWindow(new Date(update.playedAt));
+  return updateWindow?.key === activeWindow.key;
 }
 
 export async function ensureWeeklyChallengeState(

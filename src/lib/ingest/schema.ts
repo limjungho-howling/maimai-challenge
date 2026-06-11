@@ -50,6 +50,7 @@ const detailPagesSchema = z.array(
 
 export const ingestPayloadSchema = z.object({
   playerHtml: z.string().min(1),
+  recentPlayHtml: z.string().min(1).optional(),
   scorePages: scorePagesSchema,
   detailPages: detailPagesSchema.optional(),
   collectedAt: z.string().datetime().optional(),
@@ -63,6 +64,7 @@ export const catalogPayloadSchema = z.object({
 
 export const legacyIngestPayloadSchema = z.object({
   playerHtml: z.string().min(1),
+  recentPlayHtml: z.string().min(1).optional(),
   scorePages: z
     .array(
       z.object({

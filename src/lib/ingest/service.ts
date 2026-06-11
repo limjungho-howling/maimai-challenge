@@ -17,7 +17,9 @@ import {
   parseSongDetailHtml,
   parseSongDetailScoreHtml,
   parsePlayerDataHtml,
+  parsePlaylogHtml,
   parseSongScoreHtml,
+  type ParsedPlaylogScore,
   type ParsedSongScore,
 } from "@/lib/maimai/parser";
 import type { MaimaiCatalogPayload, MaimaiIngestPayload } from "@/lib/ingest/schema";
@@ -136,6 +138,12 @@ export async function ingestMaimaiPayload(
       uniqueScores,
       chartsByKey,
     );
+    const weeklyScoreUpdates = payload.recentPlayHtml
+      ? matchPlaylogsToWeeklyScoreUpdates(
+          parsePlaylogHtml(payload.recentPlayHtml),
+          chartsByKey,
+        )
+      : [];
     const chartIds = scoreUpdates.map((update) => update.chartId);
 
     await reportProgress(onProgress, {
@@ -188,12 +196,7 @@ export async function ingestMaimaiPayload(
       ingestRunId: run.id,
       profileId: user.id,
       submittedAt: collectedAt,
-      updates: scoreUpdates.map(({ chartId, score }) => ({
-        achievementRate: score.achievementRate,
-        chartId,
-        dxScore: score.dxScore,
-        maxDxScore: score.maxDxScore,
-      })),
+      updates: weeklyScoreUpdates,
     });
 
     await reportProgress(onProgress, {
@@ -282,6 +285,60 @@ export async function ingestMaimaiPayload(
     });
     throw new Error(errorMessage);
   }
+}
+
+function matchPlaylogsToWeeklyScoreUpdates(
+  playlogs: ParsedPlaylogScore[],
+  chartsByKey: Map<string, CatalogChart>,
+): Array<{
+  achievementRate: number | null;
+  chartId: string;
+  dxScore: number;
+  maxDxScore: number;
+  playedAt: string;
+}> {
+  const updatesByChartId = new Map<
+    string,
+    {
+      achievementRate: number | null;
+      chartId: string;
+      dxScore: number;
+      maxDxScore: number;
+      playedAt: string;
+    }
+  >();
+
+  for (const playlog of playlogs) {
+    const chart = chartsByKey.get(chartKey(playlog));
+    if (!chart) {
+      continue;
+    }
+
+    const update = {
+      achievementRate: playlog.achievementRate,
+      chartId: chart.chartId,
+      dxScore: playlog.dxScore,
+      maxDxScore: playlog.maxDxScore,
+      playedAt: playlog.playedAt,
+    };
+    const previous = updatesByChartId.get(chart.chartId);
+    if (!previous || shouldReplaceWeeklyPlaylogUpdate(previous, update)) {
+      updatesByChartId.set(chart.chartId, update);
+    }
+  }
+
+  return [...updatesByChartId.values()];
+}
+
+function shouldReplaceWeeklyPlaylogUpdate(
+  previous: { dxScore: number; playedAt: string },
+  next: { dxScore: number; playedAt: string },
+): boolean {
+  if (next.dxScore !== previous.dxScore) {
+    return next.dxScore > previous.dxScore;
+  }
+
+  return next.playedAt < previous.playedAt;
 }
 
 export function matchScoresToCatalogCharts(
@@ -1316,7 +1373,7 @@ function songKey(title: string, kind: string): string {
   return `${kind}\u0000${title}`;
 }
 
-function chartKey(score: ParsedSongScore): string {
+function chartKey(score: { difficulty: number; kind: string; title: string }): string {
   return `${songKey(score.title, score.kind)}\u0000${score.difficulty}`;
 }
 

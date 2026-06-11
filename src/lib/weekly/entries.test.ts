@@ -97,4 +97,34 @@ describe("weekly challenge entries", () => {
     expect(entries[0]?.dx_score).toBe(2350);
     expect(entries[0]?.submitted_at).toBe("2026-06-10T12:00:00+09:00");
   });
+
+  it("uses the recent play time when building weekly entries", () => {
+    const entries = buildWeeklyEntryUpserts({
+      existingEntriesByPickId: new Map(),
+      ingestRunId: "run-3",
+      picksByChartId: new Map([
+        [
+          "chart-low",
+          {
+            category: "low",
+            pickId: "pick-low",
+            weekId: "week-1",
+          },
+        ],
+      ]),
+      profileId: "profile-1",
+      submittedAt: "2026-06-10T12:00:00+09:00",
+      updates: [
+        {
+          achievementRate: 100.9545,
+          chartId: "chart-low",
+          dxScore: 2106,
+          maxDxScore: 2172,
+          playedAt: "2026-06-10T01:31:00+09:00",
+        },
+      ],
+    });
+
+    expect(entries[0]?.submitted_at).toBe("2026-06-10T01:31:00+09:00");
+  });
 });

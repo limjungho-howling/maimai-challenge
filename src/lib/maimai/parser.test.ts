@@ -4,6 +4,7 @@ import {
   parseSongDetailHtml,
   parseSongDetailScoreHtml,
   parsePlayerDataHtml,
+  parsePlaylogHtml,
   parseSongScoreHtml,
 } from "@/lib/maimai/parser";
 
@@ -262,5 +263,83 @@ describe("maimai parser", () => {
       officialIdx: "idx-token",
       jacketUrl: "https://maimaidx-eng.com/maimai-mobile/img/Music/012345.png",
     });
+  });
+
+  it("extracts recent playlog records from the game record page", () => {
+    const html = `
+      <div class="p_10 t_l f_0 v_b">
+        <div class="playlog_top_container p_r">
+          <img src="./files/diff_master.png" class="playlog_diff v_b">
+          <div class="sub_title t_c f_r f_11">
+            <span class="red f_b v_b">TRACK 03</span><span class="v_b">2026/06/10 01:31</span>
+          </div>
+        </div>
+        <div class="playlog_master_container">
+          <div class="basic_block m_5 m_t_17 m_r_60 p_5 p_l_10 f_13 break">
+            <div class="w_80 f_r"><div class="music_lv_back">12+</div></div>
+            ヤミツキ
+          </div>
+          <div class="p_r f_0">
+            <img src="./files/music_dx.png" class="playlog_music_kind_icon">
+            <div class="playlog_result_block">
+              <div class="playlog_achievement_txt t_r">100<span class="f_20">.9545%</span></div>
+              <div class="playlog_result_innerblock basic_block p_5 f_13">
+                <div class="playlog_score_block playlog_score_block_star f_0">
+                  <div class="white p_r_5 f_15 f_r">2,106 / 2,172</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p_10 t_l f_0 v_b">
+        <div class="playlog_top_container p_r">
+          <img src="./files/diff_remaster.png" class="playlog_diff v_b">
+          <div class="sub_title t_c f_r f_11">
+            <span class="red f_b v_b">TRACK 02</span><span class="v_b">2026/06/10 01:29</span>
+          </div>
+        </div>
+        <div class="playlog_remaster_container">
+          <div class="basic_block m_5 m_t_17 m_r_60 p_5 p_l_10 f_13 break">
+            <div class="w_80 f_r"><div class="music_lv_back">14</div></div>
+            スーパーシンメトリー
+          </div>
+          <div class="p_r f_0">
+            <img src="./files/music_standard.png" class="playlog_music_kind_icon">
+            <div class="playlog_result_block">
+              <div class="playlog_achievement_txt t_r">100<span class="f_20">.7788%</span></div>
+              <div class="playlog_result_innerblock basic_block p_5 f_13">
+                <div class="playlog_score_block playlog_score_block_star f_0">
+                  <div class="white p_r_5 f_15 f_r">2,936 / 3,000</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    expect(parsePlaylogHtml(html)).toEqual([
+      {
+        achievementRate: 100.9545,
+        difficulty: 3,
+        difficultyLabel: "MASTER",
+        dxScore: 2106,
+        kind: "DX",
+        maxDxScore: 2172,
+        playedAt: "2026-06-10T01:31:00+09:00",
+        title: "ヤミツキ",
+      },
+      {
+        achievementRate: 100.7788,
+        difficulty: 4,
+        difficultyLabel: "Re:MASTER",
+        dxScore: 2936,
+        kind: "STANDARD",
+        maxDxScore: 3000,
+        playedAt: "2026-06-10T01:29:00+09:00",
+        title: "スーパーシンメトリー",
+      },
+    ]);
   });
 });

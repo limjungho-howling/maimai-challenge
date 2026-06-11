@@ -42,6 +42,17 @@ export interface ParsedSongDetailScore {
   maxDxScore: number;
 }
 
+export interface ParsedPlaylogScore {
+  achievementRate: number | null;
+  difficulty: Difficulty;
+  difficultyLabel: string;
+  dxScore: number;
+  kind: SongKind;
+  maxDxScore: number;
+  playedAt: string;
+  title: string;
+}
+
 export function parsePlayerDataHtml(html: string): ParsedPlayerData {
   const $ = cheerio.load(html);
   const name = normalizeText($(".name_block").first().text());
@@ -74,6 +85,55 @@ export function parseSongDetailHtml(
     officialIdx,
     jacketUrl: findFirstJacketUrl(html, $),
   };
+}
+
+export function parsePlaylogHtml(html: string): ParsedPlaylogScore[] {
+  const $ = cheerio.load(html);
+  const playlogs: ParsedPlaylogScore[] = [];
+
+  for (const node of $(".playlog_top_container").toArray()) {
+    const root = $(node).closest(".p_10.t_l.f_0.v_b");
+    if (root.length === 0) {
+      continue;
+    }
+
+    const difficulty = parsePlaylogDifficulty(
+      root.find(".playlog_diff").first().attr("src"),
+    );
+    if (difficulty === null) {
+      continue;
+    }
+
+    const content = root.find(".playlog_master_container, .playlog_remaster_container").first();
+    const title = extractPlaylogTitle(content);
+    const playedAt = parsePlaylogPlayedAt(
+      root.find(".playlog_top_container .sub_title span").last().text(),
+    );
+    const kind = parseSongKind(root.find(".playlog_music_kind_icon").first().attr("src"));
+    const achievementRate = parseAchievement(
+      root.find(".playlog_achievement_txt").first().text(),
+    );
+    const [dxScore, maxDxScore] = parseDxScorePair(
+      root.find(".playlog_score_block").first().text(),
+    );
+
+    if (!title || !playedAt || maxDxScore === null) {
+      continue;
+    }
+
+    playlogs.push({
+      achievementRate,
+      difficulty,
+      difficultyLabel: getDifficultyLabel(difficulty),
+      dxScore,
+      kind,
+      maxDxScore,
+      playedAt,
+      title,
+    });
+  }
+
+  return playlogs;
 }
 
 export function parseSongScoreHtml(
@@ -226,6 +286,40 @@ function getDetailDifficultySelector(difficulty: Difficulty): string {
   };
 
   return selectors[difficulty];
+}
+
+function parsePlaylogDifficulty(src: string | undefined): Difficulty | null {
+  if (src?.includes("diff_master.png")) {
+    return 3;
+  }
+
+  if (src?.includes("diff_remaster.png")) {
+    return 4;
+  }
+
+  return null;
+}
+
+function extractPlaylogTitle(content: cheerio.Cheerio<AnyNode>): string {
+  const titleBlock = content
+    .find(".basic_block.m_5.m_t_17.m_r_60.p_5.p_l_10.f_13.break")
+    .first()
+    .clone();
+  titleBlock.find(".w_80, .music_lv_back").remove();
+  return normalizeText(titleBlock.text());
+}
+
+function parsePlaylogPlayedAt(value: string): string | null {
+  const normalized = normalizeText(value);
+  const match = normalized.match(
+    /(\d{4})\/(\d{2})\/(\d{2})\s+(\d{2}):(\d{2})/,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:00+09:00`;
 }
 
 function findJacketUrl(container: cheerio.Cheerio<AnyNode>): string | null {

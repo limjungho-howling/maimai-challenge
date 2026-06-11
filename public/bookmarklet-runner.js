@@ -142,9 +142,10 @@
 
   try {
     await waitForRelayReady();
-    notifyStatus("MASTER/Re:MASTER 점수 목록을 수집하는 중입니다.");
+    notifyStatus("최근 플레이 기록과 MASTER/Re:MASTER 점수 목록을 수집하는 중입니다.");
 
     const playerHtml = await fetchPlayerHtml();
+    const recentPlayHtml = await fetchText("/maimai-mobile/record/?_=" + Date.now());
     const scorePages = await Promise.all(
       SCORE_DIFFICULTIES.map(async function (difficulty) {
         const html = await fetchText(
@@ -164,6 +165,7 @@
         uploadType: "score",
         payload: {
           playerHtml,
+          recentPlayHtml,
           scorePages,
         },
       },
