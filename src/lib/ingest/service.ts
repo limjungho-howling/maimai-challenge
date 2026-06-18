@@ -918,14 +918,17 @@ async function listPlayerScoresForCharts(
   return scoresByChartId;
 }
 
-function detectChangedChartIds(
+export function detectChangedChartIds(
   updates: Array<{ chartId: string; score: ParsedSongScore }>,
   previousScoresByChartId: Map<string, { dxScore: number }>,
 ): string[] {
   return [
     ...new Set(
       updates
-        .filter(({ chartId, score }) => previousScoresByChartId.get(chartId)?.dxScore !== score.dxScore)
+        .filter(({ chartId, score }) => {
+          const previousScore = previousScoresByChartId.get(chartId);
+          return previousScore ? previousScore.dxScore !== score.dxScore : false;
+        })
         .map(({ chartId }) => chartId),
     ),
   ];

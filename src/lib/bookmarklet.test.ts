@@ -10,6 +10,10 @@ describe("buildBookmarklet", () => {
 
     expect(href).toMatch(/^javascript:/);
     expect(source).toContain("https://example.com/bookmarklet.js");
+    expect(source).toContain("__MAIMAI_CHALLENGE_APP_ORIGIN");
+    expect(source).toContain("__MAIMAI_CHALLENGE_RELAY_WINDOW");
+    expect(source).toContain("window.open");
+    expect(source).toContain("https://example.com/ingest/relay");
     expect(source).toContain("document.createElement('script')");
     expect(source).not.toContain("/maimai-mobile/record/musicGenre/search/");
   });
@@ -26,6 +30,7 @@ describe("buildBookmarklet", () => {
     const source = decodeURIComponent(href.replace(/^javascript:/, ""));
 
     expect(source).toContain("https://example.com/new-catalog-bookmarklet.js");
+    expect(source).toContain("https://example.com/ingest/relay");
   });
 });
 
@@ -43,6 +48,7 @@ describe("bookmarklet runner", () => {
     expect(source).toContain("fetchPlayerHtml");
     expect(source).toContain("hasValidPlayerData");
     expect(source).toContain("PLAYER_DATA_RETRY_COUNT = 5");
+    expect(source).toContain("__MAIMAI_CHALLENGE_RELAY_WINDOW");
   });
 
   it("collects catalog pages by version with a 0.1 second interval", () => {
@@ -61,6 +67,7 @@ describe("bookmarklet runner", () => {
     expect(source).toContain("maimai-challenge:collection-complete");
     expect(source).toContain("versionName");
     expect(source).toContain("uploadType: \"catalog\"");
+    expect(source).toContain("__MAIMAI_CHALLENGE_RELAY_WINDOW");
   });
 
   it("collects only CiRCLE catalog pages from the new catalog loader", () => {
@@ -68,7 +75,10 @@ describe("bookmarklet runner", () => {
     const runner = readFileSync("public/catalog-bookmarklet-runner.js", "utf8");
 
     expect(loader).toContain("scope=circle");
+    expect(loader).toContain("__MAIMAI_CHALLENGE_CATALOG_SCOPE");
+    expect(loader).toContain("runner.onerror");
     expect(runner).toContain('RUNNER_SCOPE === "circle"');
+    expect(runner).toContain("__MAIMAI_CHALLENGE_CATALOG_SCOPE");
     expect(runner).toContain('[[25, "CiRCLE"]]');
   });
 });

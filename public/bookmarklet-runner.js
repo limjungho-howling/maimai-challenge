@@ -1,6 +1,10 @@
 (async function () {
   const script = document.currentScript;
-  const APP_ORIGIN = script ? new URL(script.src).origin : "";
+  const APP_ORIGIN =
+    script && script.src
+      ? new URL(script.src).origin
+      : window.__MAIMAI_CHALLENGE_APP_ORIGIN ||
+        "https://maimai-challenge.vercel.app";
   const MAIMAI_ORIGIN = "https://maimaidx-eng.com";
   const MAIMAI_PATH_PREFIX = "/maimai-mobile/";
   const FETCH_RETRY_COUNT = 3;
@@ -25,11 +29,28 @@
     return;
   }
 
-  const relay = window.open(
-    APP_ORIGIN + "/ingest/relay",
-    "maimaiChallengeRelay",
-    "popup,width=520,height=720",
-  );
+  const getRelayWindow = function () {
+    const existing = window.__MAIMAI_CHALLENGE_RELAY_WINDOW;
+    if (existing && !existing.closed) {
+      try {
+        if (existing.location && existing.location.href === "about:blank") {
+          existing.location.href = APP_ORIGIN + "/ingest/relay";
+        }
+      } catch (_error) {
+        // Cross-origin windows are expected once the relay has started loading.
+      }
+      return existing;
+    }
+
+    const opened = window.open(
+      APP_ORIGIN + "/ingest/relay",
+      "maimaiChallengeRelay",
+      "popup,width=520,height=720",
+    );
+    window.__MAIMAI_CHALLENGE_RELAY_WINDOW = opened;
+    return opened;
+  };
+  const relay = getRelayWindow();
 
   if (!relay) {
     alert("팝업이 차단되었습니다. 팝업을 허용한 뒤 다시 실행해주세요.");

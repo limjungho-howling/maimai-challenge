@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { buildPlayerScoreRows, matchScoresToCatalogCharts } from "@/lib/ingest/service";
+import {
+  buildPlayerScoreRows,
+  detectChangedChartIds,
+  matchScoresToCatalogCharts,
+} from "@/lib/ingest/service";
 import type { ParsedSongScore } from "@/lib/maimai/parser";
 
 const baseScore: ParsedSongScore = {
@@ -92,5 +96,41 @@ describe("buildPlayerScoreRows", () => {
         updated_at: "2026-06-11T12:00:05+09:00",
       },
     ]);
+  });
+});
+
+describe("detectChangedChartIds", () => {
+  it("ignores scores that do not have an existing previous score row", () => {
+    expect(
+      detectChangedChartIds(
+        [
+          {
+            chartId: "chart-1",
+            score: {
+              ...baseScore,
+              dxScore: 2400,
+            },
+          },
+          {
+            chartId: "chart-2",
+            score: {
+              ...baseScore,
+              dxScore: 2450,
+            },
+          },
+          {
+            chartId: "chart-3",
+            score: {
+              ...baseScore,
+              dxScore: 2500,
+            },
+          },
+        ],
+        new Map([
+          ["chart-1", { dxScore: 2400 }],
+          ["chart-2", { dxScore: 2300 }],
+        ]),
+      ),
+    ).toEqual(["chart-2"]);
   });
 });

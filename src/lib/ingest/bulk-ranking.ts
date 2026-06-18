@@ -60,6 +60,11 @@ export function detectBulkRankingEvents({
     const before = beforeScoresByChartId.get(update.chartId) ?? [];
     const previousActorScore =
       before.find((entry) => entry.userId === actorUserId)?.dxScore ?? null;
+
+    if (previousActorScore === null) {
+      continue;
+    }
+
     const after = applyActorScore(before, actorUserId, update.dxScore);
     const chartEvents = detectRankingEvents({
       chartId: update.chartId,

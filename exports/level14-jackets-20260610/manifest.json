@@ -1,0 +1,4163 @@
+{
+  "generatedAt": "2026-06-10T08:00:11.935Z",
+  "imageCount": 291,
+  "items": [
+    {
+      "title": "一か罰",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1873c61115b01c98.png",
+      "charts": [
+        {
+          "chartId": "884f37e7-5d82-461b-9408-bc01a1be90e9",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 73197,
+      "file": "001_一か罰_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Now or Never",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/611619306640df12.png",
+      "charts": [
+        {
+          "chartId": "a8384db6-b149-47d1-ae15-30996ae4eaea",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 83925,
+      "file": "002_Now or Never_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "零號車輛",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5013b0405bb25bc3.png",
+      "charts": [
+        {
+          "chartId": "c848b61e-7033-4001-be0e-a60dedf626b0",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 83125,
+      "file": "003_零號車輛_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Hurtling Boys",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/50fa8e9ca7692f0c.png",
+      "charts": [
+        {
+          "chartId": "98c288b0-9522-49bb-bb35-032f648a4b58",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 67825,
+      "file": "004_Hurtling Boys_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Eureka",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/86c38e2cb81ac90a.png",
+      "charts": [
+        {
+          "chartId": "9505fcab-9367-45ef-ada3-3a8c4ea957e9",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 77904,
+      "file": "005_Eureka_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ニルヴの心臓",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/55313d58f6159663.png",
+      "charts": [
+        {
+          "chartId": "d98db840-c97e-44e5-ae60-0248ea1f9d72",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 55455,
+      "file": "006_ニルヴの心臓_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "チューリングの跡",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6c38d19035bd1ea6.png",
+      "charts": [
+        {
+          "chartId": "7002ec82-27a7-4e6a-8d4a-c08896eb8db9",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 85019,
+      "file": "007_チューリングの跡_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Axeria",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/37a5eaf55d5e4d32.png",
+      "charts": [
+        {
+          "chartId": "05f7becf-69fd-41d3-9ce0-9a7ca7e1fbab",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 65080,
+      "file": "008_Axeria_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "火炎地獄",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4f5af85242e1b088.png",
+      "charts": [
+        {
+          "chartId": "981f02e1-1df0-4b8c-848d-7c0e4ec4a3f6",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 64504,
+      "file": "009_火炎地獄_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Alea jacta est!",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/60d2b1b662ae5823.png",
+      "charts": [
+        {
+          "chartId": "ee0700fa-f061-4263-9e93-96de6f35b255",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "b9954c30-8686-47a4-b66c-d11d0741c2b7",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 63157,
+      "file": "010_Alea jacta est!_STANDARD_Re_MASTER Lv14+, MASTER Lv14.png"
+    },
+    {
+      "title": "Break The Speakers",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cd7cdd7115f1ff5f.png",
+      "charts": [
+        {
+          "chartId": "936bcf19-0bf0-4b93-b0ce-9f6f2889b08e",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 83505,
+      "file": "011_Break The Speakers_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Caliburne ～Story of the Legendary sword～",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7750698f692b00cd.png",
+      "charts": [
+        {
+          "chartId": "fa83d90a-e34b-4432-9dbb-d51653d96bd0",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 65863,
+      "file": "012_Caliburne ～Story of the Legendary sword～_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Re:Unknown X",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0847c38d2a623e99.png",
+      "charts": [
+        {
+          "chartId": "a106719d-92d5-416e-a56c-8846efc91710",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 82227,
+      "file": "013_Re_Unknown X_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "YURUSHITE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7e709a028bc1c5c3.png",
+      "charts": [
+        {
+          "chartId": "36d90449-cd61-414e-ab23-a1cae010381c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 82714,
+      "file": "014_YURUSHITE_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Desperado Waltz",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/9cf73e43ce65b3a9.png",
+      "charts": [
+        {
+          "chartId": "a4b61068-a4b4-4171-9c77-484a7474e69b",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 82996,
+      "file": "015_Desperado Waltz_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "TiamaT:F minor",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/272a82ac2151f9a2.png",
+      "charts": [
+        {
+          "chartId": "52805f5a-1b77-4269-9ed4-732600f0855b",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 90016,
+      "file": "016_TiamaT_F minor_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "Retribution ～ Cycle of Redemption ～",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/bed54ad3ef5fea33.png",
+      "charts": [
+        {
+          "chartId": "46931921-7b26-4924-8058-eb6607162566",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 76721,
+      "file": "017_Retribution ～ Cycle of Redemption ～_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Bloody Trail",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e9c5825f3cebbfe1.png",
+      "charts": [
+        {
+          "chartId": "54b35d5b-ef48-4216-b20c-d46b1b06d6db",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 84756,
+      "file": "018_Bloody Trail_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "RondeauX of RagnaroQ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2741f6c344272eb8.png",
+      "charts": [
+        {
+          "chartId": "186f02ff-05f4-4f32-9951-3bdab6d07a10",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 77218,
+      "file": "019_RondeauX of RagnaroQ_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "雨露霜雪",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2c80b1a894f03420.png",
+      "charts": [
+        {
+          "chartId": "633edf13-9c92-4801-8a77-f8996d839a80",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 81248,
+      "file": "020_雨露霜雪_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "忙シー日",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e27b4a41495e33d3.png",
+      "charts": [
+        {
+          "chartId": "844b6ebb-30e7-422a-8507-6cb0f51e8b54",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 70367,
+      "file": "021_忙シー日_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Yorugao",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/ffa8c12106a9ee96.png",
+      "charts": [
+        {
+          "chartId": "eab369c4-4588-4909-ad82-6667a86aa517",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 94348,
+      "file": "022_Yorugao_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Destr0yer",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e930f73c462d8a84.png",
+      "charts": [
+        {
+          "chartId": "f4ab24e9-4b7f-43e4-90e7-395ad8b23ed0",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 28781,
+      "file": "023_Destr0yer_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "NAGAREBOSHI☆ROCKET",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/db0eec06b051299f.png",
+      "charts": [
+        {
+          "chartId": "02821bca-6511-4dab-a521-577a68a48b91",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 75013,
+      "file": "024_NAGAREBOSHI☆ROCKET_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Trick tear",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5e69a551a2fa34d9.png",
+      "charts": [
+        {
+          "chartId": "9007e36c-3dd7-48e2-9041-cb061e444b4a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 93203,
+      "file": "025_Trick tear_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "躯樹の墓守",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/55a2c29fef3811ad.png",
+      "charts": [
+        {
+          "chartId": "88cabd22-1119-4fdb-8f01-4e8df837a41d",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 100711,
+      "file": "026_躯樹の墓守_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "felys -final remix-",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/372b2bdce425ac62.png",
+      "charts": [
+        {
+          "chartId": "ed4c5b68-11f2-4bea-a895-dfe31d4f069a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 63214,
+      "file": "027_felys -final remix-_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Energizing Flame",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/eb39039aa47b1aa7.png",
+      "charts": [
+        {
+          "chartId": "aa5555a1-ac97-4673-8daa-ef7c0da1ec7d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 81077,
+      "file": "028_Energizing Flame_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Straight into the lights",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/bb049831e2c0b573.png",
+      "charts": [
+        {
+          "chartId": "6b42997c-2fcf-4d19-9968-5342aa08a9ae",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 87571,
+      "file": "029_Straight into the lights_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Xaleid◆scopiX",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7bf12d9c7382a32c.png",
+      "charts": [
+        {
+          "chartId": "cda17c7d-c2a3-49c3-8bc3-a79668df04f7",
+          "difficulty": "MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "a9756524-b6cb-44a9-bf8a-62ea5001795c",
+          "difficulty": "Re:MASTER",
+          "level": "15"
+        }
+      ],
+      "byteLength": 99525,
+      "file": "030_Xaleid◆scopiX_DX_MASTER Lv14+, Re_MASTER Lv15.png"
+    },
+    {
+      "title": "Ref:rain (for 7th Heaven)",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/3012b0903feb6e15.png",
+      "charts": [
+        {
+          "chartId": "614f0f1a-8160-4088-9557-568b7b1b8e29",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 96018,
+      "file": "031_Ref_rain (for 7th Heaven)_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "MarbleBlue.",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/297d6d7da385d698.png",
+      "charts": [
+        {
+          "chartId": "98447ec0-bde4-418a-9b08-a13b43ac37c8",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 79690,
+      "file": "032_MarbleBlue._DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Credits",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2204bfb20e3e2e1d.png",
+      "charts": [
+        {
+          "chartId": "b1c82178-3729-4423-a5b1-33858e93544f",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 34782,
+      "file": "033_Credits_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "Maboroshi",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/38f695d2f1210456.png",
+      "charts": [
+        {
+          "chartId": "b13fbf9b-7dec-4f16-abe1-6f498e37a696",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 43121,
+      "file": "034_Maboroshi_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ouroboros -twin stroke of the end-",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/8b12a65d1c465e60.png",
+      "charts": [
+        {
+          "chartId": "69d92ac5-6bd4-4b37-b842-17e2cc816764",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 87796,
+      "file": "035_ouroboros -twin stroke of the end-_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "HECATONCHEIR",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/49e05689f3a0b19a.png",
+      "charts": [
+        {
+          "chartId": "43661373-b0ad-4efa-a70f-ce15f056ae39",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 105881,
+      "file": "036_HECATONCHEIR_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ワンダーシャッフェンの法則",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7795406e0a4be488.png",
+      "charts": [
+        {
+          "chartId": "91c63846-44f3-40f0-a8f6-5f45951c2682",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 97280,
+      "file": "037_ワンダーシャッフェンの法則_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Regulus",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f340a4081d9c66d7.png",
+      "charts": [
+        {
+          "chartId": "6460f682-2544-41cf-80d2-07979539243c",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 92261,
+      "file": "038_Regulus_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "ARAIS",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/63687937bbd3b9f4.png",
+      "charts": [
+        {
+          "chartId": "6a39c920-a004-4fdf-bcae-2db00cb577f1",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 54202,
+      "file": "039_ARAIS_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "UniTas",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a7c4c1462f81284a.png",
+      "charts": [
+        {
+          "chartId": "cb291c33-55d5-45d3-9594-75ddbd2513fd",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 72482,
+      "file": "040_UniTas_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Sage",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4cd6568a0952195d.png",
+      "charts": [
+        {
+          "chartId": "e1fb3a67-f920-4316-bc5d-16998818f85e",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 96089,
+      "file": "041_Sage_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "初音ミクの消失",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1a02c2684d829331.png",
+      "charts": [
+        {
+          "chartId": "29768e4f-c86e-43f0-a348-32a46cadbdf9",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 79391,
+      "file": "042_初音ミクの消失_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ジングルベル",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5c0567c39670fbf4.png",
+      "charts": [
+        {
+          "chartId": "4f4e23bf-8198-4081-ac3c-f62a5c5af84c",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        },
+        {
+          "chartId": "52903eee-ed07-4110-ae5b-54d421704ce8",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 53845,
+      "file": "043_ジングルベル_STANDARD_Re_MASTER Lv14, MASTER Lv14.png"
+    },
+    {
+      "title": "僕の和風本当上手",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/96eb4c9ec685a7bc.png",
+      "charts": [
+        {
+          "chartId": "040efb66-c787-4e7a-a90a-f49c3e8a1f81",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 69090,
+      "file": "044_僕の和風本当上手_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "QZKago Requiem",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5c4531323f4aadcf.png",
+      "charts": [
+        {
+          "chartId": "a1baad4f-385e-4cc9-9939-3efa86986336",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "65efdc5c-3581-451e-b5d4-2dcb61c25e71",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 66352,
+      "file": "045_QZKago Requiem_STANDARD_Re_MASTER Lv14+, MASTER Lv14+.png"
+    },
+    {
+      "title": "larva",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f233a82bddb1a450.png",
+      "charts": [
+        {
+          "chartId": "d26a973e-f11b-4adb-9086-c0774253dfdd",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 38321,
+      "file": "046_larva_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "Cthugha",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/90fc803686e1f37e.png",
+      "charts": [
+        {
+          "chartId": "ce6165a4-8794-494c-8b09-4af70a7dfd4e",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 62899,
+      "file": "047_Cthugha_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "HERA",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/dee5503743aec8dc.png",
+      "charts": [
+        {
+          "chartId": "bab181ef-11c9-44a6-b8d2-e7ca4a6b7b55",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 50515,
+      "file": "048_HERA_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "宙天",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/92fed24b2755bbb4.png",
+      "charts": [
+        {
+          "chartId": "6c48a0ec-bfe7-4d62-a521-50d61eef5469",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 70281,
+      "file": "049_宙天_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Åntinomiε",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b232e4ac452ac306.png",
+      "charts": [
+        {
+          "chartId": "da9bb70f-d99d-4799-ba12-312ed96ab6f8",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 41823,
+      "file": "050_Åntinomiε_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "World's end BLACKBOX",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4f8dd5d9c721b249.png",
+      "charts": [
+        {
+          "chartId": "c34b3cfa-27eb-4d59-8195-7307072e2dc5",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 107970,
+      "file": "051_World's end BLACKBOX_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "AFTER PANDORA",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/337975e1e775a059.png",
+      "charts": [
+        {
+          "chartId": "e34108c0-1382-4392-be63-d64287b27711",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 42690,
+      "file": "052_AFTER PANDORA_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "人里に下ったアタイがいつの間にか社畜になっていた件",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/67e1ffddfdbf6220.png",
+      "charts": [
+        {
+          "chartId": "5996cfb1-6faa-4e41-a2f9-eaf2ded13b78",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 75807,
+      "file": "053_人里に下ったアタイがいつの間にか社畜になっていた件_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Love's Theme of BADASS ～バッド・アス 愛のテーマ～",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/fd30be82f708758f.png",
+      "charts": [
+        {
+          "chartId": "0d190247-242f-4c53-b18d-ccbaa3ac23a5",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 99751,
+      "file": "054_Love's Theme of BADASS ～バッド・アス 愛のテーマ～_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "シリウスの輝きのように",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e855318fd3b94fc0.png",
+      "charts": [
+        {
+          "chartId": "0c48c779-f859-4d07-9454-8e74de0f6e5e",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 88168,
+      "file": "055_シリウスの輝きのように_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Elemental Ethnic",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d24d81a72fa103e9.png",
+      "charts": [
+        {
+          "chartId": "0a988aad-d4b0-4120-b856-2d71e4de1919",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 93547,
+      "file": "056_Elemental Ethnic_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "分からない",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d8bcd053f3741728.png",
+      "charts": [
+        {
+          "chartId": "454704b0-0c98-4f40-b016-911e89202ae6",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 61161,
+      "file": "057_分からない_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "BLUE ZONE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/21c639ba03568a5a.png",
+      "charts": [
+        {
+          "chartId": "cb4bb38f-91d6-4e0c-86f3-1ee9799acdab",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 90280,
+      "file": "058_BLUE ZONE_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Λzure Vixen",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/52844a4b40958122.png",
+      "charts": [
+        {
+          "chartId": "11faee27-8901-42e5-8a31-369b1621b582",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 48192,
+      "file": "059_Λzure Vixen_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "SQUAD-Phvntom-",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1f7f4a1e70e24919.png",
+      "charts": [
+        {
+          "chartId": "5a9091a2-697c-4e24-ba4f-fa13dd2370e2",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 80874,
+      "file": "060_SQUAD-Phvntom-_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "インパアフェクシオン・ホワイトガアル",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f3e016cdb888c313.png",
+      "charts": [
+        {
+          "chartId": "bab7bb06-93b1-4b6b-83f7-d5e739e1831c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 69928,
+      "file": "061_インパアフェクシオン・ホワイトガアル_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "BULK UP (GAME EXCLUSIVE EDIT)",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/bde3cd8df3f6d7e5.png",
+      "charts": [
+        {
+          "chartId": "3b5f2494-f26a-4707-a380-a22160f944f1",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 55246,
+      "file": "062_BULK UP (GAME EXCLUSIVE EDIT)_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "WE'RE BACK!!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/31d7d548f4a52676.png",
+      "charts": [
+        {
+          "chartId": "e780c9ab-df46-474d-bb90-1ce6782b1a2e",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 85452,
+      "file": "063_WE'RE BACK!!_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Trrricksters!!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/482a7afdc94fba8b.png",
+      "charts": [
+        {
+          "chartId": "321a5ca2-2c42-401f-a883-c5ee1d8b73e4",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 94126,
+      "file": "064_Trrricksters!!_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Get U ♭ack",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6420ff4f7a622cd6.png",
+      "charts": [
+        {
+          "chartId": "68efa760-8a76-441e-8c79-50bbdeabff99",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 79860,
+      "file": "065_Get U ♭ack_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "アポカリプスに反逆の焔を焚べろ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5b142977c87d85d1.png",
+      "charts": [
+        {
+          "chartId": "6056159d-3f53-4572-a9ef-5110da81f3d4",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 72485,
+      "file": "066_アポカリプスに反逆の焔を焚べろ_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Cryptarithm",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cb40822c0f5a3ec1.png",
+      "charts": [
+        {
+          "chartId": "6b44527c-7c1d-48b2-a390-51fc580ca6da",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 109209,
+      "file": "067_Cryptarithm_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "ラストピースに祝福と栄光を",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/632ba87daeb2ced1.png",
+      "charts": [
+        {
+          "chartId": "43bb4e69-c836-4d2d-9208-098559ef6533",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 90000,
+      "file": "068_ラストピースに祝福と栄光を_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "7thSense",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/fb042d053168ef56.png",
+      "charts": [
+        {
+          "chartId": "8063be4e-f30a-4ec2-b976-37d9f547ca1c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 68077,
+      "file": "069_7thSense_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "GIGANTØMAKHIA",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/fed702195b5af0e7.png",
+      "charts": [
+        {
+          "chartId": "c0ad38ff-974f-480e-9df1-2f34e127a366",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 89628,
+      "file": "070_GIGANTØMAKHIA_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "火炎地獄",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4f5af85242e1b088.png",
+      "charts": [
+        {
+          "chartId": "fb79a7e6-e03c-4fb6-98bf-96077e07d891",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 64504,
+      "file": "071_火炎地獄_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Dazzle hop",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7e0a656d5b1753ac.png",
+      "charts": [
+        {
+          "chartId": "763c4ef9-e0f5-4ddd-9073-beb9950c47df",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 59003,
+      "file": "072_Dazzle hop_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Ai C",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/17fd83901e99d7b6.png",
+      "charts": [
+        {
+          "chartId": "16cdf1b5-de23-40f7-8b73-ab49f227ba74",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 93621,
+      "file": "073_Ai C_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "the EmpErroR",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e5a64880bc872e8b.png",
+      "charts": [
+        {
+          "chartId": "43e730f9-1a98-4915-b567-47acb43806c8",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "f08b084d-4152-46e8-b4a8-2ba85db8ea52",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 40933,
+      "file": "074_the EmpErroR_STANDARD_Re_MASTER Lv14+, MASTER Lv14+.png"
+    },
+    {
+      "title": "PANDORA PARADOXXX",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/35b2760a42a8eebe.png",
+      "charts": [
+        {
+          "chartId": "9ca30d75-5b0a-4f98-8ddb-9c6ffacc9390",
+          "difficulty": "Re:MASTER",
+          "level": "15"
+        },
+        {
+          "chartId": "37869e1a-ed85-4eaa-a99f-eb7df5576766",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 60002,
+      "file": "075_PANDORA PARADOXXX_STANDARD_Re_MASTER Lv15, MASTER Lv14+.png"
+    },
+    {
+      "title": "MAXRAGE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0a0caa488ad79b61.png",
+      "charts": [
+        {
+          "chartId": "e942a023-051a-47c5-a90a-8482f6f3ca0f",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 63194,
+      "file": "076_MAXRAGE_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "雷切-RAIKIRI-",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/be3cf43e80e9462e.png",
+      "charts": [
+        {
+          "chartId": "9af60752-2176-420d-a4b3-d90413b86d88",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "f90c7017-904d-4c68-951c-951974246b60",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 79073,
+      "file": "077_雷切-RAIKIRI-_STANDARD_Re_MASTER Lv14+, MASTER Lv14+.png"
+    },
+    {
+      "title": "N3V3R G3T OV3R",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4a4b3606f9a72e2c.png",
+      "charts": [
+        {
+          "chartId": "8e58756e-c15c-414b-8cca-4ba0da523def",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 101496,
+      "file": "078_N3V3R G3T OV3R_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "殿ッ！？ご乱心！？",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/8b1d4ada02babe00.png",
+      "charts": [
+        {
+          "chartId": "c9b26824-9d23-474f-90e7-56e85df97bc5",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 51161,
+      "file": "079_殿ッ！？ご乱心！？_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "7 Wonders",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/3119002860e5eca8.png",
+      "charts": [
+        {
+          "chartId": "dea20eac-5f0a-4a3f-a7e3-9b3d1b35717d",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 57505,
+      "file": "080_7 Wonders_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "False Amber (from the Black Bazaar, Or by A Kervan Trader from the Lands Afar, Or Buried Beneath the Shifting Sands That Lead Everywhere but Nowhere)",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5745f4aa35faeedd.png",
+      "charts": [
+        {
+          "chartId": "e9a6e276-521e-4a08-9374-9b82d27a18e0",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 62826,
+      "file": "081_False Amber (from the Black Bazaar, Or by A Kervan Trader from the Lands Afar, Or Buried Beneath the Shifting Sands That_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Customized Justice",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/9354ec1583e9ffbb.png",
+      "charts": [
+        {
+          "chartId": "7d7e3af4-be4e-4e51-aff1-6a3250ffaa47",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 85315,
+      "file": "082_Customized Justice_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "渦状銀河のシンフォニエッタ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a9be993d5f552289.png",
+      "charts": [
+        {
+          "chartId": "8eaf0a2a-a880-4c89-8a57-becaa8fe0805",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 72765,
+      "file": "083_渦状銀河のシンフォニエッタ_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "渦状銀河のシンフォニエッタ",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a9be993d5f552289.png",
+      "charts": [
+        {
+          "chartId": "e883a0fe-57ea-48ab-b3e4-66d908f4fb3a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 72765,
+      "file": "084_渦状銀河のシンフォニエッタ_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "超熊猫的周遊記（ワンダーパンダートラベラー）",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/ee5ed79e9849c1a6.png",
+      "charts": [
+        {
+          "chartId": "8edbcf78-3022-4abb-a4a2-993ab454d741",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 81108,
+      "file": "085_超熊猫的周遊記（ワンダーパンダートラベラー）_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Blows Up Everything",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6791fcbbde5a1056.png",
+      "charts": [
+        {
+          "chartId": "327d409d-c910-4212-856c-fed0482a0406",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 71891,
+      "file": "086_Blows Up Everything_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Garakuta Doll Play",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a259af51e0b9d863.png",
+      "charts": [
+        {
+          "chartId": "5e3baa2b-0eb0-4458-acd9-05a6f428a7df",
+          "difficulty": "MASTER",
+          "level": "14"
+        },
+        {
+          "chartId": "d9d8758f-fe54-4197-b1a8-10e004acada0",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 93318,
+      "file": "087_Garakuta Doll Play_STANDARD_MASTER Lv14, Re_MASTER Lv14+.png"
+    },
+    {
+      "title": "ジングルベル",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5c0567c39670fbf4.png",
+      "charts": [
+        {
+          "chartId": "6a30182b-ed2d-443c-a60f-da6f05e10cce",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 53845,
+      "file": "088_ジングルベル_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "QuiQ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cbe2c6b9420a2d98.png",
+      "charts": [
+        {
+          "chartId": "86ca053f-da82-4008-a7cb-d5a3ca6a00a4",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 44634,
+      "file": "089_QuiQ_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Valsqotch",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d394210103ee76c3.png",
+      "charts": [
+        {
+          "chartId": "befcda0a-d569-4e6e-81e4-66e5cf91f794",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 67610,
+      "file": "090_Valsqotch_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Apollo",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2b46dc47f1fe3d6d.png",
+      "charts": [
+        {
+          "chartId": "4589f1af-2160-46de-9669-c7516c313c9e",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 88086,
+      "file": "091_Apollo_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "LAMIA",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0cde431203c0df1c.png",
+      "charts": [
+        {
+          "chartId": "63c5f7a0-9eb4-4b97-a799-c9896702ee21",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 80216,
+      "file": "092_LAMIA_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "FLUFFY FLASH",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6572d38b823295bd.png",
+      "charts": [
+        {
+          "chartId": "8f066665-e17b-474f-95e4-b73a82670905",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 88851,
+      "file": "093_FLUFFY FLASH_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Titania",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a6dce38910fd32d7.png",
+      "charts": [
+        {
+          "chartId": "cfc2660e-a5d2-41a9-8b98-d35ceb54af94",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 72810,
+      "file": "094_Titania_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "鬼女紅妖",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/12e822396bbf7ca1.png",
+      "charts": [
+        {
+          "chartId": "62294ced-385d-4584-b01c-a470df66bc77",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 78321,
+      "file": "095_鬼女紅妖_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "系ぎて",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1ace9e4612c5e020.png",
+      "charts": [
+        {
+          "chartId": "bbdb42d6-984b-4e7f-94bd-012ec206314e",
+          "difficulty": "Re:MASTER",
+          "level": "15"
+        },
+        {
+          "chartId": "a1dfb4e9-e4c0-47e9-be3e-115411ab3bc4",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 56459,
+      "file": "096_系ぎて_DX_Re_MASTER Lv15, MASTER Lv14+.png"
+    },
+    {
+      "title": "Abstruse Dilemma",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a5c6705e2bfa3419.png",
+      "charts": [
+        {
+          "chartId": "79fa12e1-cb34-4365-991b-3bc7de8e4e3d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 96798,
+      "file": "097_Abstruse Dilemma_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ULTRA SYNERGY MATRIX",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/020b7a4dea021d7e.png",
+      "charts": [
+        {
+          "chartId": "e5c298f5-045e-4031-9e86-1f04eae651ee",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 48470,
+      "file": "098_ULTRA SYNERGY MATRIX_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "華天月兎",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/03e15327e6423545.png",
+      "charts": [
+        {
+          "chartId": "467adc61-b535-4f4d-81b4-050de0f464be",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 81308,
+      "file": "099_華天月兎_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Deicide",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/52fdd4f921a6c08e.png",
+      "charts": [
+        {
+          "chartId": "86d55b92-5adb-4a24-8400-ed2d1a47c496",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 83763,
+      "file": "100_Deicide_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "IF:U",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0c04b513c0520392.png",
+      "charts": [
+        {
+          "chartId": "e216f5d5-2960-4c1f-b71e-286c3f634195",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 58347,
+      "file": "101_IF_U_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "勦滅",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f724f87d64fa40db.png",
+      "charts": [
+        {
+          "chartId": "701165bf-d03c-4de4-bfb4-e6f0d52510cf",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 79120,
+      "file": "102_勦滅_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Raven Emperor",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/000e4e52cbf4d11f.png",
+      "charts": [
+        {
+          "chartId": "6f1e1f23-aae8-444f-ae28-a9021007144b",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 91153,
+      "file": "103_Raven Emperor_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "デッドマンズバラッド",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/fc8413fd2a11ca68.png",
+      "charts": [
+        {
+          "chartId": "2189952a-1466-4b06-ae99-9ccd531bf0e6",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 81507,
+      "file": "104_デッドマンズバラッド_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Alcyone",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/071768635e02a075.png",
+      "charts": [
+        {
+          "chartId": "a30276d5-4d31-4288-b610-89fcddf88799",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 98143,
+      "file": "105_Alcyone_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Lia=Fail",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0c326d43294255a7.png",
+      "charts": [
+        {
+          "chartId": "5f590847-0deb-479a-84c1-f49c8733368b",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 84494,
+      "file": "106_Lia=Fail_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "星詠みとデスペラード",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f01745a29d2ef5bd.png",
+      "charts": [
+        {
+          "chartId": "479cbfb9-071b-48cc-b9a3-2e20298f40dc",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 105875,
+      "file": "107_星詠みとデスペラード_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "BLACK SWAN",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/58d3f2aeccf6a09d.png",
+      "charts": [
+        {
+          "chartId": "3506c9c4-5e3f-4b8b-9c32-cd142ae61258",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 89676,
+      "file": "108_BLACK SWAN_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "IMBRUED:FLUX",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/51959395323a90a1.png",
+      "charts": [
+        {
+          "chartId": "7d3a5f3f-8e32-4c44-9fb8-cc3c271eb0d9",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 64860,
+      "file": "109_IMBRUED_FLUX_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Starry Colors",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f38fc9d91ef0b72c.png",
+      "charts": [
+        {
+          "chartId": "09572dfc-46ec-48e9-88fe-8551311314e7",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 87020,
+      "file": "110_Starry Colors_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "MYTHOS",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cf794d85900e873d.png",
+      "charts": [
+        {
+          "chartId": "30e0fc38-f0ab-4d32-a913-e304028c2584",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 67516,
+      "file": "111_MYTHOS_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "FFT",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/866ca42598db8c01.png",
+      "charts": [
+        {
+          "chartId": "24c265e7-1f53-47e3-aec5-35e212214d83",
+          "difficulty": "MASTER",
+          "level": "14"
+        },
+        {
+          "chartId": "f4c4d87f-0e30-44da-b9bc-c20054fe8a99",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 58739,
+      "file": "112_FFT_STANDARD_MASTER Lv14, Re_MASTER Lv14.png"
+    },
+    {
+      "title": "AMAZING MIGHTYYYY!!!!",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b642cd32bc38692a.png",
+      "charts": [
+        {
+          "chartId": "8208b6ab-b89b-4383-9c41-dd742d20ce92",
+          "difficulty": "MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "df659a59-c684-4a77-8118-54f70be09b18",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 66866,
+      "file": "113_AMAZING MIGHTYYYY!!!!_STANDARD_MASTER Lv14+, Re_MASTER Lv14.png"
+    },
+    {
+      "title": "VERTeX",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/23941430342ce007.png",
+      "charts": [
+        {
+          "chartId": "d39ed1e6-cba5-40f9-95b8-b4678b9c8696",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 63894,
+      "file": "114_VERTeX_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "VERTeX (rintaro soma deconstructed remix)",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/fad2062de9b868ae.png",
+      "charts": [
+        {
+          "chartId": "5163cc0e-ddbe-4b70-8846-7005e403cc33",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 82267,
+      "file": "115_VERTeX (rintaro soma deconstructed remix)_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "氷滅の135小節",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b28c21f0d14c6e26.png",
+      "charts": [
+        {
+          "chartId": "d4dfc7c0-705c-4cba-acd6-40cdfb7c8535",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 72839,
+      "file": "116_氷滅の135小節_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "有明/Ariake",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2e4769fb4445584c.png",
+      "charts": [
+        {
+          "chartId": "620fa23d-da4d-4aae-af7e-66530ff00872",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 77634,
+      "file": "117_有明_Ariake_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "taboo tears you up",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e108675f2aab8a85.png",
+      "charts": [
+        {
+          "chartId": "f2e89aac-509d-40ad-9332-399826a85a00",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 28387,
+      "file": "118_taboo tears you up_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "おべんきょうたいむ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/57a35acac52f9635.png",
+      "charts": [
+        {
+          "chartId": "3347a0c8-99e4-4a6c-9ce2-382b0dfd0b04",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 40901,
+      "file": "119_おべんきょうたいむ_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "るろうらんる",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/393de382185611be.png",
+      "charts": [
+        {
+          "chartId": "4cc758f6-eae9-47db-8cf8-e8f7f60a0287",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 13669,
+      "file": "120_るろうらんる_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "The Great Banquet",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4014389349bb320b.png",
+      "charts": [
+        {
+          "chartId": "d5411fe0-4e89-4185-864b-8bf7a7c3bca2",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 89976,
+      "file": "121_The Great Banquet_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Latent Kingdom",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2079d8ee35e28e4d.png",
+      "charts": [
+        {
+          "chartId": "ae1c52ac-f02c-4427-8411-d4ad8aaf46c1",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 72833,
+      "file": "122_Latent Kingdom_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Swift Swing",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b88e127e372b0c2e.png",
+      "charts": [
+        {
+          "chartId": "1c55058f-93ab-4d0a-9594-dc56c53aba8a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 77964,
+      "file": "123_Swift Swing_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Mutation",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/927305ac2ee395bf.png",
+      "charts": [
+        {
+          "chartId": "01e10faa-2c33-4246-8f8b-2be5ff50e580",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 84127,
+      "file": "124_Mutation_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Horoscope Express",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/8ad4e0648c979e13.png",
+      "charts": [
+        {
+          "chartId": "d7a38229-9dc9-411d-869c-1e7e7e68581c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 52818,
+      "file": "125_Horoscope Express_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "raputa",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/486d317c19a52fd5.png",
+      "charts": [
+        {
+          "chartId": "f1a0b316-5c44-4d39-abd2-86558ed73a4a",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 77888,
+      "file": "126_raputa_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Zitronectar",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2b7c6e8b13676f2e.png",
+      "charts": [
+        {
+          "chartId": "c5637072-2684-4b7d-9918-acea0c888f6f",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 76743,
+      "file": "127_Zitronectar_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ヤミナベ!!!!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/48b784c73d0cba6b.png",
+      "charts": [
+        {
+          "chartId": "642f07c7-4b02-43bf-8082-193e4979fb9e",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 63586,
+      "file": "128_ヤミナベ!!!!_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "STEEL TRANSONIC",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/fac8d66129926589.png",
+      "charts": [
+        {
+          "chartId": "9599eb07-fa06-4b2e-9993-b2a26a964ae9",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 78069,
+      "file": "129_STEEL TRANSONIC_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Like the Wind [Reborn]",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0fe32017bb6280d5.png",
+      "charts": [
+        {
+          "chartId": "a8e03947-3983-4920-a91f-935ff69e124a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 59824,
+      "file": "130_Like the Wind [Reborn]_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "JACKY [Remix]",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0f69f3123db19f49.png",
+      "charts": [
+        {
+          "chartId": "5579b199-f8fe-40cf-a60d-0ba1f565016d",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 62969,
+      "file": "131_JACKY [Remix]_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Grievous Lady",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6d9c69398720e097.png",
+      "charts": [
+        {
+          "chartId": "7faec769-9658-4982-a79f-ac0fa11a5308",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 94204,
+      "file": "132_Grievous Lady_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Outlaw's Lullaby",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d54f61d4d4db472a.png",
+      "charts": [
+        {
+          "chartId": "16fedc5a-855b-4be8-a30a-d6267cceb7e5",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 31352,
+      "file": "133_Outlaw's Lullaby_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Sqlupp (Camellia's \"Sqleipd*Hiytex\" Remix)",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/fcb1d9c95bb8205d.png",
+      "charts": [
+        {
+          "chartId": "f1e4bbd8-18fe-42e0-a34d-d90b05cd1330",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 88654,
+      "file": "134_Sqlupp (Camellia's _Sqleipd_Hiytex_ Remix)_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "R'N'R Monsta",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/162fce5271b54ab3.png",
+      "charts": [
+        {
+          "chartId": "9f2c3388-8687-4aca-9cf7-2eb65224d30f",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 80333,
+      "file": "135_R'N'R Monsta_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "美夜月鏡",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/286e3071ecea46df.png",
+      "charts": [
+        {
+          "chartId": "9a025bcd-f122-4c13-9e37-813fb54cb8c9",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 71869,
+      "file": "136_美夜月鏡_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "GEOMETRIC DANCE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/34b3ce15e74d1446.png",
+      "charts": [
+        {
+          "chartId": "14cf4668-28ea-4471-ab49-6a099b99d3b9",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 87345,
+      "file": "137_GEOMETRIC DANCE_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "MYTH Re：LEASE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/bf9cd35017832f93.png",
+      "charts": [
+        {
+          "chartId": "bc6eca21-9930-41d8-88f3-81db55d4592d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 112004,
+      "file": "138_MYTH Re：LEASE_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "QUATTUORUX",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5d5496cab15d0422.png",
+      "charts": [
+        {
+          "chartId": "17a8d297-f52f-4fa2-ba46-9c01119a5a2b",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 104004,
+      "file": "139_QUATTUORUX_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "INFiNiTE ENERZY -Overdoze-",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/486ae6dae890e7d7.png",
+      "charts": [
+        {
+          "chartId": "4d06c1be-44ba-4562-a9a8-f2927a59fbce",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 46292,
+      "file": "140_INFiNiTE ENERZY -Overdoze-_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "神威",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1ca2b9f20e307c03.png",
+      "charts": [
+        {
+          "chartId": "4e318f02-9f93-4a3e-a3b6-cbbf6021e152",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 61517,
+      "file": "141_神威_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "VeRForTe αRtE:VEiN",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5461cc48817a3c7a.png",
+      "charts": [
+        {
+          "chartId": "3815dc49-fb97-48f6-8afd-9b683d33aaf3",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 79660,
+      "file": "142_VeRForTe αRtE_VEiN_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "砂の函",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/64591d22ccbf08c8.png",
+      "charts": [
+        {
+          "chartId": "8e5fcc86-d1cd-4bcc-92e3-b173dc930ac8",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 73869,
+      "file": "143_砂の函_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Divide et impera!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/da7d3a099d23a585.png",
+      "charts": [
+        {
+          "chartId": "21badce0-e2c6-4cf4-8400-b5dfaf19b4b9",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 86049,
+      "file": "144_Divide et impera!_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "TEmPTaTiON",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/492c768653001e2a.png",
+      "charts": [
+        {
+          "chartId": "1369d47a-1b22-4d51-85a6-176bb89e41a1",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 60365,
+      "file": "145_TEmPTaTiON_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Party☆People☆Princess",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/284cbd482551683b.png",
+      "charts": [
+        {
+          "chartId": "70625c63-f0a2-43a4-a4f2-abf8d566087b",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 79882,
+      "file": "146_Party☆People☆Princess_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "KHYMΞXΛ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/474425ed8b75f482.png",
+      "charts": [
+        {
+          "chartId": "3230b160-4fe4-4c9d-bce7-3df17149e844",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 79187,
+      "file": "147_KHYMΞXΛ_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "WiPE OUT MEMORIES",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1a61a11a3b89420f.png",
+      "charts": [
+        {
+          "chartId": "7d7f2dcd-505a-4b1f-8372-b17b52633ab3",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 64825,
+      "file": "148_WiPE OUT MEMORIES_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Strive against fate",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c22b6708af0c7a69.png",
+      "charts": [
+        {
+          "chartId": "eddb1aca-130d-44dd-b273-844eac88e4be",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 86838,
+      "file": "149_Strive against fate_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "パラマウント☆ショータイム！！",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f4f0f2f8ebd3f0da.png",
+      "charts": [
+        {
+          "chartId": "40292624-b2b7-4e36-ad90-d9230d3766ad",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 94828,
+      "file": "150_パラマウント☆ショータイム！！_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Metamorphosism",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d02540b6cedfa362.png",
+      "charts": [
+        {
+          "chartId": "74dcfeea-0eab-45cf-bf1e-784afbc9ef22",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 91104,
+      "file": "151_Metamorphosism_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "World's end loneliness",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e341ba3d5adb60dd.png",
+      "charts": [
+        {
+          "chartId": "a74e2479-366e-4853-b99d-777feec6c271",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 104336,
+      "file": "152_World's end loneliness_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "バーチャルダム ネーション",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d95b9e9492d691ec.png",
+      "charts": [
+        {
+          "chartId": "8e600504-d65e-4095-a71c-6604dcf5500f",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 49985,
+      "file": "153_バーチャルダム ネーション_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Schwarzschild",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2454ef7c65d00f77.png",
+      "charts": [
+        {
+          "chartId": "7df65594-c533-454d-b83e-c4591757feff",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "99ad7e0a-78a8-4d00-8d76-7c8add918574",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 66440,
+      "file": "154_Schwarzschild_STANDARD_Re_MASTER Lv14+, MASTER Lv14.png"
+    },
+    {
+      "title": "ミラクルポップ☆アドベンチャー!!!!!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/15e5297f80a4aa55.png",
+      "charts": [
+        {
+          "chartId": "3245528b-3e90-4a79-a04a-b5ea9e7fbfcb",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 84298,
+      "file": "155_ミラクルポップ☆アドベンチャー!!!!!_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "PUPA",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/32f705d989f3cd7f.png",
+      "charts": [
+        {
+          "chartId": "267b5788-1581-441e-896f-b72e4b7c8dc7",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 67911,
+      "file": "156_PUPA_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "田中",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/eb0ab4dfa64b01f1.png",
+      "charts": [
+        {
+          "chartId": "335dbfab-8a96-4633-be00-d56b037c673c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 85221,
+      "file": "157_田中_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "竹",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/03897fe7481825cc.png",
+      "charts": [
+        {
+          "chartId": "f3d428e8-e063-4ab0-a74f-e49742eb2c2c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 80532,
+      "file": "158_竹_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ATLAS RUSH",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/499800c520a31d54.png",
+      "charts": [
+        {
+          "chartId": "ba5cbf05-1654-45fd-8c9a-5e35a508c2d7",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 61462,
+      "file": "159_ATLAS RUSH_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "mystique as iris",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/077872054fe8552d.png",
+      "charts": [
+        {
+          "chartId": "c5d8d1ee-4793-49ed-8be6-a3c3e48de9b4",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 74655,
+      "file": "160_mystique as iris_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Tricolor⁂circuS",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/3839ea9459990614.png",
+      "charts": [
+        {
+          "chartId": "4f42051a-117e-496b-8a03-0da73cb66a9d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 83188,
+      "file": "161_Tricolor⁂circuS_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "蜘蛛の糸",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/28898558057a514c.png",
+      "charts": [
+        {
+          "chartId": "5d0a7e9d-77bb-4dd2-be32-30fbde64c5b7",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 85404,
+      "file": "162_蜘蛛の糸_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "源平大戦絵巻テーマソング",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/ad6ef476a7500798.png",
+      "charts": [
+        {
+          "chartId": "ff3ec852-ce25-4392-a92b-bcf04567adf0",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 93862,
+      "file": "163_源平大戦絵巻テーマソング_STANDARD_Re_MASTER Lv14+.png"
+    },
+    {
+      "title": "Sun Dance",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/aca38878fc022dcb.png",
+      "charts": [
+        {
+          "chartId": "34dcdf3b-8d39-4d29-888d-2c00ad79e20c",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 53661,
+      "file": "164_Sun Dance_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "最強STRONGER",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f9c1158b5ed2757f.png",
+      "charts": [
+        {
+          "chartId": "0729436a-1053-4abb-9f00-0dc2ee6171ac",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 95322,
+      "file": "165_最強STRONGER_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Aegleseeker",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/ced71091c6d0d194.png",
+      "charts": [
+        {
+          "chartId": "1d9ec447-118a-46d9-a4a5-aa213ad030cb",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 88455,
+      "file": "166_Aegleseeker_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "FLΛME/FRΦST",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cd7dc8b9ec80cf06.png",
+      "charts": [
+        {
+          "chartId": "4da369a0-c7a3-4ee7-8c32-3abdd76a7adf",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 82958,
+      "file": "167_FLΛME_FRΦST_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "電光石火",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/74c92bac1b51a9c3.png",
+      "charts": [
+        {
+          "chartId": "92170560-a0e7-4175-a5ed-2de9ca0a5082",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 98628,
+      "file": "168_電光石火_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Hainuwele",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6bb029ffc3be5817.png",
+      "charts": [
+        {
+          "chartId": "4b164177-fbcb-4a41-acf4-4b14c82a2b77",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 111391,
+      "file": "169_Hainuwele_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "BREaK! BREaK! BREaK!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/91737a421106e7ca.png",
+      "charts": [
+        {
+          "chartId": "3ea5f35c-d493-4a9c-ad3b-af480df4c771",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 91139,
+      "file": "170_BREaK! BREaK! BREaK!_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Fragrance",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2bb3f7cff734ce6a.png",
+      "charts": [
+        {
+          "chartId": "79ca8435-38cb-4963-872b-568178eff707",
+          "difficulty": "MASTER",
+          "level": "14"
+        },
+        {
+          "chartId": "74728e8e-48a9-4685-af49-273e5bfdb8bc",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 56787,
+      "file": "171_Fragrance_STANDARD_MASTER Lv14, Re_MASTER Lv14+.png"
+    },
+    {
+      "title": "Nerverakes",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/de90828ed738aa17.png",
+      "charts": [
+        {
+          "chartId": "48f50337-235c-4cc0-81d4-63edf9a2aa93",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 69902,
+      "file": "172_Nerverakes_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "YA･DA･YO [Reborn]",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1cb752563c0aaa9d.png",
+      "charts": [
+        {
+          "chartId": "0b112702-a427-4770-abd1-8625590239dc",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 74435,
+      "file": "173_YA･DA･YO [Reborn]_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "System “Z”",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b9f9c95d02592f5c.png",
+      "charts": [
+        {
+          "chartId": "92103751-3eb9-4b1a-9e07-f565a18863e3",
+          "difficulty": "MASTER",
+          "level": "14"
+        },
+        {
+          "chartId": "a6cf226a-2950-4398-a640-0033db2bd11f",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 73341,
+      "file": "174_System “Z”_STANDARD_MASTER Lv14, Re_MASTER Lv14.png"
+    },
+    {
+      "title": "脳漿炸裂ガール",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/968dbd5f0c309827.png",
+      "charts": [
+        {
+          "chartId": "e2593edf-67ca-49f6-bba3-fe069cc61c55",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 64099,
+      "file": "175_脳漿炸裂ガール_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "DEVOTION",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/dfe08aefe5fcd266.png",
+      "charts": [
+        {
+          "chartId": "72610c68-5dc1-4180-952b-7ad39d1b37fe",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 69557,
+      "file": "176_DEVOTION_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "地球",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/df8227797c9a592e.png",
+      "charts": [
+        {
+          "chartId": "05ddceb4-eed1-49b3-8996-661a99cc6483",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 76660,
+      "file": "177_地球_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "MEGATON BLAST",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5e9ecbc940b79708.png",
+      "charts": [
+        {
+          "chartId": "0b8c14af-a40d-4cf9-8688-c2c5d292b3ba",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 84559,
+      "file": "178_MEGATON BLAST_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "In Chaos",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a044abc0c8fca1cf.png",
+      "charts": [
+        {
+          "chartId": "dc2a4e3f-94fb-41fe-a2d0-1db62a5b6334",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 69313,
+      "file": "179_In Chaos_STANDARD_Re_MASTER Lv14+.png"
+    },
+    {
+      "title": "Beat Of Mind",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2aea2c2fbd7c0b2a.png",
+      "charts": [
+        {
+          "chartId": "25616d3d-1c6c-41d1-a26e-42d2ef5d93cc",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 42737,
+      "file": "180_Beat Of Mind_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Beat of getting entangled",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1302aa1b571e7ef0.png",
+      "charts": [
+        {
+          "chartId": "b40e3e91-42ef-4523-8205-4f89a64f33f9",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 64190,
+      "file": "181_Beat of getting entangled_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Death Scythe",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f4e1193a7dc748ea.png",
+      "charts": [
+        {
+          "chartId": "281a2f2e-f9f3-448d-9d9d-3b617ccb3a93",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 66339,
+      "file": "182_Death Scythe_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "BATTLE NO.1",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7aa3724d12b8a82d.png",
+      "charts": [
+        {
+          "chartId": "8c018582-20d4-4ca5-a302-a7223721c37e",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 75693,
+      "file": "183_BATTLE NO.1_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Mjölnir",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/21b9cc9519eab016.png",
+      "charts": [
+        {
+          "chartId": "6db04e61-f4ef-4092-a181-8d23dd166790",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 50175,
+      "file": "184_Mjölnir_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Halcyon",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4e2279e433710717.png",
+      "charts": [
+        {
+          "chartId": "5473fb06-b341-4205-b859-2ce637b072a0",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 67496,
+      "file": "185_Halcyon_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Vallista",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c1e02d23d7cc8cca.png",
+      "charts": [
+        {
+          "chartId": "e514f8b8-25ca-4e84-93ab-726a22848c9d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 58330,
+      "file": "186_Vallista_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "康莊大道",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d7aa8fbe05bb911e.png",
+      "charts": [
+        {
+          "chartId": "2acd78bc-4c41-4dfe-adb1-42223bdeeb5f",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 98148,
+      "file": "187_康莊大道_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "otorii INNOVATED -[i]3-",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/22cfe49ebfb24007.png",
+      "charts": [
+        {
+          "chartId": "a1103cd7-0b5a-4117-8e8a-685f8a9dbabc",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 81705,
+      "file": "188_otorii INNOVATED -[i]3-_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Jack-the-Ripper◆",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/face36da229c0923.png",
+      "charts": [
+        {
+          "chartId": "a82d0eef-14f7-4d84-8674-6832e2ef11be",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 56676,
+      "file": "189_Jack-the-Ripper◆_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Got more raves？",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c1dd57e2618609f3.png",
+      "charts": [
+        {
+          "chartId": "2cfc56b5-fd2e-4f9b-b110-6d55171db57a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 72170,
+      "file": "190_Got more raves？_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "B.B.K.K.B.K.K.",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/60545b69d517fb30.png",
+      "charts": [
+        {
+          "chartId": "bd685a57-0a63-4814-b354-81a6726d2c0d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 25145,
+      "file": "191_B.B.K.K.B.K.K._STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "カゲロウデイズ",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b6e33b58e573a59b.png",
+      "charts": [
+        {
+          "chartId": "d2966524-5741-4471-bd3d-16cf58efed44",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 49476,
+      "file": "192_カゲロウデイズ_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Beat Opera op.1",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c87ba892e4792628.png",
+      "charts": [
+        {
+          "chartId": "ecbb88ea-71c4-4cae-85e2-d9153b2e5ca1",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 90424,
+      "file": "193_Beat Opera op.1_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "#狂った民族２ PRAVARGYAZOOQA",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1bde84ebe909f8bc.png",
+      "charts": [
+        {
+          "chartId": "463418c6-c7fb-4b50-bc9c-0564cd9d1736",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 89714,
+      "file": "194_#狂った民族２ PRAVARGYAZOOQA_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "VIIIbit Explorer",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/511f76bc9e72ec56.png",
+      "charts": [
+        {
+          "chartId": "8f8363b0-c8c2-4209-95d5-d7b1324db243",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 99677,
+      "file": "195_VIIIbit Explorer_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "VIIIbit Explorer",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/511f76bc9e72ec56.png",
+      "charts": [
+        {
+          "chartId": "d4b074ea-ecc2-4c01-9a48-f44005d52504",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 99677,
+      "file": "196_VIIIbit Explorer_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "VSpook!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5d7f7536dd643e71.png",
+      "charts": [
+        {
+          "chartId": "b930f7b9-a09c-433b-b0bd-c9b6bba89cbb",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 82010,
+      "file": "197_VSpook!_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Rising on the horizon",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7294b35c4ce70324.png",
+      "charts": [
+        {
+          "chartId": "d5019cfb-62ea-42ba-9b31-eeb5287bc303",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 67009,
+      "file": "198_Rising on the horizon_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "\"411Ψ892\"",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c05db4664af4c45e.png",
+      "charts": [
+        {
+          "chartId": "0588a081-d158-4cc5-95e0-a3874999f43a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 98071,
+      "file": "199__411Ψ892__DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Unwelcome School",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/ba639bf8d279f397.png",
+      "charts": [
+        {
+          "chartId": "c7add073-0424-48d0-bfb4-50d60cc71ca3",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 49974,
+      "file": "200_Unwelcome School_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "幻想のサテライト",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/032fe5fc9324b24e.png",
+      "charts": [
+        {
+          "chartId": "3e13b763-76bd-4df6-9144-2179a438e061",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 50601,
+      "file": "201_幻想のサテライト_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "きたさいたま2000",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/8c567d50c8522006.png",
+      "charts": [
+        {
+          "chartId": "1ced922a-02de-4e58-b2b5-24c7149afab1",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 85616,
+      "file": "202_きたさいたま2000_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "FUJIN Rumble",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c023c6efc6447818.png",
+      "charts": [
+        {
+          "chartId": "c67289e6-6e58-48a8-9a36-1f5850bf5b35",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 90545,
+      "file": "203_FUJIN Rumble_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Ignis Danse",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/8de7dd8b8e1c1016.png",
+      "charts": [
+        {
+          "chartId": "8f7adbab-b30f-4ad8-bbd0-cdd18904c5cb",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 50547,
+      "file": "204_Ignis Danse_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "マツヨイナイトバグ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e20fd62b4e0dfe16.png",
+      "charts": [
+        {
+          "chartId": "672cb59d-6b80-43d1-ab95-483649164798",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 71759,
+      "file": "205_マツヨイナイトバグ_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "ナイト・オブ・ナイツ",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/541de4c8cadacd0e.png",
+      "charts": [
+        {
+          "chartId": "51c9dfe5-dca7-454a-9ef9-86bb2813b4dc",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 56249,
+      "file": "206_ナイト・オブ・ナイツ_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "患部で止まってすぐ溶ける～狂気の優曇華院",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/943b8a0563a24df8.png",
+      "charts": [
+        {
+          "chartId": "48b48a3c-ae62-4675-a7c7-ba3f24633e12",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 56863,
+      "file": "207_患部で止まってすぐ溶ける～狂気の優曇華院_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Aetheric Energy",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b2491c88e30e7d0b.png",
+      "charts": [
+        {
+          "chartId": "8e8a293d-fbf0-4bf4-97c8-d7a053a6cf14",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 83927,
+      "file": "208_Aetheric Energy_DX_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "FLOWER",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c155d89c7d8ca001.png",
+      "charts": [
+        {
+          "chartId": "818f9866-0757-4b4c-99ad-2ccf8fff6268",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 74141,
+      "file": "209_FLOWER_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Dragoon",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/bf6a041e1c971bdd.png",
+      "charts": [
+        {
+          "chartId": "d74388d3-ffd8-40ad-b28c-9db31558126f",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 66663,
+      "file": "210_Dragoon_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "ロストワンの号哭",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1cb4a922d67acf7e.png",
+      "charts": [
+        {
+          "chartId": "b1a040b1-0399-451c-9958-cdd584147c2f",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 53749,
+      "file": "211_ロストワンの号哭_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "ガラテアの螺旋",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0c110a5873857c5f.png",
+      "charts": [
+        {
+          "chartId": "980f334d-38d7-4180-9d55-7b8003c7e54c",
+          "difficulty": "Re:MASTER",
+          "level": "14+"
+        },
+        {
+          "chartId": "142242bd-6b30-49c8-a843-7569b7ab073d",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 38163,
+      "file": "212_ガラテアの螺旋_STANDARD_Re_MASTER Lv14+, MASTER Lv14+.png"
+    },
+    {
+      "title": "Oshama Scramble!",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/64635a3534ce788a.png",
+      "charts": [
+        {
+          "chartId": "d2c4d0ca-a057-4d9f-8ecb-eec95cead353",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 43255,
+      "file": "213_Oshama Scramble!_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "ViRTUS",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5d89c120d8c41d6a.png",
+      "charts": [
+        {
+          "chartId": "2a33edeb-2e58-4fba-b829-4c4c6777baba",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 82774,
+      "file": "214_ViRTUS_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "U&iVERSE -銀河鸞翔-",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6cc01bbad2650c50.png",
+      "charts": [
+        {
+          "chartId": "8783aea9-8782-42fa-a045-1189766d8e0a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 90039,
+      "file": "215_U&iVERSE -銀河鸞翔-_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "ℝ∈Χ LUNATiCA",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/48447c3e67a26b08.png",
+      "charts": [
+        {
+          "chartId": "89ba2f89-f341-4df8-b602-75149a41cde5",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 64003,
+      "file": "216_ℝ∈Χ LUNATiCA_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "ほしぞらスペクタクル",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/3b610dccb2b32467.png",
+      "charts": [
+        {
+          "chartId": "9bb3be4b-f3e0-4d0d-854f-b5e238b0c13a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 84365,
+      "file": "217_ほしぞらスペクタクル_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "封焔の135秒",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2985e6ee69db26de.png",
+      "charts": [
+        {
+          "chartId": "4f5dd21f-817d-47a4-9bb2-b74269d8feab",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 70873,
+      "file": "218_封焔の135秒_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Galaxy Blaster",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/eb065aac3a8e4c07.png",
+      "charts": [
+        {
+          "chartId": "3ff181a2-1b01-49d9-ae9e-30d6b0cc602e",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 79131,
+      "file": "219_Galaxy Blaster_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "≠彡\"/了→",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7bd3115b580213e3.png",
+      "charts": [
+        {
+          "chartId": "f4648c3f-6b8b-44ee-9cd2-7802644417e9",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 61663,
+      "file": "220_≠彡__了→_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "sølips",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/8043243d47cacaee.png",
+      "charts": [
+        {
+          "chartId": "c5a88cfa-9a1a-47f7-a944-bd59dd970c86",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 79748,
+      "file": "221_sølips_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Chronomia",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/ec046ab5d636f47c.png",
+      "charts": [
+        {
+          "chartId": "d72c064b-2f98-485a-a8d1-048cbffbf07d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 76538,
+      "file": "222_Chronomia_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "JINGLE DEATH",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c467dedfe621ce57.png",
+      "charts": [
+        {
+          "chartId": "5c65eabc-3471-4b8e-90fb-686f1b6af8c6",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 91509,
+      "file": "223_JINGLE DEATH_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Luminaria",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/03b507681b4bb63f.png",
+      "charts": [
+        {
+          "chartId": "b85b4f34-9629-4589-aff8-7af1d3e93ad2",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 99865,
+      "file": "224_Luminaria_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "∀",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e01e7560acc1348d.png",
+      "charts": [
+        {
+          "chartId": "4c7f83c3-e05a-47d4-9a9c-24158f140ce4",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 66980,
+      "file": "225_∀_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Synthesis.",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/27619d6525a81f92.png",
+      "charts": [
+        {
+          "chartId": "2572529b-6665-4a4f-a49f-a57a6175434d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 97596,
+      "file": "226_Synthesis._DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Destined Marionette",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/7fa4a3f8246030ce.png",
+      "charts": [
+        {
+          "chartId": "0fa324c0-b795-4f51-84b9-313432dec30a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 72084,
+      "file": "227_Destined Marionette_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Overjoy ★ OVERDOSE!!",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b2c3bad6c7f6d2c7.png",
+      "charts": [
+        {
+          "chartId": "7242981c-b5b4-4fc9-b2a9-a07d0dc6bd28",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 76262,
+      "file": "228_Overjoy ★ OVERDOSE!!_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "DATAERR0R",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/e3da5b1f49b33f3b.png",
+      "charts": [
+        {
+          "chartId": "f462a95d-6aa2-45ce-b3ce-5bc389e592ed",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 83290,
+      "file": "229_DATAERR0R_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "HYP3RTRIBE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/57a1f926723b132f.png",
+      "charts": [
+        {
+          "chartId": "b65159ba-04be-449e-9313-d3854e815888",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 55369,
+      "file": "230_HYP3RTRIBE_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "天使光輪",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2df53853d801d0e9.png",
+      "charts": [
+        {
+          "chartId": "9a74747c-f0ce-4f43-9804-d89c08df071c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 89025,
+      "file": "231_天使光輪_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Xenovcipher",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/9a806edb5b8a642e.png",
+      "charts": [
+        {
+          "chartId": "1e1317aa-9933-4c94-b23c-cdbf6edab58a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 84938,
+      "file": "232_Xenovcipher_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "AMABIE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/761e10bd436f83cf.png",
+      "charts": [
+        {
+          "chartId": "44d3db68-a534-488f-95fa-808b08e81a8d",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 99377,
+      "file": "233_AMABIE_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Heavenly Blast",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b93bb5411292f1d8.png",
+      "charts": [
+        {
+          "chartId": "35d4e858-7d88-4a41-8dd0-1732f37702cc",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 88077,
+      "file": "234_Heavenly Blast_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Glorious Crown",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0c142b42f0e37845.png",
+      "charts": [
+        {
+          "chartId": "6a7295cb-9845-48ac-aeb4-0189c7e58196",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 64380,
+      "file": "235_Glorious Crown_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "Aiolos",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/3982693e19e7ee22.png",
+      "charts": [
+        {
+          "chartId": "11400718-ccb4-459c-bc84-0312a0b2f4f0",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 70522,
+      "file": "236_Aiolos_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "BIRTH",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/6957b90486e1318e.png",
+      "charts": [
+        {
+          "chartId": "4701c33b-2427-46ab-98bd-d3772c1b9a8c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 80858,
+      "file": "237_BIRTH_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Revive The Rave",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b24578a4495292cf.png",
+      "charts": [
+        {
+          "chartId": "e0fb9c62-9415-49d6-867a-068da491d634",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 56919,
+      "file": "238_Revive The Rave_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "METATRON",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1a95ad12ccd7eb13.png",
+      "charts": [
+        {
+          "chartId": "ac7db576-3bd6-4edd-85e9-7616f9984558",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 39287,
+      "file": "239_METATRON_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Contrapasso -paradiso-",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d2de6981019288a0.png",
+      "charts": [
+        {
+          "chartId": "978b8ec4-aa9f-438c-b8c9-805ed8ba8740",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 59964,
+      "file": "240_Contrapasso -paradiso-_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Jumble Rumble",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cf0f60c2aa35ac13.png",
+      "charts": [
+        {
+          "chartId": "81a3e230-f313-4643-8883-d1d9ae24d505",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 42151,
+      "file": "241_Jumble Rumble_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "宿星審判",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c052a8d637901cf3.png",
+      "charts": [
+        {
+          "chartId": "a0009b89-fc06-4384-820a-c5f92007dc5b",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 97753,
+      "file": "242_宿星審判_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "スピカの天秤",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b81925a4285c4ce1.png",
+      "charts": [
+        {
+          "chartId": "d8cec77f-e9ff-4118-9d95-8e35a29beebe",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 99638,
+      "file": "243_スピカの天秤_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Climax",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c8af8a03388a9a19.png",
+      "charts": [
+        {
+          "chartId": "6833767d-5fca-4c5f-99d4-ad042c2f626b",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 108441,
+      "file": "244_Climax_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Nitrous Fury",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/bf49149f0461dc43.png",
+      "charts": [
+        {
+          "chartId": "7a50bf3e-3de3-4b92-8865-341bec5eea80",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 67586,
+      "file": "245_Nitrous Fury_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "CITRUS MONSTER",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2d53766d4a3020c0.png",
+      "charts": [
+        {
+          "chartId": "e939be1f-5402-488e-9091-8d8e1a1ba286",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 64644,
+      "file": "246_CITRUS MONSTER_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "夜明けまであと３秒",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/da71e058b62ac120.png",
+      "charts": [
+        {
+          "chartId": "08eac0ff-e268-4a5a-a4a1-285a5de18f1d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 61931,
+      "file": "247_夜明けまであと３秒_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Prophesy One",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b1db65900e40e9b0.png",
+      "charts": [
+        {
+          "chartId": "954936a2-c4be-4dec-8cc9-2d5c0f82fb3a",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 74904,
+      "file": "248_Prophesy One_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "conflict",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a276e29d2cfb99f3.png",
+      "charts": [
+        {
+          "chartId": "2d9565ab-b352-4b99-94a9-7f6bcb3c2b1a",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 79332,
+      "file": "249_conflict_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Lividi",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f614f3c776a56c88.png",
+      "charts": [
+        {
+          "chartId": "7c0c166b-8d36-486b-9de5-2f61ed71a2df",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 68313,
+      "file": "250_Lividi_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "ねぇ、壊れタ人形ハ何処へ棄テらレるノ？",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b683efde84f7858e.png",
+      "charts": [
+        {
+          "chartId": "acfff2b2-5d3d-4f82-8165-41236a396610",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 63052,
+      "file": "251_ねぇ、壊れタ人形ハ何処へ棄テらレるノ？_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "天火明命",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/44a824b696e80c18.png",
+      "charts": [
+        {
+          "chartId": "d6d1bf3c-e05f-4c7e-87f4-876ceb2467c4",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 74274,
+      "file": "252_天火明命_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Panopticon",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/daac7472da31196b.png",
+      "charts": [
+        {
+          "chartId": "b8e93aec-ec05-477e-bc3e-25982b9e9518",
+          "difficulty": "MASTER",
+          "level": "14"
+        },
+        {
+          "chartId": "4c65a514-dbcc-4c9c-8550-dbbb0f0e853d",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 58417,
+      "file": "253_Panopticon_STANDARD_MASTER Lv14, Re_MASTER Lv14.png"
+    },
+    {
+      "title": "The wheel to the right",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/9f01a2ef6b665b53.png",
+      "charts": [
+        {
+          "chartId": "50e44b65-9d32-4680-a76c-9413d2540002",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 86535,
+      "file": "254_The wheel to the right_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Maxi",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/5cb01ca719a56bb5.png",
+      "charts": [
+        {
+          "chartId": "72c63754-39e7-44d4-a1d0-10c6ed9811c6",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 74045,
+      "file": "255_Maxi_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "184億回のマルチトニック",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a2354433a57c01eb.png",
+      "charts": [
+        {
+          "chartId": "573d55a8-8771-4eac-9b39-f474265dc09c",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 89661,
+      "file": "256_184億回のマルチトニック_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "チエルカ／エソテリカ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/9475222592a29f06.png",
+      "charts": [
+        {
+          "chartId": "c7547c7f-b34c-4e34-a18a-0cc385a2d902",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 85027,
+      "file": "257_チエルカ／エソテリカ_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Ultranova",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/8d5c2f19a804346a.png",
+      "charts": [
+        {
+          "chartId": "742a6b09-7ef9-4c90-8f64-4f1109aa7291",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 38567,
+      "file": "258_Ultranova_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Moon of Noon",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/60d856b88ea0f2b3.png",
+      "charts": [
+        {
+          "chartId": "bd11586a-de53-4de2-b6cd-ef92d0af2d15",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 61073,
+      "file": "259_Moon of Noon_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "幸せになれる隠しコマンドがあるらしい",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a1da6a4bdebaf419.png",
+      "charts": [
+        {
+          "chartId": "e4fd1e01-d77b-4354-a7c1-c3d3bea97209",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 30672,
+      "file": "260_幸せになれる隠しコマンドがあるらしい_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "アージェントシンメトリー",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4f526bd3f2d19ef2.png",
+      "charts": [
+        {
+          "chartId": "ed54a56f-34b8-4a01-be73-ffdc7582372c",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 53821,
+      "file": "261_アージェントシンメトリー_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "記憶、記録",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/d3b6c643833fed2b.png",
+      "charts": [
+        {
+          "chartId": "26720c7c-0e5d-4648-b143-79b868c0f0ae",
+          "difficulty": "Re:MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 70029,
+      "file": "262_記憶、記録_STANDARD_Re_MASTER Lv14.png"
+    },
+    {
+      "title": "Calamity Fortune",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/f909efa99e6ff90b.png",
+      "charts": [
+        {
+          "chartId": "c5f083bd-00ca-40be-8d71-8e8a257dd502",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 42707,
+      "file": "263_Calamity Fortune_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "エンドマークに希望と涙を添えて",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/944deaf220b28eb0.png",
+      "charts": [
+        {
+          "chartId": "a2c02c51-4eaa-4456-9e20-eb75ff3a0443",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 81430,
+      "file": "264_エンドマークに希望と涙を添えて_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "もうみんなしねばいいのに",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0efa58724b907097.png",
+      "charts": [
+        {
+          "chartId": "a6f462d3-f6f6-4657-b97e-c5ce5bd42a51",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 56541,
+      "file": "265_もうみんなしねばいいのに_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "麒麟",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/88185a61da17d947.png",
+      "charts": [
+        {
+          "chartId": "d5cea613-e383-4caf-9019-40a1fc4f63b8",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 60952,
+      "file": "266_麒麟_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "CO5M1C R4ILR0AD",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/0ea80d8bbb1fba2f.png",
+      "charts": [
+        {
+          "chartId": "a1da6f7f-0125-48aa-98f2-e83a280702f2",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 81946,
+      "file": "267_CO5M1C R4ILR0AD_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Re：End of a Dream",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/61b60aecd7fda2a2.png",
+      "charts": [
+        {
+          "chartId": "00164cd3-054f-4971-9c49-98f07983842f",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 72058,
+      "file": "268_Re：End of a Dream_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Justified",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/4e33f9f34a93e2d6.png",
+      "charts": [
+        {
+          "chartId": "a2a5b15a-880e-4ff1-927e-a1c64fa74ebe",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 82598,
+      "file": "269_Justified_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Excalibur ～Revived resolution～",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/75d7dea600e4b298.png",
+      "charts": [
+        {
+          "chartId": "b81e8586-d2b4-4784-817b-7f4c97aa0236",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 64058,
+      "file": "270_Excalibur ～Revived resolution～_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "Our Wrenally",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cde51cc89f91dd8a.png",
+      "charts": [
+        {
+          "chartId": "3cd28e22-78bc-4a88-943d-5972d13f5a83",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 75066,
+      "file": "271_Our Wrenally_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "SILENT BLUE",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/b80623d7b2aceb77.png",
+      "charts": [
+        {
+          "chartId": "083800b5-f8c6-4a72-ad9f-9f2bc327261e",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 53990,
+      "file": "272_SILENT BLUE_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "Ragnarok",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/94d6673eb9213df0.png",
+      "charts": [
+        {
+          "chartId": "24bdf0ec-4f15-4731-8177-0b1b82da9cb3",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 61230,
+      "file": "273_Ragnarok_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "B.M.S.",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c9840f2792da9a98.png",
+      "charts": [
+        {
+          "chartId": "9aba8ed2-ad22-412f-afbc-e658f5f3a5bd",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 35261,
+      "file": "274_B.M.S._STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "魔法少女になるしかねぇ",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c0924efcbefbaf6c.png",
+      "charts": [
+        {
+          "chartId": "19970e13-0b64-4bab-a696-5b51d9694415",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 66416,
+      "file": "275_魔法少女になるしかねぇ_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "End Time",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/912135a524e81212.png",
+      "charts": [
+        {
+          "chartId": "29852142-3cea-4efd-8514-810b0fb491c5",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 53552,
+      "file": "276_End Time_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "花と、雪と、ドラムンベース。",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/52e9a79b5e6a2ef5.png",
+      "charts": [
+        {
+          "chartId": "9873127e-12ab-408a-97d1-fcfe0c59a41d",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 69096,
+      "file": "277_花と、雪と、ドラムンベース。_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "World Vanquisher",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/efeba3263a928f3f.png",
+      "charts": [
+        {
+          "chartId": "04a17d0b-73c0-40e0-8030-590e6605b6ed",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 81163,
+      "file": "278_World Vanquisher_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Xevel",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/a1a92cb034053e70.png",
+      "charts": [
+        {
+          "chartId": "9225f760-181b-4308-bbc3-bb82b74a2437",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 73092,
+      "file": "279_Xevel_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "初音ミクの激唱",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/286115dc6007ad2a.png",
+      "charts": [
+        {
+          "chartId": "e2d37719-4189-41cb-b67e-c5d709ad7d0f",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 64394,
+      "file": "280_初音ミクの激唱_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "怒槌",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cd9b3af41756ab53.png",
+      "charts": [
+        {
+          "chartId": "3082c546-f06f-422d-9bcd-9fc5cb558706",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 88898,
+      "file": "281_怒槌_STANDARD_MASTER Lv14+.png"
+    },
+    {
+      "title": "FREEDOM DiVE (tpz Overcute Remix)",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/cd0737f073f7c32c.png",
+      "charts": [
+        {
+          "chartId": "5e85e809-d731-476d-8dc7-d3d8d8758fe0",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 69812,
+      "file": "282_FREEDOM DiVE (tpz Overcute Remix)_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "Scarlet Lance",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/bd702cd7e2582905.png",
+      "charts": [
+        {
+          "chartId": "24e382fb-84a9-4ec5-8cd7-9f75a3cbb7aa",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 70885,
+      "file": "283_Scarlet Lance_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "極圏",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1019619742a72b89.png",
+      "charts": [
+        {
+          "chartId": "8f92d38d-3a5a-4a8b-9cf4-3545ddb7d5b6",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 91660,
+      "file": "284_極圏_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "ウサテイ",
+      "kind": "STANDARD",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/3ad0c2206eeb3435.png",
+      "charts": [
+        {
+          "chartId": "5e8ebfd5-efd3-4e74-9610-74ddbe629c14",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 58584,
+      "file": "285_ウサテイ_STANDARD_MASTER Lv14.png"
+    },
+    {
+      "title": "脳天直撃",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/1a7893a226f7befc.png",
+      "charts": [
+        {
+          "chartId": "6ab03a43-f778-4684-8f17-b30fae037023",
+          "difficulty": "MASTER",
+          "level": "14+"
+        }
+      ],
+      "byteLength": 75776,
+      "file": "286_脳天直撃_DX_MASTER Lv14+.png"
+    },
+    {
+      "title": "Falsum Atlantis.",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/403667b44ac1d17e.png",
+      "charts": [
+        {
+          "chartId": "007e82f1-ba92-4ecf-a1d5-3a02731a76c2",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 89166,
+      "file": "287_Falsum Atlantis._DX_MASTER Lv14.png"
+    },
+    {
+      "title": "エータ・ベータ・イータ",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/241ef09441315f33.png",
+      "charts": [
+        {
+          "chartId": "d93dbc2f-a00e-46d6-86f3-22ca2f6b8762",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 89503,
+      "file": "288_エータ・ベータ・イータ_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Good bye, Merry-Go-Round.",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/c7f4f382b3342a09.png",
+      "charts": [
+        {
+          "chartId": "fdbe356e-b82a-47f4-bf00-2b12f8945e26",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 58717,
+      "file": "289_Good bye, Merry-Go-Round._DX_MASTER Lv14.png"
+    },
+    {
+      "title": "SUPER AMBULANCE",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/11f607f1a79a3165.png",
+      "charts": [
+        {
+          "chartId": "cbf29eae-7a46-4d0e-8eb2-5ba442460ed4",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 99157,
+      "file": "290_SUPER AMBULANCE_DX_MASTER Lv14.png"
+    },
+    {
+      "title": "Don't Fight The Music",
+      "kind": "DX",
+      "jacketUrl": "https://maimaidx-eng.com/maimai-mobile/img/Music/2e9da84e3e523f2f.png",
+      "charts": [
+        {
+          "chartId": "ebd1ebf2-a6d6-4bcd-b93d-1aa3d83be7e1",
+          "difficulty": "MASTER",
+          "level": "14"
+        }
+      ],
+      "byteLength": 72170,
+      "file": "291_Don't Fight The Music_DX_MASTER Lv14.png"
+    }
+  ],
+  "missingJacketCount": 0,
+  "source": "chart_leaderboard_summary",
+  "targetChartCount": 307
+}

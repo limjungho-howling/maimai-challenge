@@ -11,6 +11,9 @@ describe("bulk ranking event detection", () => {
           chartId: "chart-a",
           title: "Song A",
           difficultyLabel: "MASTER",
+          level: "13",
+          versionName: "CiRCLE",
+          kind: "DX",
           dxScore: 1450,
           maxDxScore: 1500,
         },
@@ -18,6 +21,9 @@ describe("bulk ranking event detection", () => {
           chartId: "chart-b",
           title: "Song B",
           difficultyLabel: "EXPERT",
+          level: "12+",
+          versionName: "PRiSM PLUS",
+          kind: "STANDARD",
           dxScore: 990,
           maxDxScore: 1000,
         },
@@ -25,6 +31,9 @@ describe("bulk ranking event detection", () => {
           chartId: "chart-c",
           title: "Song C",
           difficultyLabel: "Re:MASTER",
+          level: "14",
+          versionName: null,
+          kind: "DX",
           dxScore: 1550,
           maxDxScore: 1600,
         },
@@ -48,16 +57,12 @@ describe("bulk ranking event detection", () => {
       ]),
     });
 
-    expect(result.changedChartIds).toEqual(new Set(["chart-a", "chart-b", "chart-c"]));
-    expect(result.events).toContainEqual({
-      type: "rank_dropped",
-      chartId: "chart-a",
-      userId: "bob",
-      previousDxScore: 1400,
-      nextDxScore: 1400,
-      previousRank: 2,
-      nextRank: 3,
-    });
+    expect(result.changedChartIds).toEqual(new Set(["chart-b", "chart-c"]));
+    expect(result.events).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        chartId: "chart-a",
+      }),
+    ]));
     expect(result.events).toContainEqual({
       type: "rank_dropped",
       chartId: "chart-c",
