@@ -12,6 +12,7 @@ import {
   getCurrentWeeklyChallengeWindow,
   type WeeklyChallengeWindow,
 } from "@/lib/weekly/time";
+import { selectWeeklyChallengeCandidate } from "@/lib/weekly/picks";
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServiceClient } from "@/lib/supabase/server";
 import { kstNowIsoString } from "@/lib/time";
@@ -366,12 +367,14 @@ async function ensureWeekPicks(
   const missingCategories = (["low", "middle"] as const).filter(
     (category) => !existingCategories.has(category),
   );
+  const usedChartIds = await listUsedWeeklyChallengeChartIds(supabase);
 
   for (const category of missingCategories) {
-    const chart = await pickRandomChartForCategory(supabase, category);
+    const chart = await pickRandomChartForCategory(supabase, category, usedChartIds);
     if (!chart) {
       continue;
     }
+    usedChartIds.add(chart.chart_id);
 
     const { error } = await supabase
       .from("weekly_challenge_picks")
@@ -410,16 +413,27 @@ async function listPicks(
 async function pickRandomChartForCategory(
   supabase: SupabaseClient,
   category: "low" | "middle",
+  usedChartIds: Set<string>,
 ): Promise<ChartSummaryRow | null> {
-  const candidates = (await fetchAllChartSummaries(supabase)).filter(
-    (chart) => getWeeklyChallengeLevelGroup(chart.level) === category,
-  );
+  return selectWeeklyChallengeCandidate(await fetchAllChartSummaries(supabase), {
+    category,
+    usedChartIds,
+  });
+}
 
-  if (candidates.length === 0) {
-    return null;
-  }
+async function listUsedWeeklyChallengeChartIds(
+  supabase: SupabaseClient,
+): Promise<Set<string>> {
+  const rows = await fetchAllPagedRows<{ chart_id: string }>(async (from, to) => {
+    const { data, error } = await supabase
+      .from("weekly_challenge_picks")
+      .select("chart_id")
+      .range(from, to);
 
-  return candidates[Math.floor(Math.random() * candidates.length)] ?? null;
+    return { data: (data ?? []) as Array<{ chart_id: string }>, error };
+  });
+
+  return new Set(rows.map((row) => row.chart_id));
 }
 
 async function fetchAllChartSummaries(
