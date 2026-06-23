@@ -864,6 +864,8 @@ async function listScoresForChartChunk(
       .from("player_scores")
       .select("chart_id, profile_id, dx_score")
       .in("chart_id", chartIds)
+      .order("chart_id", { ascending: true })
+      .order("profile_id", { ascending: true })
       .range(from, from + DB_SELECT_PAGE_SIZE - 1);
 
     if (error) {

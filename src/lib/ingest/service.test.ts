@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -132,5 +134,21 @@ describe("detectChangedChartIds", () => {
         ]),
       ),
     ).toEqual(["chart-2"]);
+  });
+});
+
+describe("ranking score pagination", () => {
+  it("uses a deterministic chart and profile order before applying range pagination", () => {
+    const source = readFileSync("src/lib/ingest/service.ts", "utf8");
+    const functionSource = source.match(
+      /async function listScoresForChartChunk[\s\S]*?\n}\n\nasync function listPlayerScoresForCharts/,
+    )?.[0];
+
+    expect(functionSource).toBeDefined();
+    expect(functionSource).toContain('.order("chart_id", { ascending: true })');
+    expect(functionSource).toContain('.order("profile_id", { ascending: true })');
+    expect(functionSource?.indexOf('.order("profile_id"')).toBeLessThan(
+      functionSource?.indexOf(".range(") ?? -1,
+    );
   });
 });
