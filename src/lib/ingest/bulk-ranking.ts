@@ -107,6 +107,9 @@ export function detectBulkRankingEvents({
       if (isExistingRankUp || isNewEntryRankUp) {
         rankUpEvents.push({
           ...event,
+          // 신규 진입은 그 곡에 기록이 없어 순위가 없었으므로, 변동 이전 순위를
+          // 기존 유저 전원보다 아래(미등록=최하위)인 `기존 유저 수 + 1`로 표시한다.
+          previousRank: isNewEntryRankUp ? before.length + 1 : event.previousRank,
           chartTitle: update.title,
           difficultyLabel: update.difficultyLabel,
           level: update.level,

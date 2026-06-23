@@ -93,7 +93,8 @@ describe("bulk ranking event detection", () => {
         actorMaxDxScore: 1500,
       }),
     ]));
-    // 신규 진입으로 추월한 chart-a도 등수 상승(도전장) 로그 대상이며, 이전 순위는 null이다.
+    // 신규 진입으로 추월한 chart-a도 등수 상승(도전장) 로그 대상이며, 이전 순위는
+    // 기존 유저(2명)보다 아래인 #3으로 확실하게 표시한다.
     expect(result.rankUpEvents).toEqual(expect.arrayContaining([
       expect.objectContaining({
         chartId: "chart-c",
@@ -106,7 +107,7 @@ describe("bulk ranking event detection", () => {
         chartId: "chart-a",
         chartTitle: "Song A",
         difficultyLabel: "MASTER",
-        previousRank: null,
+        previousRank: 3,
         nextRank: 2,
       }),
     ]));
