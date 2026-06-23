@@ -57,12 +57,7 @@ describe("bulk ranking event detection", () => {
       ]),
     });
 
-    expect(result.changedChartIds).toEqual(new Set(["chart-b", "chart-c"]));
-    expect(result.events).not.toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        chartId: "chart-a",
-      }),
-    ]));
+    expect(result.changedChartIds).toEqual(new Set(["chart-a", "chart-b", "chart-c"]));
     expect(result.events).toContainEqual({
       type: "rank_dropped",
       chartId: "chart-c",
@@ -72,11 +67,16 @@ describe("bulk ranking event detection", () => {
       previousRank: 1,
       nextRank: 2,
     });
-    expect(result.rankDropEvents).not.toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        chartId: "chart-a",
-      }),
-    ]));
+    // 기존 기록이 없던 chart-a에 신규 진입하면서 bob을 강등시킨다.
+    expect(result.events).toContainEqual({
+      type: "rank_dropped",
+      chartId: "chart-a",
+      userId: "bob",
+      previousDxScore: 1400,
+      nextDxScore: 1400,
+      previousRank: 2,
+      nextRank: 3,
+    });
     expect(result.rankDropEvents).toEqual(expect.arrayContaining([
       expect.objectContaining({
         chartId: "chart-c",
@@ -85,8 +85,16 @@ describe("bulk ranking event detection", () => {
         actorDxScore: 1550,
         actorMaxDxScore: 1600,
       }),
+      expect.objectContaining({
+        chartId: "chart-a",
+        chartTitle: "Song A",
+        difficultyLabel: "MASTER",
+        actorDxScore: 1450,
+        actorMaxDxScore: 1500,
+      }),
     ]));
-    expect(result.rankUpEvents).toEqual([
+    // 신규 진입으로 추월한 chart-a도 등수 상승(도전장) 로그 대상이며, 이전 순위는 null이다.
+    expect(result.rankUpEvents).toEqual(expect.arrayContaining([
       expect.objectContaining({
         chartId: "chart-c",
         chartTitle: "Song C",
@@ -94,6 +102,47 @@ describe("bulk ranking event detection", () => {
         previousRank: 2,
         nextRank: 1,
       }),
-    ]);
+      expect.objectContaining({
+        chartId: "chart-a",
+        chartTitle: "Song A",
+        difficultyLabel: "MASTER",
+        previousRank: null,
+        nextRank: 2,
+      }),
+    ]));
+    expect(result.rankUpEvents).toHaveLength(2);
+  });
+
+  it("skips charts with no previous actor score on the initial bulk ingest", () => {
+    const result = detectBulkRankingEvents({
+      actorUserId: "actor",
+      isInitialIngest: true,
+      updates: [
+        {
+          chartId: "chart-a",
+          title: "Song A",
+          difficultyLabel: "MASTER",
+          level: "13",
+          versionName: "CiRCLE",
+          kind: "DX",
+          dxScore: 1450,
+          maxDxScore: 1500,
+        },
+      ],
+      beforeScoresByChartId: new Map([
+        [
+          "chart-a",
+          [
+            { userId: "alice", dxScore: 1500 },
+            { userId: "bob", dxScore: 1400 },
+          ],
+        ],
+      ]),
+    });
+
+    expect(result.changedChartIds).toEqual(new Set());
+    expect(result.events).toEqual([]);
+    expect(result.rankUpEvents).toEqual([]);
+    expect(result.rankDropEvents).toEqual([]);
   });
 });

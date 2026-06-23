@@ -46,10 +46,12 @@ export function detectBulkRankingEvents({
   actorUserId,
   updates,
   beforeScoresByChartId,
+  isInitialIngest = false,
 }: {
   actorUserId: string;
   updates: BulkRankingUpdate[];
   beforeScoresByChartId: Map<string, ScoreEntry[]>;
+  isInitialIngest?: boolean;
 }): BulkRankingResult {
   const changedChartIds = new Set<string>();
   const events: RankingEvent[] = [];
@@ -61,7 +63,9 @@ export function detectBulkRankingEvents({
     const previousActorScore =
       before.find((entry) => entry.userId === actorUserId)?.dxScore ?? null;
 
-    if (previousActorScore === null) {
+    // 최초 대량 갱신일 때만 기존 기록이 없는 곡을 건너뛴다. 그 외에는 기록이 없던
+    // 곡에 새 점수가 들어오면 신규 진입으로 보고 랭킹 이벤트를 생성한다.
+    if (previousActorScore === null && isInitialIngest) {
       continue;
     }
 
@@ -82,13 +86,25 @@ export function detectBulkRankingEvents({
     changedChartIds.add(update.chartId);
     events.push(...chartEvents);
 
+    // 신규 진입(기존 기록 없음)으로 다른 유저보다 위에 들어가 한 명이라도 강등시키면
+    // 액터의 등수 상승(도전장 로그) 대상으로 본다.
+    const actorOvertookSomeone = chartEvents.some(
+      (event) => event.type === "rank_dropped",
+    );
+
     for (const event of chartEvents) {
-      if (
+      const isExistingRankUp =
         event.type === "rank_changed" &&
         event.userId === actorUserId &&
         event.previousRank !== null &&
-        event.nextRank < event.previousRank
-      ) {
+        event.nextRank < event.previousRank;
+      const isNewEntryRankUp =
+        event.type === "score_changed" &&
+        event.userId === actorUserId &&
+        event.previousRank === null &&
+        actorOvertookSomeone;
+
+      if (isExistingRankUp || isNewEntryRankUp) {
         rankUpEvents.push({
           ...event,
           chartTitle: update.title,
@@ -101,7 +117,7 @@ export function detectBulkRankingEvents({
         });
       }
 
-      if (event.type !== "rank_dropped" || previousActorScore === null) {
+      if (event.type !== "rank_dropped") {
         continue;
       }
 

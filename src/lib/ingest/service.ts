@@ -176,6 +176,7 @@ export async function ingestMaimaiPayload(
         maxDxScore: score.maxDxScore,
       })),
       beforeScoresByChartId: rankingScoresByChartId,
+      isInitialIngest: isInitialScoreIngest,
     });
 
     await reportProgress(onProgress, {
