@@ -1219,6 +1219,7 @@ async function notifyChannel(
             level: event.level,
             versionName: event.versionName,
             kind: event.kind,
+            previousDxScore: event.previousDxScore,
             previousRank: event.previousRank,
             nextRank: event.nextRank,
             actorDxScore: event.actorDxScore,

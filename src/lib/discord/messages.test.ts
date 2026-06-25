@@ -127,6 +127,31 @@ describe("Discord messages", () => {
     expect(message).not.toContain("곡 랭킹: <https://maimai-challenge.vercel.app/charts/chart-2>");
   });
 
+  it("labels a new channel rank entry as 신규 instead of the calculated bottom rank", () => {
+    const message = buildChannelRankUpMessages({
+      actorName: "E.HOWL",
+      events: [
+        {
+          chartId: "chart-new",
+          chartTitle: "New Song",
+          difficultyLabel: "MASTER",
+          level: "13+",
+          versionName: "CiRCLE",
+          kind: "DX",
+          previousDxScore: null,
+          previousRank: 16,
+          nextRank: 5,
+          actorDxScore: 2400,
+          actorMaxDxScore: 2500,
+        },
+      ],
+      appUrl: "https://maimai-challenge.vercel.app",
+    })[0];
+
+    expect(message).toContain("순위: 신규 -> #5");
+    expect(message).not.toContain("순위: #16 -> #5");
+  });
+
   it("builds a rank goal message with higher scores above the user", () => {
     const goals: RankGoal[] = [
       {

@@ -16,7 +16,7 @@ export interface PersonalRankDropEvent
 }
 
 export interface ChannelRankUpEvent
-  extends Pick<RankingEvent, "previousRank" | "nextRank"> {
+  extends Pick<RankingEvent, "previousDxScore" | "previousRank" | "nextRank"> {
   chartId: string;
   chartTitle: string;
   difficultyLabel: string;
@@ -122,7 +122,12 @@ export function buildChannelRankUpMessages({
   appUrl: string;
 }): string[] {
   return events.map((event) => {
-    const previousRank = event.previousRank === null ? "-" : `#${event.previousRank}`;
+    const previousRank =
+      event.previousDxScore === null
+        ? "신규"
+        : event.previousRank === null
+          ? "-"
+          : `#${event.previousRank}`;
     return [
       formatDiscordTitle(
         `${actorName}의 기록 갱신으로 다음 곡의 등수가 상승하였습니다.`,
