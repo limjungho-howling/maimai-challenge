@@ -44,15 +44,15 @@ describe("weekly challenge time windows", () => {
 
   it("formats week labels by month and week-of-month in KST", () => {
     expect(formatWeeklyChallengeLabel("2026-06-08")).toBe("2026년 6월 2주차");
-    expect(formatWeeklyChallengeLabel("2026-06-29")).toBe("2026년 6월 5주차");
-    expect(formatWeeklyChallengeLabel("2026-07-06")).toBe("2026년 7월 1주차");
+    expect(formatWeeklyChallengeLabel("2026-06-29")).toBe("2026년 7월 1주차");
+    expect(formatWeeklyChallengeLabel("2026-07-06")).toBe("2026년 7월 2주차");
   });
 
   it("reconstructs stored weekly windows by key", () => {
     expect(getWeeklyChallengeWindowByKey("2026-07-06")).toEqual({
       endsAt: "2026-07-13T04:00:00+09:00",
       key: "2026-07-06",
-      label: "2026년 7월 1주차",
+      label: "2026년 7월 2주차",
       startsAt: "2026-07-06T07:00:00+09:00",
     });
   });

@@ -37,10 +37,14 @@ export function getWeeklyChallengeWindowByKey(key: string): WeeklyChallengeWindo
 }
 
 export function formatWeeklyChallengeLabel(key: string): string {
-  const [yearText, monthText, dayText] = key.split("-");
-  const weekOfMonth = Math.ceil(Number(dayText) / 7);
+  const [year, month, day] = key.split("-").map(Number);
+  const labelDate = new Date(Date.UTC(year, month - 1, day + 3));
+  const labelYear = labelDate.getUTCFullYear();
+  const labelMonth = labelDate.getUTCMonth() + 1;
+  const labelDay = labelDate.getUTCDate();
+  const weekOfMonth = Math.ceil(labelDay / 7);
 
-  return `${yearText}년 ${Number(monthText)}월 ${weekOfMonth}주차`;
+  return `${labelYear}년 ${labelMonth}월 ${weekOfMonth}주차`;
 }
 
 function buildWeeklyChallengeWindow(startsAtUtc: number): WeeklyChallengeWindow {
