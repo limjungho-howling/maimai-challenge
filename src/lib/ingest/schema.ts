@@ -26,12 +26,12 @@ const catalogScorePagesSchema = z
     z.object({
       difficulty: difficultySchema,
       html: z.string().min(1),
-      version: z.number().int().min(0).max(25).nullable().optional(),
+      version: z.number().int().min(0).max(26).nullable().optional(),
       versionName: z.string().min(1).nullable().optional(),
     }),
   )
   .min(1)
-  .max(52)
+  .max(54)
   .refine(
     (pages) =>
       new Set(

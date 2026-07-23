@@ -36,6 +36,7 @@ export const MAIMAI_VERSIONS = [
   { number: 23, name: "PRiSM" },
   { number: 24, name: "PRiSM PLUS" },
   { number: 25, name: "CiRCLE" },
+  { number: 26, name: "CiRCLE PLUS" },
 ] as const;
 
 export type Difficulty = (typeof DIFFICULTIES)[number];

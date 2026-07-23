@@ -70,7 +70,7 @@ describe("bookmarklet runner", () => {
     expect(source).toContain("__MAIMAI_CHALLENGE_RELAY_WINDOW");
   });
 
-  it("collects only CiRCLE catalog pages from the new catalog loader", () => {
+  it("collects only the latest version's catalog pages from the new catalog loader", () => {
     const loader = readFileSync("public/new-catalog-bookmarklet.js", "utf8");
     const runner = readFileSync("public/catalog-bookmarklet-runner.js", "utf8");
 
@@ -79,6 +79,9 @@ describe("bookmarklet runner", () => {
     expect(loader).toContain("runner.onerror");
     expect(runner).toContain('RUNNER_SCOPE === "circle"');
     expect(runner).toContain("__MAIMAI_CHALLENGE_CATALOG_SCOPE");
-    expect(runner).toContain('[[25, "CiRCLE"]]');
+    // 신곡 스코프는 ALL_VERSIONS의 마지막(최신) 버전 한 개만 수집한다.
+    expect(runner).toContain("ALL_VERSIONS[ALL_VERSIONS.length - 1]");
+    expect(runner).toContain("RUNNER_SCOPE === \"circle\" ? [LATEST_VERSION] : ALL_VERSIONS");
+    expect(runner).toContain('[26, "CiRCLE PLUS"]');
   });
 });

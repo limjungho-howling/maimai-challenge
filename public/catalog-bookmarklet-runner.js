@@ -45,8 +45,10 @@
     [23, "PRiSM"],
     [24, "PRiSM PLUS"],
     [25, "CiRCLE"],
+    [26, "CiRCLE PLUS"],
   ];
-  const VERSIONS = RUNNER_SCOPE === "circle" ? [[25, "CiRCLE"]] : ALL_VERSIONS;
+  const LATEST_VERSION = ALL_VERSIONS[ALL_VERSIONS.length - 1];
+  const VERSIONS = RUNNER_SCOPE === "circle" ? [LATEST_VERSION] : ALL_VERSIONS;
 
   if (
     location.origin !== MAIMAI_ORIGIN ||
