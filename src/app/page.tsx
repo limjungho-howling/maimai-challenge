@@ -11,6 +11,7 @@ import {
   listChartVersions,
   listCharts,
 } from "@/lib/data/charts";
+import { MAIMAI_VERSIONS } from "@/lib/maimai/constants";
 import { hasSupabasePublicEnv } from "@/lib/supabase/env";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { formatKstDateTime } from "@/lib/time";
@@ -325,9 +326,15 @@ function parseDifficulty(value: string | undefined): number | null {
   return parsed === 3 || parsed === 4 ? parsed : null;
 }
 
+const MAX_VERSION_NUMBER = Math.max(
+  ...MAIMAI_VERSIONS.map((version) => version.number),
+);
+
 function parseVersion(value: string | undefined): number | null {
   const parsed = Number.parseInt(value ?? "", 10);
-  return Number.isInteger(parsed) && parsed >= 0 && parsed <= 25 ? parsed : null;
+  return Number.isInteger(parsed) && parsed >= 0 && parsed <= MAX_VERSION_NUMBER
+    ? parsed
+    : null;
 }
 
 function parseChartSort(value: string | undefined): ChartSort {
