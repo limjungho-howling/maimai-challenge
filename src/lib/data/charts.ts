@@ -7,7 +7,7 @@ import { getSupabasePublicEnv } from "@/lib/supabase/env";
 const SELECT_PAGE_SIZE = 1000;
 const CHART_ID_FILTER_CHUNK_SIZE = 100;
 export const CHART_LIST_CACHE_TAG = "chart-list";
-const CHART_LIST_CACHE_VERSION = "v3";
+const CHART_LIST_CACHE_VERSION = "v4";
 
 export interface ChartSummary {
   chartId: string;
@@ -338,7 +338,7 @@ const cachedListChartLevels = unstable_cache(
   return [...new Set(rows.map((row) => String(row.level)).filter(Boolean))]
     .sort(compareLevels);
   },
-  ["chart-levels"],
+  ["chart-levels", CHART_LIST_CACHE_VERSION],
   { revalidate: false, tags: [CHART_LIST_CACHE_TAG] },
 );
 
@@ -388,7 +388,7 @@ const cachedListChartVersions = unstable_cache(
     .sort(([left], [right]) => left - right)
     .map(([number, name]) => ({ number, name }));
   },
-  ["chart-versions"],
+  ["chart-versions", CHART_LIST_CACHE_VERSION],
   { revalidate: false, tags: [CHART_LIST_CACHE_TAG] },
 );
 
