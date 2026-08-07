@@ -41,7 +41,7 @@ export async function POST(request: Request) {
             (progress: IngestProgress) => send({ type: "progress", progress }),
           );
 
-          revalidateTag(CHART_LIST_CACHE_TAG, "max");
+          revalidateTag(CHART_LIST_CACHE_TAG, { expire: 0 });
           send({ type: "result", result });
         } catch (error) {
           send({
