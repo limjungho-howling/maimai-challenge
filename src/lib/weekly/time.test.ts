@@ -56,4 +56,73 @@ describe("weekly challenge time windows", () => {
       startsAt: "2026-07-06T07:00:00+09:00",
     });
   });
+
+  it("ends the 2026-09-07 transition week at Monday 01:00 KST while keeping its start", () => {
+    const active = getCurrentWeeklyChallengeWindow(
+      new Date("2026-09-13T15:59:59.000Z"),
+    );
+    const atEndBoundary = getCurrentWeeklyChallengeWindow(
+      new Date("2026-09-13T16:00:00.000Z"),
+    );
+
+    expect(active).toEqual({
+      endsAt: "2026-09-14T01:00:00+09:00",
+      key: "2026-09-07",
+      label: "2026년 9월 2주차",
+      startsAt: "2026-09-07T07:00:00+09:00",
+    });
+    expect(atEndBoundary).toBeNull();
+  });
+
+  it("does not create a new challenge during the Monday 01:00-02:00 KST gap", () => {
+    expect(
+      getCurrentWeeklyChallengeWindow(new Date("2026-09-13T16:30:00.000Z")),
+    ).toBeNull();
+  });
+
+  it("starts weeks at Monday 02:00 KST and ends them at Monday 01:00 KST from 2026-09-14", () => {
+    const firstNewWeek = getCurrentWeeklyChallengeWindow(
+      new Date("2026-09-13T17:00:00.000Z"),
+    );
+    const followingWeek = getCurrentWeeklyChallengeWindow(
+      new Date("2026-09-20T17:00:00.000Z"),
+    );
+
+    expect(firstNewWeek).toEqual({
+      endsAt: "2026-09-21T01:00:00+09:00",
+      key: "2026-09-14",
+      label: "2026년 9월 3주차",
+      startsAt: "2026-09-14T02:00:00+09:00",
+    });
+    expect(followingWeek).toEqual({
+      endsAt: "2026-09-28T01:00:00+09:00",
+      key: "2026-09-21",
+      label: "2026년 9월 4주차",
+      startsAt: "2026-09-21T02:00:00+09:00",
+    });
+  });
+
+  it("keeps the new schedule for later weeks", () => {
+    const laterWeek = getCurrentWeeklyChallengeWindow(
+      new Date("2026-12-06T17:00:00.000Z"),
+    );
+
+    expect(laterWeek?.startsAt).toBe("2026-12-07T02:00:00+09:00");
+    expect(laterWeek?.endsAt).toBe("2026-12-14T01:00:00+09:00");
+  });
+
+  it("reconstructs new-schedule windows by key", () => {
+    expect(getWeeklyChallengeWindowByKey("2026-09-07")).toEqual({
+      endsAt: "2026-09-14T01:00:00+09:00",
+      key: "2026-09-07",
+      label: "2026년 9월 2주차",
+      startsAt: "2026-09-07T07:00:00+09:00",
+    });
+    expect(getWeeklyChallengeWindowByKey("2026-09-14")).toEqual({
+      endsAt: "2026-09-21T01:00:00+09:00",
+      key: "2026-09-14",
+      label: "2026년 9월 3주차",
+      startsAt: "2026-09-14T02:00:00+09:00",
+    });
+  });
 });
