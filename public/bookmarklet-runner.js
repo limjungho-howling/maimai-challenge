@@ -12,6 +12,7 @@
   const PLAYER_DATA_RETRY_COUNT = 5;
   const SCORE_DIFFICULTIES = [3, 4];
   const RELAY_READY_TIMEOUT_MS = 120000;
+  const RELAY_READY_PING_INTERVAL_MS = 750;
 
   if (
     location.origin !== MAIMAI_ORIGIN ||
@@ -65,15 +66,19 @@
   };
   const waitForRelayReady = function () {
     return new Promise(function (resolve, reject) {
-      var timeout = setTimeout(function () {
+      var pingTimer = null;
+      var timeout = null;
+      var cleanup = function () {
+        if (pingTimer !== null) {
+          clearInterval(pingTimer);
+          pingTimer = null;
+        }
+        if (timeout !== null) {
+          clearTimeout(timeout);
+          timeout = null;
+        }
         window.removeEventListener("message", handleMessage);
-        reject(
-          new Error(
-            "릴레이가 준비되지 않았습니다. 릴레이 창에서 Discord 로그인을 완료한 뒤 북마클릿을 다시 실행해주세요.",
-          ),
-        );
-      }, RELAY_READY_TIMEOUT_MS);
-
+      };
       var handleMessage = function (event) {
         if (event.origin !== APP_ORIGIN) {
           return;
@@ -83,13 +88,41 @@
           return;
         }
 
-        clearTimeout(timeout);
-        window.removeEventListener("message", handleMessage);
+        cleanup();
         resolve();
       };
+      // 릴레이 창이 아직 로딩 중이면 이 인사는 유실된다. 준비 응답을 받을 때까지
+      // 반복해서 보내야 어느 쪽이 먼저 준비되든 핸드셰이크가 성립한다.
+      var ping = function () {
+        if (relay.closed) {
+          cleanup();
+          reject(
+            new Error(
+              "릴레이 창이 닫혔습니다. 릴레이 창을 열어둔 상태로 북마클릿을 다시 실행해주세요.",
+            ),
+          );
+          return;
+        }
+
+        try {
+          relay.postMessage({ type: "maimai-challenge:hello" }, APP_ORIGIN);
+        } catch (_error) {
+          // 릴레이 창이 준비되기 전에는 전달이 실패할 수 있으므로 다음 주기에 다시 시도한다.
+        }
+      };
+
+      timeout = setTimeout(function () {
+        cleanup();
+        reject(
+          new Error(
+            "릴레이가 준비되지 않았습니다. 릴레이 창에서 Discord 로그인을 완료한 뒤 북마클릿을 다시 실행해주세요.",
+          ),
+        );
+      }, RELAY_READY_TIMEOUT_MS);
 
       window.addEventListener("message", handleMessage);
-      relay.postMessage({ type: "maimai-challenge:hello" }, APP_ORIGIN);
+      pingTimer = setInterval(ping, RELAY_READY_PING_INTERVAL_MS);
+      ping();
     });
   };
   const fetchText = async function (path) {

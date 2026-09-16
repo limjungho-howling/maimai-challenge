@@ -8,7 +8,7 @@ export default function IngestRelayLoading() {
         <div>
           <h1 className="text-2xl font-semibold text-white">maimai 데이터 릴레이</h1>
           <p className="mt-3 text-sm leading-6 text-slate-300">
-            북마클릿에서 보내는 데이터를 기다리고 있습니다.
+            릴레이 창을 준비하는 중입니다.
           </p>
         </div>
         <div className="w-full">

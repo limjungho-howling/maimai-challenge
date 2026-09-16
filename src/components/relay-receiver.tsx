@@ -3,7 +3,9 @@
 import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { isAllowedRelayOrigin } from "@/lib/ingest/relay";
+import { isAllowedRelayOrigin, MAIMAI_ORIGIN } from "@/lib/ingest/relay";
+
+const RELAY_READY_ANNOUNCE_INTERVAL_MS = 1000;
 
 type RelayState =
   | { status: "idle"; message: string; progress: number }
@@ -59,14 +61,29 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
   const [closeMessage, setCloseMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      return;
-    }
+    const announceReady = () => {
+      if (!isLoggedIn) {
+        return;
+      }
 
-    window.opener?.postMessage(
-      { type: "maimai-challenge:relay-ready" },
-      "https://maimaidx-eng.com",
-    );
+      window.opener?.postMessage(
+        { type: "maimai-challenge:relay-ready" },
+        MAIMAI_ORIGIN,
+      );
+    };
+    // 북마클릿이 message 리스너를 설치하기 전에 보낸 준비 신호는 그대로 유실된다.
+    // 실제 작업 메시지를 받기 전까지 준비 신호를 주기적으로 다시 보내 교착을 막는다.
+    let announceTimer: number | undefined = isLoggedIn
+      ? window.setInterval(announceReady, RELAY_READY_ANNOUNCE_INTERVAL_MS)
+      : undefined;
+    const stopAnnouncing = () => {
+      if (announceTimer !== undefined) {
+        window.clearInterval(announceTimer);
+        announceTimer = undefined;
+      }
+    };
+
+    announceReady();
 
     async function handleMessage(event: MessageEvent<RelayMessage>) {
       if (!isAllowedRelayOrigin(event.origin)) {
@@ -74,11 +91,11 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
       }
 
       if (event.data.type === "maimai-challenge:hello") {
-        window.opener?.postMessage(
-          { type: "maimai-challenge:relay-ready" },
-          "https://maimaidx-eng.com",
-        );
+        announceReady();
+        return;
       }
+
+      stopAnnouncing();
 
       if (event.data.type === "maimai-challenge:status") {
         setState({
@@ -154,7 +171,7 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
               ok,
               message,
             },
-            "https://maimaidx-eng.com",
+            MAIMAI_ORIGIN,
           );
         };
         setState({
@@ -240,7 +257,10 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
     }
 
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      stopAnnouncing();
+      window.removeEventListener("message", handleMessage);
+    };
   }, [isLoggedIn]);
 
   const Icon =

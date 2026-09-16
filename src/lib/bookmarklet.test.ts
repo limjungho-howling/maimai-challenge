@@ -51,6 +51,20 @@ describe("bookmarklet runner", () => {
     expect(source).toContain("__MAIMAI_CHALLENGE_RELAY_WINDOW");
   });
 
+  it("keeps re-sending the relay handshake so a lost greeting cannot deadlock collection", () => {
+    for (const path of [
+      "public/bookmarklet-runner.js",
+      "public/catalog-bookmarklet-runner.js",
+    ]) {
+      const source = readFileSync(path, "utf8");
+
+      // 인사를 한 번만 보내면 릴레이가 늦게 준비될 때 그대로 유실되어 교착된다.
+      expect(source).toContain("RELAY_READY_PING_INTERVAL_MS = 750");
+      expect(source).toContain("setInterval(ping, RELAY_READY_PING_INTERVAL_MS)");
+      expect(source).toContain("relay.closed");
+    }
+  });
+
   it("collects catalog pages by version with a 0.1 second interval", () => {
     const source = readFileSync("public/catalog-bookmarklet-runner.js", "utf8");
 
