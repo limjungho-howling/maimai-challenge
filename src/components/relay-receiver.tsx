@@ -1,11 +1,12 @@
 "use client";
 
 import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { isAllowedRelayOrigin, MAIMAI_ORIGIN } from "@/lib/ingest/relay";
 
 const RELAY_READY_ANNOUNCE_INTERVAL_MS = 1000;
+const RELAY_SIGNAL_STALL_TIMEOUT_MS = 12000;
 
 type RelayState =
   | { status: "idle"; message: string; progress: number }
@@ -59,17 +60,22 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
     progress: isLoggedIn ? 0 : 100,
   });
   const [closeMessage, setCloseMessage] = useState<string | null>(null);
+  const bookmarkletWindowRef = useRef<Window | null>(null);
 
   useEffect(() => {
+    // window.opener 는 팝업이 이전 실행에서 남아 재사용되거나 북마클릿을 실행한
+    // 탭이 새로고침되면 null 이 된다. 그러면 응답 채널만 조용히 끊겨 교착되므로,
+    // 북마클릿이 보낸 메시지의 발신 창을 우선 응답 대상으로 사용한다.
+    const postToBookmarklet = (message: Record<string, unknown>) => {
+      const target = bookmarkletWindowRef.current ?? window.opener;
+      target?.postMessage(message, MAIMAI_ORIGIN);
+    };
     const announceReady = () => {
       if (!isLoggedIn) {
         return;
       }
 
-      window.opener?.postMessage(
-        { type: "maimai-challenge:relay-ready" },
-        MAIMAI_ORIGIN,
-      );
+      postToBookmarklet({ type: "maimai-challenge:relay-ready" });
     };
     // 북마클릿이 message 리스너를 설치하기 전에 보낸 준비 신호는 그대로 유실된다.
     // 실제 작업 메시지를 받기 전까지 준비 신호를 주기적으로 다시 보내 교착을 막는다.
@@ -85,13 +91,49 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
 
     announceReady();
 
+    // 신호가 전혀 오지 않으면 팝업이 북마클릿과 짝이 맞지 않는 상태다.
+    // 이 창을 닫고 다시 실행하면 정상적인 opener 를 가진 팝업이 열린다.
+    let receivedSignal = false;
+    const stalledTimer = window.setTimeout(() => {
+      if (receivedSignal) {
+        return;
+      }
+
+      setState((previous) =>
+        previous.status === "idle"
+          ? {
+              status: "idle",
+              message:
+                "북마클릿 신호를 받지 못했습니다. 이 릴레이 창을 닫고 공식 페이지에서 북마클릿을 다시 실행해주세요.",
+              progress: 0,
+            }
+          : previous,
+      );
+    }, RELAY_SIGNAL_STALL_TIMEOUT_MS);
+
     async function handleMessage(event: MessageEvent<RelayMessage>) {
       if (!isAllowedRelayOrigin(event.origin)) {
         return;
       }
 
+      receivedSignal = true;
+      window.clearTimeout(stalledTimer);
+
+      if (event.source) {
+        bookmarkletWindowRef.current = event.source as Window;
+      }
+
       if (event.data.type === "maimai-challenge:hello") {
         announceReady();
+        setState((previous) =>
+          previous.status === "idle"
+            ? {
+                status: "idle",
+                message: "북마클릿과 연결되었습니다. 공식 페이지 데이터 수집을 기다리고 있습니다.",
+                progress: 2,
+              }
+            : previous,
+        );
         return;
       }
 
@@ -164,15 +206,12 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
           }
 
           uploadCompleted = true;
-          window.opener?.postMessage(
-            {
-              type: "maimai-challenge:upload-complete",
-              uploadId,
-              ok,
-              message,
-            },
-            MAIMAI_ORIGIN,
-          );
+          postToBookmarklet({
+            type: "maimai-challenge:upload-complete",
+            uploadId,
+            ok,
+            message,
+          });
         };
         setState({
           status: "uploading",
@@ -259,6 +298,7 @@ export function RelayReceiver({ isLoggedIn }: RelayReceiverProps) {
     window.addEventListener("message", handleMessage);
     return () => {
       stopAnnouncing();
+      window.clearTimeout(stalledTimer);
       window.removeEventListener("message", handleMessage);
     };
   }, [isLoggedIn]);
