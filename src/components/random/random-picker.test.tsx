@@ -8,7 +8,14 @@ import { resetRandomPoolStore } from "@/lib/random/store";
 
 const searchRandomPoolCharts = vi.hoisted(() => vi.fn());
 
+const commitRandomDraw = vi.hoisted(() => vi.fn());
+const revealRandomDraw = vi.hoisted(() => vi.fn());
+
 vi.mock("@/app/random/actions", () => ({ searchRandomPoolCharts }));
+vi.mock("@/app/random/draw-actions", () => ({
+  commitRandomDraw,
+  revealRandomDraw,
+}));
 
 function chart(chartId: string, title: string): RandomPoolChart {
   return {
@@ -24,8 +31,14 @@ function chart(chartId: string, title: string): RandomPoolChart {
 
 const CHARTS = [chart("a", "Alpha"), chart("b", "Bravo"), chart("c", "Charlie")];
 
-function renderPicker() {
-  render(<RandomPicker levels={["13"]} versions={[{ number: 23, name: "PRiSM" }]} />);
+function renderPicker(isLoggedIn = true) {
+  render(
+    <RandomPicker
+      isLoggedIn={isLoggedIn}
+      levels={["13"]}
+      versions={[{ number: 23, name: "PRiSM" }]}
+    />,
+  );
   // Flush the mount-time search and the localStorage restore.
   return act(async () => {});
 }
@@ -63,6 +76,8 @@ describe("RandomPicker", () => {
     window.localStorage.clear();
     resetRandomPoolStore();
     searchRandomPoolCharts.mockReset();
+    commitRandomDraw.mockReset();
+    revealRandomDraw.mockReset();
     searchRandomPoolCharts.mockResolvedValue({
       charts: CHARTS,
       page: 1,
@@ -202,6 +217,110 @@ describe("RandomPicker", () => {
     expect(titlesIn(drawnSection())).toEqual([]);
     expect(titlesIn(poolSection())).toHaveLength(2);
     expect(screen.getByRole("button", { name: "랜덤 선곡" })).toBeEnabled();
+  });
+
+  it("asks for login before a verified draw", async () => {
+    await renderPicker(false);
+
+    await click("검증 모드");
+
+    expect(
+      screen.getByRole("link", { name: /Discord로 로그인/ }),
+    ).toHaveAttribute("href", "/auth/login?next=/random");
+    expect(
+      screen.queryByRole("button", { name: "검증 선곡" }),
+    ).not.toBeInTheDocument();
+    expect(commitRandomDraw).not.toHaveBeenCalled();
+  });
+
+  it("commits the pool, waits for the beacon, then lands on the revealed winner", async () => {
+    const beaconAvailableAt = new Date(Date.now() + 9_000).toISOString();
+    const committed = {
+      id: "11111111-1111-1111-1111-111111111111",
+      drawerName: "tester",
+      poolHash: "hash",
+      pool: [],
+      poolSize: 2,
+      beaconChain: "chain",
+      beaconRound: 100,
+      beaconAvailableAt,
+      committedAt: new Date().toISOString(),
+      revealedAt: null,
+      beaconRandomness: null,
+      beaconSignature: null,
+      winnerIndex: null,
+      winnerChartId: null,
+      winnerTitle: null,
+    };
+    commitRandomDraw.mockResolvedValue({ draw: committed, earlierDrawCount: 2 });
+    revealRandomDraw.mockResolvedValue({
+      ...committed,
+      revealedAt: new Date().toISOString(),
+      beaconRandomness: "aa",
+      winnerIndex: 1,
+      winnerChartId: "b",
+      winnerTitle: "Bravo",
+    });
+
+    await renderPicker();
+    await click("Alpha DX MASTER 풀에 추가");
+    await click("Bravo DX MASTER 풀에 추가");
+    await click("검증 모드");
+    await click("검증 선곡");
+
+    expect(commitRandomDraw).toHaveBeenCalledWith({ chartIds: ["a", "b"] });
+    // The winner is only revealed after the committed round is published.
+    expect(revealRandomDraw).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(11_000);
+    });
+    expect(revealRandomDraw).toHaveBeenCalledWith(committed.id);
+
+    await runSpin();
+
+    expect(titlesIn(drawnSection())).toEqual(["Bravo"]);
+    expect(titlesIn(poolSection())).toEqual(["Alpha"]);
+    expect(screen.getByText(/이미 2번 추첨한 기록/)).toBeInTheDocument();
+  });
+
+  it("keeps the unrevealed record so a failed reveal is not re-rolled", async () => {
+    const committed = {
+      id: "22222222-2222-2222-2222-222222222222",
+      drawerName: "tester",
+      poolHash: "hash",
+      pool: [],
+      poolSize: 1,
+      beaconChain: "chain",
+      beaconRound: 100,
+      beaconAvailableAt: new Date(Date.now() + 1_000).toISOString(),
+      committedAt: new Date().toISOString(),
+      revealedAt: null,
+      beaconRandomness: null,
+      beaconSignature: null,
+      winnerIndex: null,
+      winnerChartId: null,
+      winnerTitle: null,
+    };
+    commitRandomDraw.mockResolvedValue({ draw: committed, earlierDrawCount: 0 });
+    revealRandomDraw.mockRejectedValue(new Error("drand 응답 없음"));
+
+    await renderPicker();
+    await click("Alpha DX MASTER 풀에 추가");
+    await click("검증 모드");
+    await click("검증 선곡");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(4_000);
+    });
+
+    expect(screen.getByText("drand 응답 없음")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "결과 다시 공개" }),
+    ).toBeInTheDocument();
+    // Nothing was drawn, so the pool is untouched and the record still stands.
+    expect(titlesIn(poolSection())).toEqual(["Alpha"]);
+    expect(titlesIn(drawnSection())).toEqual([]);
   });
 
   it("restores the pool from localStorage on mount", async () => {

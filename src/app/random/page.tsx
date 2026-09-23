@@ -3,6 +3,8 @@ import { Suspense } from "react";
 
 import { RandomPicker } from "@/components/random/random-picker";
 import { listChartLevels, listChartVersions } from "@/lib/data/charts";
+import { hasSupabasePublicEnv } from "@/lib/supabase/env";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import { RandomPickerSkeleton } from "./skeleton";
 
@@ -45,6 +47,12 @@ export default function RandomPage() {
               주간 랭킹
             </Link>
             <Link
+              className="rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+              href="/random/draws"
+            >
+              선곡 기록
+            </Link>
+            <Link
               className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"
               href="/dashboard"
             >
@@ -62,10 +70,26 @@ export default function RandomPage() {
 }
 
 async function RandomPickerContent() {
-  const [levels, versions] = await Promise.all([
+  const [levels, versions, isLoggedIn] = await Promise.all([
     listChartLevels(),
     listChartVersions(),
+    getIsLoggedIn(),
   ]);
 
-  return <RandomPicker levels={levels} versions={versions} />;
+  return (
+    <RandomPicker isLoggedIn={isLoggedIn} levels={levels} versions={versions} />
+  );
+}
+
+async function getIsLoggedIn(): Promise<boolean> {
+  if (!hasSupabasePublicEnv()) {
+    return false;
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return Boolean(user);
 }
