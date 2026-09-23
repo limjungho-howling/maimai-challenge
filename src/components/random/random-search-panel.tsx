@@ -26,6 +26,7 @@ export interface RandomSearchPanelProps {
   isPoolFull: boolean;
   levels: string[];
   onAdd: (chart: RandomPoolChart) => void;
+  onAddMany: (charts: RandomPoolChart[]) => void;
   poolChartIds: Set<string>;
   versions: Array<{ number: number; name: string }>;
 }
@@ -35,6 +36,7 @@ export function RandomSearchPanel({
   isPoolFull,
   levels,
   onAdd,
+  onAddMany,
   poolChartIds,
   versions,
 }: RandomSearchPanelProps) {
@@ -79,6 +81,14 @@ export function RandomSearchPanel({
       }
     });
   };
+
+  // Charts on this page that "전체 추가" would actually move into the pool.
+  const addableCharts = isPoolFull
+    ? []
+    : result.charts.filter(
+        (chart) =>
+          !poolChartIds.has(chart.chartId) && !drawnChartIds.has(chart.chartId),
+      );
 
   // Fills the panel on first paint with the default (unfiltered) first page.
   // Later searches are driven by the form, so this must not re-run.
@@ -175,6 +185,22 @@ export function RandomSearchPanel({
           풀이 가득 찼습니다. 곡을 빼야 더 담을 수 있습니다.
         </p>
       ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-slate-400">
+          검색 결과 <span className="font-mono text-slate-200">{result.count}</span>곡
+          {result.pageCount > 1 ? " · 이 페이지만 한 번에 담을 수 있습니다" : ""}
+        </p>
+        <button
+          className="rounded-md border border-cyan-300/60 px-3 py-1.5 text-xs font-semibold text-cyan-200 transition hover:bg-cyan-300/10 disabled:border-white/10 disabled:text-slate-500 disabled:hover:bg-transparent"
+          disabled={addableCharts.length === 0 || isPending}
+          onClick={() => onAddMany(addableCharts)}
+          type="button"
+        >
+          전체 추가
+          {addableCharts.length > 0 ? ` (${addableCharts.length})` : ""}
+        </button>
+      </div>
 
       <div
         aria-busy={isPending}

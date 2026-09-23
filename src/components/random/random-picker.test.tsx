@@ -30,7 +30,7 @@ function renderPicker() {
   return act(async () => {});
 }
 
-function click(name: string) {
+function click(name: string | RegExp) {
   return act(async () => {
     fireEvent.click(screen.getByRole("button", { name }));
   });
@@ -141,6 +141,48 @@ describe("RandomPicker", () => {
 
     expect(titlesIn(poolSection())).toEqual(["Alpha"]);
     expect(titlesIn(drawnSection())).toEqual([]);
+  });
+
+  it("adds every search result to the pool at once", async () => {
+    await renderPicker();
+
+    await click(/전체 추가/);
+
+    expect(titlesIn(poolSection()).sort()).toEqual(["Alpha", "Bravo", "Charlie"]);
+    expect(screen.getByRole("button", { name: /전체 추가/ })).toBeDisabled();
+  });
+
+  it("does not re-add already drawn charts when adding everything", async () => {
+    await renderPicker();
+
+    await click("Alpha DX MASTER 풀에 추가");
+    await click("랜덤 선곡");
+    await runSpin();
+
+    await click(/전체 추가/);
+
+    expect(titlesIn(poolSection()).sort()).toEqual(["Bravo", "Charlie"]);
+    expect(titlesIn(drawnSection())).toEqual(["Alpha"]);
+  });
+
+  it("moves every drawn chart back into the pool", async () => {
+    await renderPicker();
+
+    await click("Alpha DX MASTER 풀에 추가");
+    await click("Bravo DX MASTER 풀에 추가");
+    await click("랜덤 선곡");
+    await runSpin();
+    await click("랜덤 선곡");
+    await runSpin();
+
+    expect(titlesIn(poolSection())).toEqual([]);
+    expect(titlesIn(drawnSection())).toHaveLength(2);
+
+    await click("전체 되돌리기");
+
+    expect(titlesIn(drawnSection())).toEqual([]);
+    expect(titlesIn(poolSection()).sort()).toEqual(["Alpha", "Bravo"]);
+    expect(screen.getByRole("button", { name: "랜덤 선곡" })).toBeEnabled();
   });
 
   it("clears only the drawn list, leaving the pool alone", async () => {

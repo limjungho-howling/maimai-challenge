@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  addManyToPool,
   addToPool,
   buildSpinSequence,
   drawFrom,
@@ -45,6 +46,33 @@ describe("addToPool", () => {
       chart(`c${index}`),
     );
     expect(addToPool(pool, chart("extra"))).toBe(pool);
+  });
+});
+
+describe("addManyToPool", () => {
+  it("appends every new chart in order", () => {
+    const result = addManyToPool([chart("a")], [chart("b"), chart("c")]);
+    expect(result.map((item) => item.chartId)).toEqual(["a", "b", "c"]);
+  });
+
+  it("skips charts that are already in the pool", () => {
+    const result = addManyToPool([chart("a")], [chart("a"), chart("b"), chart("a")]);
+    expect(result.map((item) => item.chartId)).toEqual(["a", "b"]);
+  });
+
+  it("stops at the pool size limit instead of overflowing", () => {
+    const pool = Array.from({ length: MAX_POOL_SIZE - 1 }, (_, index) =>
+      chart(`c${index}`),
+    );
+    const result = addManyToPool(pool, [chart("x"), chart("y"), chart("z")]);
+
+    expect(result).toHaveLength(MAX_POOL_SIZE);
+    expect(result[result.length - 1].chartId).toBe("x");
+  });
+
+  it("returns the original pool when there is nothing to add", () => {
+    const pool = [chart("a")];
+    expect(addManyToPool(pool, [])).toBe(pool);
   });
 });
 

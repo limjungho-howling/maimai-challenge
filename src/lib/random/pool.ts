@@ -31,6 +31,14 @@ export function addToPool(
   return [...pool, chart];
 }
 
+/** Adds whatever fits; charts past the size limit are silently left out. */
+export function addManyToPool(
+  pool: RandomPoolChart[],
+  charts: RandomPoolChart[],
+): RandomPoolChart[] {
+  return charts.reduce(addToPool, pool);
+}
+
 export function removeFromPool(
   pool: RandomPoolChart[],
   chartId: string,

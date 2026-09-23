@@ -7,6 +7,7 @@ import { RandomDrawnList } from "@/components/random/random-drawn-list";
 import { RandomPoolList } from "@/components/random/random-pool-list";
 import { RandomSearchPanel } from "@/components/random/random-search-panel";
 import {
+  addManyToPool,
   addToPool,
   buildSpinSequence,
   drawFrom,
@@ -98,6 +99,20 @@ export function RandomPicker({ levels, versions }: RandomPickerProps) {
     }));
   };
 
+  const handleAddMany = (charts: RandomPoolChart[]) => {
+    updateRandomPoolStore((current) => {
+      const drawnIds = new Set(current.drawn.map((item) => item.chartId));
+
+      return {
+        ...current,
+        pool: addManyToPool(
+          current.pool,
+          charts.filter((chart) => !drawnIds.has(chart.chartId)),
+        ),
+      };
+    });
+  };
+
   const handleRemove = (chartId: string) => {
     updateRandomPoolStore((current) => ({
       ...current,
@@ -128,6 +143,23 @@ export function RandomPicker({ levels, versions }: RandomPickerProps) {
       setDisplayChart(null);
       setPhase("idle");
     }
+  };
+
+  const handleRestoreAll = () => {
+    updateRandomPoolStore((current) => {
+      const pool = addManyToPool(current.pool, current.drawn);
+      const pooledIds = new Set(pool.map((item) => item.chartId));
+
+      // Anything that did not fit stays in the drawn list rather than vanishing.
+      return {
+        pool,
+        drawn: current.drawn.filter((item) => !pooledIds.has(item.chartId)),
+      };
+    });
+
+    setDisplayChart(null);
+    setPhase("idle");
+    setSpin(null);
   };
 
   const handleClearDrawn = () => {
@@ -178,6 +210,7 @@ export function RandomPicker({ levels, versions }: RandomPickerProps) {
           isPoolFull={pool.length >= MAX_POOL_SIZE}
           levels={levels}
           onAdd={handleAdd}
+          onAddMany={handleAddMany}
           poolChartIds={poolChartIds}
           versions={versions}
         />
@@ -188,6 +221,7 @@ export function RandomPicker({ levels, versions }: RandomPickerProps) {
           drawn={drawn}
           onClear={handleClearDrawn}
           onRestore={handleRestore}
+          onRestoreAll={handleRestoreAll}
         />
       </div>
     </div>
