@@ -143,6 +143,25 @@ describe("RandomPicker", () => {
     expect(titlesIn(drawnSection())).toEqual([]);
   });
 
+  it("clears only the drawn list, leaving the pool alone", async () => {
+    await renderPicker();
+
+    await click("Alpha DX MASTER 풀에 추가");
+    await click("Bravo DX MASTER 풀에 추가");
+    await click("Charlie DX MASTER 풀에 추가");
+    await click("랜덤 선곡");
+    await runSpin();
+
+    expect(titlesIn(drawnSection())).toHaveLength(1);
+    expect(titlesIn(poolSection())).toHaveLength(2);
+
+    await click("전체 초기화");
+
+    expect(titlesIn(drawnSection())).toEqual([]);
+    expect(titlesIn(poolSection())).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "랜덤 선곡" })).toBeEnabled();
+  });
+
   it("restores the pool from localStorage on mount", async () => {
     window.localStorage.setItem(
       RANDOM_POOL_STORAGE_KEY,

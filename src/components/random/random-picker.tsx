@@ -130,8 +130,11 @@ export function RandomPicker({ levels, versions }: RandomPickerProps) {
     }
   };
 
-  const handleReset = () => {
-    updateRandomPoolStore(() => ({ pool: [], drawn: [] }));
+  const handleClearDrawn = () => {
+    updateRandomPoolStore((current) => ({ ...current, drawn: [] }));
+
+    // The result card would otherwise keep announcing a chart that is no
+    // longer tracked anywhere.
     setDisplayChart(null);
     setPhase("idle");
     setSpin(null);
@@ -181,7 +184,11 @@ export function RandomPicker({ levels, versions }: RandomPickerProps) {
       </div>
       <div className="flex flex-col gap-5">
         <RandomPoolList onClear={handleClearPool} onRemove={handleRemove} pool={pool} />
-        <RandomDrawnList drawn={drawn} onReset={handleReset} onRestore={handleRestore} />
+        <RandomDrawnList
+          drawn={drawn}
+          onClear={handleClearDrawn}
+          onRestore={handleRestore}
+        />
       </div>
     </div>
   );

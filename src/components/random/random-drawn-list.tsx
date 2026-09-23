@@ -8,11 +8,11 @@ import type { RandomPoolChart } from "@/lib/random/pool";
 
 export interface RandomDrawnListProps {
   drawn: RandomPoolChart[];
-  onReset: () => void;
+  onClear: () => void;
   onRestore: (chartId: string) => void;
 }
 
-export function RandomDrawnList({ drawn, onReset, onRestore }: RandomDrawnListProps) {
+export function RandomDrawnList({ drawn, onClear, onRestore }: RandomDrawnListProps) {
   return (
     <section className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.045] p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -23,7 +23,7 @@ export function RandomDrawnList({ drawn, onReset, onRestore }: RandomDrawnListPr
         <button
           className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-slate-200 transition hover:bg-white/10 disabled:text-slate-500 disabled:hover:bg-transparent"
           disabled={drawn.length === 0}
-          onClick={onReset}
+          onClick={onClear}
           type="button"
         >
           전체 초기화
