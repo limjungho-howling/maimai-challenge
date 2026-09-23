@@ -57,7 +57,7 @@ export default async function ChartPage({ params }: ChartPageProps) {
             </div>
             </div>
           </div>
-          <nav className="flex shrink-0 items-center gap-2">
+          <nav className="flex flex-wrap items-center justify-end gap-2">
             <Link
               className="rounded-md border border-white/10 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
               href="/"
@@ -75,6 +75,12 @@ export default async function ChartPage({ params }: ChartPageProps) {
               href="/weekly"
             >
               주간 랭킹
+            </Link>
+            <Link
+              className="rounded-md border border-white/10 px-3 py-2 text-sm text-slate-200 hover:bg-white/10"
+              href="/random"
+            >
+              랜덤 선곡
             </Link>
             <Link
               className="rounded-md bg-cyan-300 px-3 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-200"

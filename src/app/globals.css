@@ -22,3 +22,42 @@ body {
   background: #67e8f9;
   color: #020617;
 }
+
+/* Random song picker: one flick per swapped frame, one flourish on landing. */
+@keyframes random-draw-flick {
+  from {
+    opacity: 0.35;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes random-draw-land {
+  0% {
+    transform: scale(0.94);
+  }
+  55% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.random-draw-flick {
+  animation: random-draw-flick 120ms ease-out;
+}
+
+.random-draw-land {
+  animation: random-draw-land 460ms cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .random-draw-flick,
+  .random-draw-land {
+    animation: none;
+  }
+}
